@@ -9,6 +9,13 @@ export function createAdminClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } }
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+      // Aldrei cache-a — opnar síður eiga alltaf að sýna nýjustu gögn.
+      global: {
+        fetch: (url: RequestInfo | URL, init?: RequestInit) =>
+          fetch(url, { ...init, cache: "no-store" }),
+      },
+    }
   );
 }

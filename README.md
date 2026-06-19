@@ -194,3 +194,18 @@ sem starfsmaðurinn valdi — skanninn sýnir „⚠ Rangur viðburður“.
 
 > Þessi lagfæring krefst SQL-uppfærslu: keyrðu `0008_scan_event_guard.sql` í
 > Supabase SQL editor (á undan því að uppfæra appið), síðan venjulega cp + commit.
+
+---
+
+## Maki fær eigin miða (lagfæring)
+
+Áður deildu gestur og maki einum miða með samanlagðri drykkjainneign (t.d. „10 af 10“),
+sem var ruglandi við barinn því talningin virtist endurstillast þegar fyrri potturinn kláraðist.
+
+Nú býr skráning með maka til **tvo aðskilda miða** — gestur og maki — hvorn með eigin QR,
+eigin „X af 5“ talningu og eigin innritun við dyr. Miðasíðan sýnir nafn handhafa og tengil á
+hinn miðann; staðfestingarpósturinn inniheldur báða QR; og dyravörður sér rétt nafn (maki fær
+sitt eigið nafn, merkt „· maki“).
+
+> Krefst SQL-uppfærslu: keyrðu `0009_spouse_ticket.sql` í Supabase SQL editor (eftir 0008),
+> síðan venjulega cp + commit.

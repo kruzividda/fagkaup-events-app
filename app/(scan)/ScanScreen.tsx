@@ -125,6 +125,7 @@ function DoorResult({ r }: { r: ScanResult }) {
   const plus = g.has_plus_one === true;
   const spouse = g.spouse_name as string | null;
   const dietary = g.dietary as string | null;
+  const isGuest = g.holder_type === "guest";
 
   return (
     <div className="space-y-3">
@@ -134,11 +135,13 @@ function DoorResult({ r }: { r: ScanResult }) {
         <Banner tone="bad" title="⚠ Miði þegar notaður" />
       )}
       <Card className="space-y-1">
-        <p className="font-display text-xl text-text">{name}</p>
+        <p className="font-display text-xl text-text">
+          {name} {isGuest && <span className="text-sm text-accent">· maki</span>}
+        </p>
         {(company || unit) && (
           <p className="text-sm text-muted">{[company, unit].filter(Boolean).join(" · ")}</p>
         )}
-        {plus && <p className="text-sm text-text">Maki: {spouse || "+1"}</p>}
+        {!isGuest && plus && <p className="text-sm text-text">Maki: {spouse || "+1"}</p>}
         {dietary && (
           <p className="mt-1 rounded-lg border border-accent bg-surface px-2 py-1 text-sm text-accent">
             ⚠ Fæðuóþol: {dietary}

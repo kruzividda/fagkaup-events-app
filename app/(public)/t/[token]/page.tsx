@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { qrDataUrl } from "@/lib/qr";
@@ -8,25 +9,34 @@ export default async function TicketPage({ params }: { params: { token: string }
 
   const { data: ticket } = await admin
     .from("tickets")
-    .select("id, event_id, registration_id, table_number, seat_number")
+    .select("id, event_id, registration_id, table_number, seat_number, holder_type, holder_name")
     .eq("token", params.token)
     .single();
   if (!ticket) notFound();
 
-  const [{ data: reg }, { data: event }, { data: balances }] = await Promise.all([
+  const [{ data: reg }, { data: event }, { data: balances }, { data: siblings }] = await Promise.all([
     admin.from("registrations").select("full_name").eq("id", ticket.registration_id).single(),
     admin.from("events").select("name, starts_at, location, drinks_enabled").eq("id", ticket.event_id).single(),
+    admin.from("drink_account_balances").select("allowance, remaining").eq("ticket_id", ticket.id),
     admin
-      .from("drink_account_balances")
-      .select("scope, allowance, remaining")
-      .eq("ticket_id", ticket.id),
+      .from("tickets")
+      .select("token, holder_type, holder_name")
+      .eq("registration_id", ticket.registration_id)
+      .neq("id", ticket.id),
   ]);
 
   const qr = await qrDataUrl(params.token);
 
+  const holderName =
+    ticket.holder_type === "guest"
+      ? ticket.holder_name || "Maki"
+      : reg?.full_name || ticket.holder_name || "Gestur";
+
   const totalAllowance = (balances ?? []).reduce((s, b) => s + (b.allowance ?? 0), 0);
   const totalRemaining = (balances ?? []).reduce((s, b) => s + (b.remaining ?? 0), 0);
   const hasDrinks = event?.drinks_enabled && totalAllowance > 0;
+
+  const sibling = (siblings ?? [])[0];
 
   return (
     <main className="mx-auto max-w-sm p-5 space-y-5">
@@ -39,7 +49,8 @@ export default async function TicketPage({ params }: { params: { token: string }
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={qr} alt="QR miði" width={240} height={240} className="rounded-lg" />
         <div className="text-center">
-          <p className="font-display text-lg text-text">{reg?.full_name}</p>
+          <p className="font-display text-lg text-text">{holderName}</p>
+          {ticket.holder_type === "guest" && <p className="text-xs text-accent">Maki / +1</p>}
           <p className="text-xs text-muted">
             {event?.starts_at
               ? new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "medium", timeStyle: "short" })
@@ -73,6 +84,17 @@ export default async function TicketPage({ params }: { params: { token: string }
             </div>
           )}
         </Card>
+      )}
+
+      {sibling && (
+        <Link
+          href={`/t/${sibling.token}`}
+          className="block rounded-xl border border-border bg-surface px-4 py-3 text-center text-sm text-text transition hover:border-accent"
+        >
+          {sibling.holder_type === "guest"
+            ? `Sjá miða maka: ${sibling.holder_name || "Maki"} →`
+            : `Sjá aðalmiða: ${sibling.holder_name || "Gestur"} →`}
+        </Link>
       )}
 
       <p className="text-center text-xs text-muted">Sýndu þennan QR-kóða við innganginn.</p>

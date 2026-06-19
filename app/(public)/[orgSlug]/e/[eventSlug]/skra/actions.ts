@@ -22,7 +22,7 @@ export async function registerGuest(
   });
 
   if (error) return { ok: false, reason: error.message };
-  const result = data as { ok: boolean; ticket_token?: string; reason?: string };
+  const result = data as { ok: boolean; ticket_token?: string; spouse_token?: string | null; reason?: string };
   if (!result?.ok || !result.ticket_token) {
     return { ok: false, reason: result?.reason ?? "unknown" };
   }
@@ -37,18 +37,32 @@ export async function registerGuest(
         .eq("id", input.eventId)
         .single();
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-      const ticketUrl = `${appUrl}/t/${result.ticket_token}`;
-      const qr = await qrDataUrl(result.ticket_token);
+      const guestName = String(input.core.full_name ?? "Gestur");
+      const spouseName = String(input.core.spouse_name ?? "Maki");
+
+      const tickets = [
+        {
+          label: guestName,
+          ticketUrl: `${appUrl}/t/${result.ticket_token}`,
+          qrDataUrl: await qrDataUrl(result.ticket_token),
+        },
+      ];
+      if (result.spouse_token) {
+        tickets.push({
+          label: spouseName,
+          ticketUrl: `${appUrl}/t/${result.spouse_token}`,
+          qrDataUrl: await qrDataUrl(result.spouse_token),
+        });
+      }
+
       await sendConfirmationEmail({
         to: email,
-        guestName: String(input.core.full_name ?? ""),
         eventName: ev?.name ?? "Viðburður",
         whenText: ev?.starts_at
           ? new Date(ev.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short" })
           : "",
         location: ev?.location ?? null,
-        ticketUrl,
-        qrDataUrl: qr,
+        tickets,
       });
     }
   } catch {

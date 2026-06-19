@@ -16,6 +16,8 @@ export type FormField = {
   options: { value: string; label: string }[];
 };
 
+export type OrgUnit = { name: string; locations: string[] };
+
 const REASON_TEXT: Record<string, string> = {
   not_open: "Skráning er ekki opin.",
   not_open_yet: "Skráning er ekki hafin.",
@@ -27,11 +29,13 @@ const REASON_TEXT: Record<string, string> = {
 export function RegistrationForm({
   eventId,
   fields,
+  orgUnits,
 }: {
   eventId: string;
   orgSlug: string;
   eventSlug: string;
   fields: FormField[];
+  orgUnits: OrgUnit[];
 }) {
   const router = useRouter();
   const [values, setValues] = useState<Record<string, unknown>>({});
@@ -64,10 +68,7 @@ export function RegistrationForm({
 
   async function submit() {
     const v = validate();
-    if (v) {
-      setError(v);
-      return;
-    }
+    if (v) return setError(v);
     setSaving(true);
     setError(null);
 
@@ -84,23 +85,47 @@ export function RegistrationForm({
     const res = await registerGuest({ eventId, core, answers });
     setSaving(false);
     if (!res.ok || !res.token) {
-      setError(REASON_TEXT[res.reason ?? ""] ?? "Skráning mistókst. Reyndu aftur.");
-      return;
+      return setError(REASON_TEXT[res.reason ?? ""] ?? "Skráning mistókst. Reyndu aftur.");
     }
     router.push(`/t/${res.token}`);
   }
 
+  // Útibú ráðast af valinni deild
+  const selectedUnit = orgUnits.find((u) => u.name === values["business_unit"]);
+
   return (
     <div className="space-y-4">
-      {fields.map((f) =>
-        isVisible(f) ? (
-          <div key={f.id}>{renderField(f, values[f.field_key], (v) => setVal(f.field_key, v))}</div>
-        ) : null
-      )}
+      {fields.map((f) => {
+        if (!isVisible(f)) return null;
+        const conditional = f.visible_if != null;
 
-      {error && (
-        <p className="rounded-lg border border-danger bg-surface px-3 py-2 text-sm text-danger">{error}</p>
-      )}
+        const onChange =
+          f.field_key === "business_unit"
+            ? (v: unknown) => {
+                setVal("business_unit", v);
+                setVal("location", ""); // endurstilla útibú þegar deild breytist
+              }
+            : (v: unknown) => setVal(f.field_key, v);
+
+        const node = renderField(f, values[f.field_key], onChange, orgUnits, selectedUnit);
+
+        return (
+          <div key={f.id}>
+            {conditional ? (
+              <div className="rounded-xl border border-dashed border-border bg-surface/50 p-3">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+                  Skilyrt undirspurning
+                </p>
+                {node}
+              </div>
+            ) : (
+              node
+            )}
+          </div>
+        );
+      })}
+
+      {error && <p className="rounded-lg border border-danger bg-surface px-3 py-2 text-sm text-danger">{error}</p>}
 
       <PrimaryButton onClick={submit} disabled={saving}>
         {saving ? "Sendi…" : "Senda skráningu"}
@@ -109,58 +134,63 @@ export function RegistrationForm({
   );
 }
 
-function renderField(f: FormField, value: unknown, onChange: (v: unknown) => void) {
+function renderField(
+  f: FormField,
+  value: unknown,
+  onChange: (v: unknown) => void,
+  orgUnits: OrgUnit[],
+  selectedUnit?: OrgUnit
+) {
   const req = f.requirement === "required";
+
+  // Smellanleg deild
+  if (f.field_key === "business_unit" && orgUnits.length > 0) {
+    return <PillField label={f.label} required={req} options={orgUnits.map((u) => u.name)} value={(value as string) ?? ""} onChange={onChange} allowOther />;
+  }
+  // Smellanleg útibú (ráðast af deild)
+  if (f.field_key === "location" && selectedUnit && selectedUnit.locations.length > 0) {
+    return <PillField label={f.label} required={req} options={selectedUnit.locations} value={(value as string) ?? ""} onChange={onChange} allowOther />;
+  }
+
   switch (f.field_type) {
     case "boolean":
     case "consent":
       return <Checkbox checked={value === true} onChange={(v) => onChange(v)} label={f.label + (req ? " *" : "")} />;
     case "email":
-      return (
-        <Field label={f.label} required={req}>
-          <TextInput type="email" value={(value as string) ?? ""} onChange={onChange} />
-        </Field>
-      );
+      return <Field label={f.label} required={req}><TextInput type="email" value={(value as string) ?? ""} onChange={onChange} /></Field>;
     case "phone":
-      return (
-        <Field label={f.label} required={req}>
-          <TextInput type="tel" value={(value as string) ?? ""} onChange={onChange} />
-        </Field>
-      );
+      return <Field label={f.label} required={req}><TextInput type="tel" value={(value as string) ?? ""} onChange={onChange} /></Field>;
     case "textarea":
-      return (
-        <Field label={f.label} required={req}>
-          <TextArea value={(value as string) ?? ""} onChange={onChange} />
-        </Field>
-      );
+      return <Field label={f.label} required={req}><TextArea value={(value as string) ?? ""} onChange={onChange} /></Field>;
     case "select":
       return (
-        <Field label={f.label} required={req}>
-          <Select
-            value={(value as string) ?? ""}
-            onChange={onChange}
-            options={[{ value: "", label: "— veldu —" }, ...f.options.map((o) => ({ value: o.value || o.label, label: o.label }))]}
-          />
-        </Field>
+        <PillField
+          label={f.label}
+          required={req}
+          options={f.options.map((o) => o.value || o.label)}
+          labels={Object.fromEntries(f.options.map((o) => [o.value || o.label, o.label]))}
+          value={(value as string) ?? ""}
+          onChange={onChange}
+        />
       );
     case "multiselect": {
       const arr = Array.isArray(value) ? (value as string[]) : [];
       return (
         <div>
-          <p className="mb-1 text-xs font-medium text-muted">
-            {f.label} {req && <span className="text-accent">*</span>}
-          </p>
-          <div className="space-y-1.5">
+          <p className="mb-1.5 text-xs font-medium text-muted">{f.label} {req && <span className="text-accent">*</span>}</p>
+          <div className="flex flex-wrap gap-2">
             {f.options.map((o) => {
               const ov = o.value || o.label;
-              const checked = arr.includes(ov);
+              const on = arr.includes(ov);
               return (
-                <Checkbox
+                <button
                   key={ov}
-                  checked={checked}
-                  onChange={(c) => onChange(c ? [...arr, ov] : arr.filter((x) => x !== ov))}
-                  label={o.label}
-                />
+                  type="button"
+                  onClick={() => onChange(on ? arr.filter((x) => x !== ov) : [...arr, ov])}
+                  className={`rounded-full border px-3 py-1.5 text-sm transition ${on ? "border-accent bg-accent text-[#0B121C]" : "border-border text-text hover:border-accent"}`}
+                >
+                  {o.label}
+                </button>
               );
             })}
           </div>
@@ -168,10 +198,74 @@ function renderField(f: FormField, value: unknown, onChange: (v: unknown) => voi
       );
     }
     default:
-      return (
-        <Field label={f.label} required={req}>
-          <TextInput value={(value as string) ?? ""} onChange={onChange} />
-        </Field>
-      );
+      return <Field label={f.label} required={req}><TextInput value={(value as string) ?? ""} onChange={onChange} /></Field>;
   }
+}
+
+function PillField({
+  label,
+  required,
+  options,
+  value,
+  onChange,
+  allowOther,
+  labels,
+}: {
+  label: string;
+  required?: boolean;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+  allowOther?: boolean;
+  labels?: Record<string, string>;
+}) {
+  const known = options.includes(value);
+  const [other, setOther] = useState(!!value && !known);
+
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-medium text-muted">
+        {label} {required && <span className="text-accent">*</span>}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const on = !other && value === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => {
+                setOther(false);
+                onChange(opt);
+              }}
+              className={`rounded-full border px-3.5 py-1.5 text-sm transition ${on ? "border-accent bg-accent text-[#0B121C]" : "border-border text-text hover:border-accent"}`}
+            >
+              {labels?.[opt] ?? opt}
+            </button>
+          );
+        })}
+        {allowOther && (
+          <button
+            type="button"
+            onClick={() => {
+              setOther(true);
+              onChange("");
+            }}
+            className={`rounded-full border px-3.5 py-1.5 text-sm transition ${other ? "border-accent bg-accent text-[#0B121C]" : "border-border text-text hover:border-accent"}`}
+          >
+            Annað
+          </button>
+        )}
+      </div>
+      {other && (
+        <input
+          autoFocus
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Skrifaðu hér…"
+          className="mt-2 w-full rounded-lg border border-border bg-elevated px-3 py-2.5 text-sm text-text outline-none focus:border-accent"
+        />
+      )}
+    </div>
+  );
 }

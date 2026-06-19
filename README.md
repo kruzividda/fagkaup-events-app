@@ -233,3 +233,28 @@ Smelltu „Vista form“ til að vista. Opna skráningarsíðan endurspeglar bre
 
 > Athugið: ef þú eyðir reit sem þegar hefur söfnuð svör, eyðast þau svör með honum.
 > Til að fela reit án þess að tapa gögnum skaltu velja „Falinn“ í stað þess að eyða.
+
+---
+
+## Rekstrareiningar, smellanlegir reitir, póstur maka
+
+### Rekstrareiningar (nýtt)
+Stjórnborð → **Rekstrareiningar**. Stofnaðu deildir (t.d. Aðföng, Bónus, Hagkaup, Olís)
+og útibú undir hverri. Þetta er gert einu sinni og nýtist í öllum viðburðum.
+
+### Smellanlegir reitir í forminu
+- Reiturinn **Rekstrareining** birtist sem smellanlegar „pillur“ ef þú hefur stofnað deildir.
+- Reiturinn **Staðsetning** sýnir útibú **þeirrar deildar sem var valin** (deild → útibú).
+- Ef engar deildir eru stofnaðar, eða undir „Annað“, er reiturinn frjáls texti — t.d. fyrir
+  golfmót þar sem viðskiptavinir skrifa eigin fyrirtæki.
+- Val/fjölval-spurningar birtast líka sem pillur.
+
+### Form builder strax við stofnun
+Þegar þú stofnar nýjan viðburð lendirðu beint í skráningarforminu hans.
+
+### Tölvupóstur maka
+Þegar maki er valinn birtist reitur fyrir **tölvupóst maka**. Hann er notaður til að senda
+maka sinn eigin miða: aðalgestur fær sinn miða á sitt netfang og maki sinn á netfang maka
+(þegar Resend er tengt). Ef netfang maka vantar fá báðir miðar á netfang aðalgests.
+
+> Krefst SQL: keyrðu `0010_business_units.sql` í Supabase SQL editor (eftir 0009), svo cp + commit.

@@ -40,6 +40,7 @@ const CORE_FIELDS: { key: string; label: string; type: string }[] = [
   { key: "job_title", label: "Starfsheiti", type: "text" },
   { key: "has_plus_one", label: "Maki / +1", type: "boolean" },
   { key: "spouse_name", label: "Nafn maka", type: "text" },
+  { key: "spouse_email", label: "Tölvupóstur maka", type: "email" },
   { key: "dietary", label: "Fæðuóþol", type: "text" },
   { key: "notes", label: "Athugasemdir", type: "textarea" },
   { key: "consent", label: "Samþykki persónuverndar", type: "consent" },

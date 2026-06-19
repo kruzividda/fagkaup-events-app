@@ -51,6 +51,17 @@ export default async function RegisterPage({
     options: optsByField.get(f.id) ?? [],
   }));
 
+  // Rekstrareiningar + útibú (org-level) fyrir smellanlega reiti
+  const { data: units } = await admin.from("business_units").select("id, name").eq("org_id", org.id).order("sort_order");
+  const unitIds = (units ?? []).map((u) => u.id);
+  const { data: locs } = unitIds.length
+    ? await admin.from("business_unit_locations").select("business_unit_id, name").in("business_unit_id", unitIds).order("sort_order")
+    : { data: [] as { business_unit_id: string; name: string }[] };
+  const orgUnits = (units ?? []).map((u) => ({
+    name: u.name,
+    locations: (locs ?? []).filter((l) => l.business_unit_id === u.id).map((l) => l.name),
+  }));
+
   return (
     <main className="mx-auto max-w-lg p-5 space-y-6">
       <div>
@@ -68,6 +79,7 @@ export default async function RegisterPage({
           orgSlug={params.orgSlug}
           eventSlug={params.eventSlug}
           fields={formFields}
+          orgUnits={orgUnits}
         />
       )}
     </main>

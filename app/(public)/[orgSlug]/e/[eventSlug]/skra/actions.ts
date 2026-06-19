@@ -27,43 +27,47 @@ export async function registerGuest(
     return { ok: false, reason: result?.reason ?? "unknown" };
   }
 
-  // Staðfestingarpóstur — best-effort, blokkar aldrei skráninguna.
+  // Staðfestingarpóstar — best-effort, blokka aldrei skráninguna.
+  // Gestur fær sinn miða á sitt netfang; maki fær sinn á netfang maka (ef gefið).
   try {
-    const email = String(input.core.email ?? "");
-    if (email) {
-      const { data: ev } = await admin
-        .from("events")
-        .select("name, starts_at, location")
-        .eq("id", input.eventId)
-        .single();
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-      const guestName = String(input.core.full_name ?? "Gestur");
-      const spouseName = String(input.core.spouse_name ?? "Maki");
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const primaryEmail = String(input.core.email ?? "");
+    const spouseEmail = String(input.core.spouse_email ?? "");
+    const guestName = String(input.core.full_name ?? "Gestur");
+    const spouseName = String(input.core.spouse_name ?? "Maki");
 
-      const tickets = [
-        {
-          label: guestName,
-          ticketUrl: `${appUrl}/t/${result.ticket_token}`,
-          qrDataUrl: await qrDataUrl(result.ticket_token),
-        },
-      ];
-      if (result.spouse_token) {
-        tickets.push({
+    const { data: ev } = await admin
+      .from("events")
+      .select("name, starts_at, location")
+      .eq("id", input.eventId)
+      .single();
+    const whenText = ev?.starts_at
+      ? new Date(ev.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short" })
+      : "";
+
+    const primaryTicket = {
+      label: guestName,
+      ticketUrl: `${appUrl}/t/${result.ticket_token}`,
+      qrDataUrl: await qrDataUrl(result.ticket_token),
+    };
+    const spouseTicket = result.spouse_token
+      ? {
           label: spouseName,
           ticketUrl: `${appUrl}/t/${result.spouse_token}`,
           qrDataUrl: await qrDataUrl(result.spouse_token),
-        });
-      }
+        }
+      : null;
 
-      await sendConfirmationEmail({
-        to: email,
-        eventName: ev?.name ?? "Viðburður",
-        whenText: ev?.starts_at
-          ? new Date(ev.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short" })
-          : "",
-        location: ev?.location ?? null,
-        tickets,
-      });
+    const common = { eventName: ev?.name ?? "Viðburður", whenText, location: ev?.location ?? null };
+
+    // Póstur til aðalgests
+    if (primaryEmail) {
+      const tickets = spouseTicket && !spouseEmail ? [primaryTicket, spouseTicket] : [primaryTicket];
+      await sendConfirmationEmail({ to: primaryEmail, ...common, tickets });
+    }
+    // Sér póstur til maka ef netfang maka er gefið
+    if (spouseEmail && spouseTicket) {
+      await sendConfirmationEmail({ to: spouseEmail, ...common, tickets: [spouseTicket] });
     }
   } catch {
     // hunsa póstvillur

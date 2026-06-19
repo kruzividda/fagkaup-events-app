@@ -25,7 +25,8 @@ const DEFAULT_FIELDS = [
   { field_key: "dietary", label: "Fæðuóþol", field_type: "text", requirement: "optional", sort_order: 5, visible_if: null },
   { field_key: "has_plus_one", label: "Ég kem með maka / +1", field_type: "boolean", requirement: "optional", sort_order: 6, visible_if: null },
   { field_key: "spouse_name", label: "Nafn maka", field_type: "text", requirement: "optional", sort_order: 7, visible_if: { field: "has_plus_one", equals: true } },
-  { field_key: "consent", label: "Ég samþykki að upplýsingar mínar séu unnar vegna viðburðarins", field_type: "consent", requirement: "required", sort_order: 8, visible_if: null },
+  { field_key: "spouse_email", label: "Tölvupóstur maka (fyrir hans miða)", field_type: "email", requirement: "optional", sort_order: 8, visible_if: { field: "has_plus_one", equals: true } },
+  { field_key: "consent", label: "Ég samþykki að upplýsingar mínar séu unnar vegna viðburðarins", field_type: "consent", requirement: "required", sort_order: 9, visible_if: null },
 ];
 
 export async function createEvent(

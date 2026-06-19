@@ -6,6 +6,7 @@ const NAV = [
   { href: "/dashboard", label: "Yfirlit" },
   { href: "/dashboard/events", label: "Viðburðir" },
   { href: "/dashboard/users", label: "Notendur" },
+  { href: "/dashboard/units", label: "Rekstrareiningar" },
   { href: "/door", label: "Innritun (dyr)" },
   { href: "/bar", label: "Bar" },
 ];

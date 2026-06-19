@@ -46,7 +46,7 @@ export default function NewEventPage() {
       setError(res.error ?? "Eitthvað fór úrskeiðis.");
       return;
     }
-    router.push("/dashboard/events");
+    router.push(`/dashboard/events/${res.eventId}/form`);
     router.refresh();
   }
 

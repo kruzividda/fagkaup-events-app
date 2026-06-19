@@ -111,7 +111,9 @@ export function RegistrationForm({
           f.field_key === "business_unit"
             ? (v: unknown) => {
                 setVal("business_unit", v);
-                setVal("location", ""); // endurstilla útibú þegar deild breytist
+                // Ein staðsetning -> velst sjálfkrafa; fleiri -> gestur velur
+                const u = orgUnits.find((x) => x.name === v);
+                setVal("location", u && u.locations.length === 1 ? u.locations[0] : "");
               }
             : (v: unknown) => setVal(f.field_key, v);
 
@@ -158,7 +160,8 @@ function renderField(
   }
   // Smellanleg útibú (ráðast af deild)
   if (f.field_key === "location" && selectedUnit && selectedUnit.locations.length > 0) {
-    return <PillField label={f.label} required={req} options={selectedUnit.locations} value={(value as string) ?? ""} onChange={onChange} allowOther />;
+    const single = selectedUnit.locations.length === 1;
+    return <PillField label={f.label} required={req} options={selectedUnit.locations} value={(value as string) ?? ""} onChange={onChange} allowOther={!single} />;
   }
 
   switch (f.field_type) {

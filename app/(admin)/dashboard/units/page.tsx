@@ -24,7 +24,8 @@ export default async function UnitsPage() {
         <PageTitle>Rekstrareiningar</PageTitle>
         <p className="mt-2 text-sm text-muted">
           Stofnaðu deildir og útibú einu sinni. Þá verða þau smellanleg í skráningarformum — og útibú ráðast af valinni deild.
-          Ef þú stofnar engar, skrifar fólk sjálft inn.
+          Hver deild þarf a.m.k. <strong>eina</strong> staðsetningu (svo tölfræðin verði rétt). Hafi deild aðeins eina
+          staðsetningu velst hún sjálfkrafa þegar gestur velur deildina — hann þarf ekki að velja hana sérstaklega.
         </p>
       </div>
       <UnitsManager initial={initial} />

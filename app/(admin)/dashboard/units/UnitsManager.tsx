@@ -40,6 +40,13 @@ export function UnitsManager({ initial }: { initial: Unit[] }) {
 
   function save() {
     setMsg(null);
+    const missing = units
+      .filter((u) => u.name.trim() && u.locations.filter((l) => l.name.trim()).length === 0)
+      .map((u) => u.name.trim());
+    if (missing.length) {
+      setMsg(`Hver deild þarf a.m.k. eina staðsetningu (svo tölfræðin verði rétt). Vantar hjá: ${missing.join(", ")}.`);
+      return;
+    }
     const payload: UnitInput[] = units.map((u) => ({ id: u.id, name: u.name, locations: u.locations }));
     startSaving(async () => {
       const res = await saveBusinessUnits(payload);

@@ -124,6 +124,11 @@ export function FormBuilder({ eventId, initialFields }: { eventId: string; initi
       if (!res.ok) setMsg(res.error ?? "Vistun mistókst.");
       else {
         setMsg("Vistað ✓");
+        // Muna réttu auðkennin svo næsta vistun uppfæri (en tvöfaldi ekki) reitina
+        if (res.saved) {
+          const byKey = new Map(res.saved.map((s) => [s.field_key, s.id]));
+          setFields((prev) => prev.map((f) => ({ ...f, id: byKey.get(f.field_key) ?? f.id })));
+        }
         router.refresh();
       }
     });

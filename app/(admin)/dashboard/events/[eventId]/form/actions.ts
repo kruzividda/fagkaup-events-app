@@ -19,7 +19,7 @@ export type BuilderFieldInput = {
 export async function saveFormFields(
   eventId: string,
   fields: BuilderFieldInput[]
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; saved?: { field_key: string; id: string }[] }> {
   const supabase = createClient();
 
   const {
@@ -31,13 +31,11 @@ export async function saveFormFields(
     return { ok: false, error: "Aðeins kerfisstjóri." };
   }
 
-  // Staðfesta að viðburður tilheyri org notandans (RLS sér um aðganginn)
   const { data: ev } = await supabase.from("events").select("id").eq("id", eventId).single();
   if (!ev) return { ok: false, error: "Viðburður fannst ekki." };
 
-  const { data: current } = await supabase.from("event_form_fields").select("id").eq("event_id", eventId);
-  const currentIds = new Set((current ?? []).map((c) => c.id as string));
   const keptIds = new Set<string>();
+  const saved: { field_key: string; id: string }[] = [];
 
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
@@ -52,33 +50,37 @@ export async function saveFormFields(
       visible_if: f.visible_if,
     };
 
-    let fieldId = f.id;
-    if (fieldId && currentIds.has(fieldId)) {
-      const { error } = await supabase.from("event_form_fields").update(row).eq("id", fieldId);
-      if (error) return { ok: false, error: error.message };
-    } else {
-      const { data: ins, error } = await supabase.from("event_form_fields").insert(row).select("id").single();
-      if (error) return { ok: false, error: error.message };
-      fieldId = ins?.id as string;
-    }
-    if (fieldId) keptIds.add(fieldId);
+    // Para saman eftir (event_id, field_key): uppfærir ef reitur er til,
+    // býr til annars. Kemur í veg fyrir "duplicate key" þegar skjárinn man
+    // reit enn sem nýjan eftir fyrri vistun.
+    const { data: up, error } = await supabase
+      .from("event_form_fields")
+      .upsert(row, { onConflict: "event_id,field_key" })
+      .select("id")
+      .single();
+    if (error) return { ok: false, error: error.message };
+
+    const fieldId = up?.id as string;
+    if (!fieldId) continue;
+    keptIds.add(fieldId);
+    saved.push({ field_key: f.field_key, id: fieldId });
 
     // Valkostir (fyrir select/multiselect)
-    if (fieldId) {
-      await supabase.from("event_field_options").delete().eq("field_id", fieldId);
-      if ((f.field_type === "select" || f.field_type === "multiselect") && f.options.length) {
-        await supabase.from("event_field_options").insert(
-          f.options
-            .filter((o) => o.label.trim())
-            .map((o, oi) => ({ field_id: fieldId, value: (o.value || o.label).trim(), label: o.label.trim(), sort_order: oi }))
-        );
-      }
+    await supabase.from("event_field_options").delete().eq("field_id", fieldId);
+    if ((f.field_type === "select" || f.field_type === "multiselect") && f.options.length) {
+      await supabase.from("event_field_options").insert(
+        f.options
+          .filter((o) => o.label.trim())
+          .map((o, oi) => ({ field_id: fieldId, value: (o.value || o.label).trim(), label: o.label.trim(), sort_order: oi }))
+      );
     }
   }
 
-  const toDelete = [...currentIds].filter((id) => !keptIds.has(id));
+  // Eyða reitum sem voru fjarlægðir
+  const { data: current } = await supabase.from("event_form_fields").select("id").eq("event_id", eventId);
+  const toDelete = (current ?? []).map((c) => c.id as string).filter((id) => !keptIds.has(id));
   if (toDelete.length) await supabase.from("event_form_fields").delete().in("id", toDelete);
 
   revalidatePath(`/dashboard/events/${eventId}/form`);
-  return { ok: true };
+  return { ok: true, saved };
 }

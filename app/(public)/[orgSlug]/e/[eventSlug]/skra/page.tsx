@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Eyebrow } from "@/components/ui";
+import { Eyebrow, Card } from "@/components/ui";
 import { RegistrationForm, type FormField } from "./RegistrationForm";
 
 export default async function RegisterPage({
@@ -17,7 +17,7 @@ export default async function RegisterPage({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, status")
+    .select("id, name, status, description, starts_at, location")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -65,25 +65,48 @@ export default async function RegisterPage({
   }));
 
   return (
-    <main className="mx-auto max-w-lg p-5 space-y-6">
-      <div>
-        <Eyebrow>Skráning</Eyebrow>
-        <h1 className="font-display text-2xl font-semibold text-text">{event.name}</h1>
-      </div>
+    <main className="mx-auto max-w-lg px-5 py-8 sm:py-12">
+      <div className="fk-rise space-y-6">
+        <header className="space-y-3">
+          <Eyebrow>Skráning</Eyebrow>
+          <h1 className="font-display text-[32px] font-semibold leading-[1.1] text-text">{event.name}</h1>
+          {event.description && (
+            <p className="text-[15px] leading-relaxed text-muted">{event.description}</p>
+          )}
+          {(event.starts_at || event.location) && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {event.starts_at && (
+                <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] text-text">
+                  {new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short" })}
+                </span>
+              )}
+              {event.location && (
+                <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] text-text">
+                  {event.location}
+                </span>
+              )}
+            </div>
+          )}
+        </header>
 
-      {event.status !== "published" ? (
-        <p className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-muted">
-          Skráning er ekki opin sem stendur.
-        </p>
-      ) : (
-        <RegistrationForm
-          eventId={event.id}
-          orgSlug={params.orgSlug}
-          eventSlug={params.eventSlug}
-          fields={formFields}
-          orgUnits={orgUnits}
-        />
-      )}
+        {event.status !== "published" ? (
+          <Card>
+            <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
+          </Card>
+        ) : (
+          <Card accent className="sm:p-7">
+            <RegistrationForm
+              eventId={event.id}
+              orgSlug={params.orgSlug}
+              eventSlug={params.eventSlug}
+              fields={formFields}
+              orgUnits={orgUnits}
+            />
+          </Card>
+        )}
+
+        <p className="text-center text-[12px] text-muted">Fagkaup Events</p>
+      </div>
     </main>
   );
 }

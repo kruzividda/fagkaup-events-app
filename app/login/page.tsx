@@ -41,48 +41,44 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-5">
-      <div className="w-full max-w-sm">
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-            Fagkaup
-          </p>
-          <h1 className="mt-1 font-display text-3xl font-semibold text-text">
-            Events
-          </h1>
+    <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
+      <div className="fk-rise w-full max-w-sm">
+        <div className="mb-7 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[rgba(200,164,92,0.4)] bg-gradient-to-br from-[rgba(200,164,92,0.18)] to-transparent shadow-glow">
+            <span className="font-display text-2xl font-semibold text-accent">F</span>
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">Fagkaup</p>
+          <h1 className="mt-1 font-display text-[34px] font-semibold leading-tight text-text">Events</h1>
           <p className="mt-2 text-sm text-muted">Innskráning fyrir starfsfólk</p>
         </div>
 
-        <div className="space-y-3">
-          <Field
-            label="Netfang"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            autoComplete="email"
-          />
-          <Field
-            label="Lykilorð"
-            type="password"
-            value={password}
-            onChange={setPassword}
-            autoComplete="current-password"
-            onEnter={signIn}
-          />
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-card">
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent opacity-60" />
+          <div className="space-y-4">
+            <Field label="Netfang" type="email" value={email} onChange={setEmail} autoComplete="email" />
+            <Field
+              label="Lykilorð"
+              type="password"
+              value={password}
+              onChange={setPassword}
+              autoComplete="current-password"
+              onEnter={signIn}
+            />
 
-          {error && (
-            <p className="rounded-lg border border-danger bg-surface px-3 py-2 text-sm text-danger">
-              {error}
-            </p>
-          )}
+            {error && (
+              <p className="rounded-xl border border-danger bg-[rgba(229,103,91,0.08)] px-4 py-3 text-sm text-danger">
+                {error}
+              </p>
+            )}
 
-          <button
-            onClick={signIn}
-            disabled={loading || !email || !password}
-            className="mt-1 w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-[#0B121C] transition hover:brightness-110 disabled:opacity-50"
-          >
-            {loading ? "Skrái inn…" : "Skrá inn"}
-          </button>
+            <button
+              onClick={signIn}
+              disabled={loading || !email || !password}
+              className="mt-1 w-full rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-3.5 text-[15px] font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:opacity-50 disabled:shadow-none"
+            >
+              {loading ? "Skrái inn…" : "Skrá inn"}
+            </button>
+          </div>
         </div>
       </div>
     </main>
@@ -106,14 +102,14 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-muted">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium text-muted">{label}</span>
       <input
         type={type}
         value={value}
         autoComplete={autoComplete}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
-        className="w-full rounded-lg border border-border bg-elevated px-3 py-2.5 text-sm text-text outline-none transition focus:border-accent"
+        className="w-full rounded-xl border border-border bg-elevated px-4 py-3 text-[15px] text-text outline-none transition focus:border-accent focus:ring-2 focus:ring-[rgba(200,164,92,0.22)]"
       />
     </label>
   );

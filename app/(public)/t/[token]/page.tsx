@@ -41,19 +41,21 @@ export default async function TicketPage({ params }: { params: { token: string }
   const sibling = (siblings ?? [])[0];
 
   return (
-    <main className="mx-auto max-w-sm p-5 space-y-5">
+    <main className="fk-rise mx-auto max-w-sm px-5 py-8 space-y-5">
       <div>
         <Eyebrow>Aðgöngumiði</Eyebrow>
         <h1 className="font-display text-2xl font-semibold text-text">{event?.name}</h1>
       </div>
 
-      <Card className="flex flex-col items-center gap-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={qr} alt="QR miði" width={240} height={240} className="rounded-lg" />
+      <Card accent className="flex flex-col items-center gap-4">
+        <div className="rounded-2xl bg-white p-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={qr} alt="QR miði" width={232} height={232} className="block rounded-lg" />
+        </div>
         <div className="text-center">
-          <p className="font-display text-lg text-text">{holderName}</p>
+          <p className="font-display text-xl text-text">{holderName}</p>
           {ticket.holder_type === "guest" && <p className="text-xs text-accent">Maki / +1</p>}
-          <p className="text-xs text-muted">
+          <p className="mt-1 text-xs text-muted">
             {event?.starts_at
               ? new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "medium", timeStyle: "short" })
               : ""}
@@ -63,10 +65,10 @@ export default async function TicketPage({ params }: { params: { token: string }
       </Card>
 
       {hasDrinks && (
-        <Card className="text-center">
-          <p className="text-xs text-muted">Drykkir eftir</p>
-          <p className="mt-1 font-display text-2xl text-accent">
-            {totalRemaining} af {totalAllowance}
+        <Card accent className="text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Drykkir eftir</p>
+          <p className="mt-1.5 font-display text-[34px] leading-none text-accent">
+            {totalRemaining} <span className="text-xl text-muted">af {totalAllowance}</span>
           </p>
         </Card>
       )}

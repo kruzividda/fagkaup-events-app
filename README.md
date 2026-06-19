@@ -258,3 +258,13 @@ maka sinn eigin miða: aðalgestur fær sinn miða á sitt netfang og maki sinn 
 (þegar Resend er tengt). Ef netfang maka vantar fá báðir miðar á netfang aðalgests.
 
 > Krefst SQL: keyrðu `0010_business_units.sql` í Supabase SQL editor (eftir 0009), svo cp + commit.
+
+---
+
+## Premium útlit
+
+Heildræn sjónræn yfirferð: dýpra navy þema með mjúkum brass-bjarma í bakgrunni,
+serif fyrirsagnir (Fraunces) á móti hreinum texta (Manrope), fáguð spjöld með skugga
+og hárfínni brass-línu, stærri og mýkri inntaksreitir með brass-fókus, sérsmíðaðir
+gátreitir, og pillur/hnappar með brass-gradient. Gestasíða, miðasíða og innskráning
+fengu sérstaka fínpússun. Engin SQL-breyting.

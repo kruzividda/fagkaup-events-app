@@ -102,7 +102,7 @@ export function RegistrationForm({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {fields.map((f) => {
         if (!isVisible(f)) return null;
         const conditional = f.visible_if != null;
@@ -120,8 +120,9 @@ export function RegistrationForm({
         return (
           <div key={f.id}>
             {conditional ? (
-              <div className="rounded-xl border border-dashed border-border bg-surface/50 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+              <div className="rounded-2xl border border-dashed border-[rgba(200,164,92,0.35)] bg-[rgba(200,164,92,0.035)] p-4">
+                <p className="mb-2.5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+                  <span className="inline-block h-px w-4 bg-[rgba(200,164,92,0.7)]" aria-hidden />
                   Skilyrt undirspurning
                 </p>
                 {node}
@@ -133,7 +134,7 @@ export function RegistrationForm({
         );
       })}
 
-      {error && <p className="rounded-lg border border-danger bg-surface px-3 py-2 text-sm text-danger">{error}</p>}
+      {error && <p className="rounded-xl border border-danger bg-[rgba(229,103,91,0.08)] px-4 py-3 text-sm text-danger">{error}</p>}
 
       <PrimaryButton onClick={submit} disabled={saving}>
         {saving ? "Sendi…" : "Senda skráningu"}
@@ -185,7 +186,7 @@ function renderField(
       const arr = Array.isArray(value) ? (value as string[]) : [];
       return (
         <div>
-          <p className="mb-1.5 text-xs font-medium text-muted">{f.label} {req && <span className="text-accent">*</span>}</p>
+          <p className="mb-2 text-[13px] font-medium text-muted">{f.label} {req && <span className="text-accent">*</span>}</p>
           <div className="flex flex-wrap gap-2">
             {f.options.map((o) => {
               const ov = o.value || o.label;
@@ -195,7 +196,7 @@ function renderField(
                   key={ov}
                   type="button"
                   onClick={() => onChange(on ? arr.filter((x) => x !== ov) : [...arr, ov])}
-                  className={`rounded-full border px-3 py-1.5 text-sm transition ${on ? "border-accent bg-accent text-[#0B121C]" : "border-border text-text hover:border-accent"}`}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${on ? "border-accent bg-gradient-to-br from-accent to-accent-bright text-[#0A111B] shadow-glow" : "border-border bg-elevated text-text hover:border-accent hover:text-accent"}`}
                 >
                   {o.label}
                 </button>
@@ -232,7 +233,7 @@ function PillField({
 
   return (
     <div>
-      <p className="mb-1.5 text-xs font-medium text-muted">
+      <p className="mb-2 text-[13px] font-medium text-muted">
         {label} {required && <span className="text-accent">*</span>}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -246,7 +247,7 @@ function PillField({
                 setOther(false);
                 onChange(opt);
               }}
-              className={`rounded-full border px-3.5 py-1.5 text-sm transition ${on ? "border-accent bg-accent text-[#0B121C]" : "border-border text-text hover:border-accent"}`}
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${on ? "border-accent bg-gradient-to-br from-accent to-accent-bright text-[#0A111B] shadow-glow" : "border-border bg-elevated text-text hover:border-accent hover:text-accent"}`}
             >
               {labels?.[opt] ?? opt}
             </button>
@@ -259,7 +260,7 @@ function PillField({
               setOther(true);
               onChange("");
             }}
-            className={`rounded-full border px-3.5 py-1.5 text-sm transition ${other ? "border-accent bg-accent text-[#0B121C]" : "border-border text-text hover:border-accent"}`}
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${other ? "border-accent bg-gradient-to-br from-accent to-accent-bright text-[#0A111B] shadow-glow" : "border-border bg-elevated text-text hover:border-accent hover:text-accent"}`}
           >
             Annað
           </button>

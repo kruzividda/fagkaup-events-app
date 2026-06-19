@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 :root {
-  /* Fagkaup — djúpt, premium dökkt þema. Brass-accent (ekki acid).
-     Skiptu þessum gildum út fyrir raunverulega vörumerkjaliti þegar þeir liggja fyrir. */
-  --bg:          #0B121C;
-  --surface:     #111A27;
-  --elevated:    #16212F;
-  --border:      #1F2C3B;
-  --text:        #E8EEF6;
-  --muted:       #8DA0B5;
-  --accent:      #C8A45C;   /* brass */
-  --accent-soft: #2A2417;
-  --danger:      #E5675B;
-  --success:     #5FB28A;
+  /* Fagkaup — djúpt, premium dökkt þema. Brass-accent. */
+  --bg:           #0A111B;
+  --surface:      #0F1825;
+  --elevated:     #14202E;
+  --border:       #213040;
+  --text:         #E9EEF6;
+  --muted:        #8A9DB2;
+  --accent:       #C8A45C;   /* brass */
+  --accent-bright:#E2C079;   /* ljósara brass fyrir gradient */
+  --accent-soft:  #2A2417;
+  --danger:       #E5675B;
+  --success:      #5FB28A;
 }
 
 * { border-color: var(--border); }
@@ -22,39 +22,56 @@
 html, body {
   background-color: var(--bg);
   color: var(--text);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
+/* Andrúmsloft: mjúkur brass-bjarmi efst, fínleg vignetta */
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  background-image:
+    radial-gradient(900px 480px at 50% -8%, rgba(200, 164, 92, 0.07), transparent 62%),
+    radial-gradient(1200px 700px at 100% 0%, rgba(95, 178, 138, 0.04), transparent 60%);
+  background-attachment: fixed;
 }
 
-::selection { background: var(--accent); color: #0B121C; }
+h1, h2, h3 { letter-spacing: -0.01em; }
+
+::selection { background: var(--accent); color: #0A111B; }
+
+/* Inntaksreitir: dökk sjálfvirk útfylling (Chrome autofill) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--elevated) inset;
+  caret-color: var(--text);
+  transition: background-color 9999s ease-out;
+}
+
+/* Fínn brass-skroll */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #2c3e52; }
 
 /* Hægðar á hreyfingu virt */
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
 
-/* QR-skanni: halda myndavél innan skjábreiddar (sérstaklega í síma) */
-#qr-reader {
-  width: 100% !important;
-  border: none;
+/* Mjúk innkoma fyrir efni */
+@keyframes fk-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-#qr-reader video {
-  width: 100% !important;
-  height: auto !important;
-  border-radius: 12px;
-  display: block;
-}
-#qr-reader img[alt="Info icon"],
-#qr-reader__dashboard_section_csr button {
-  /* fela auka-UI frá html5-qrcode sem getur farið út fyrir */
-  max-width: 100%;
-}
-#qr-reader__scan_region {
-  min-height: 0 !important;
-}
+.fk-rise { animation: fk-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* Engin lárétt skrun á litlum skjáum */
-html, body { max-width: 100%; overflow-x: hidden; }
+/* QR-skanni: halda myndavél innan skjábreiddar */
+#qr-reader { width: 100% !important; border: none; }
+#qr-reader video { width: 100% !important; height: auto !important; border-radius: 14px; display: block; }
+#qr-reader img[alt="Info icon"],
+#qr-reader__dashboard_section_csr button { max-width: 100%; }
+#qr-reader__scan_region { min-height: 0 !important; }

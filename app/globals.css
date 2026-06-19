@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Fagkaup — djúpt, premium dökkt þema. Brass-accent (ekki acid).
+     Skiptu þessum gildum út fyrir raunverulega vörumerkjaliti þegar þeir liggja fyrir. */
+  --bg:          #0B121C;
+  --surface:     #111A27;
+  --elevated:    #16212F;
+  --border:      #1F2C3B;
+  --text:        #E8EEF6;
+  --muted:       #8DA0B5;
+  --accent:      #C8A45C;   /* brass */
+  --accent-soft: #2A2417;
+  --danger:      #E5675B;
+  --success:     #5FB28A;
+}
+
+* { border-color: var(--border); }
+
+html, body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #0B121C; }
+
+/* Hægðar á hreyfingu virt */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* QR-skanni: halda myndavél innan skjábreiddar (sérstaklega í síma) */
+#qr-reader {
+  width: 100% !important;
+  border: none;
+}
+#qr-reader video {
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 12px;
+  display: block;
+}
+#qr-reader img[alt="Info icon"],
+#qr-reader__dashboard_section_csr button {
+  /* fela auka-UI frá html5-qrcode sem getur farið út fyrir */
+  max-width: 100%;
+}
+#qr-reader__scan_region {
+  min-height: 0 !important;
+}
+
+/* Engin lárétt skrun á litlum skjáum */
+html, body { max-width: 100%; overflow-x: hidden; }

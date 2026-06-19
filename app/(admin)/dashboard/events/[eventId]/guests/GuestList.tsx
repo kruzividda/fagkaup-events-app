@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { slugify } from "@/lib/slug";
+import { downloadXlsx, type CellValue } from "@/lib/xlsx";
 
 type Drinks = { allowance: number; used: number; remaining: number };
 
@@ -48,14 +49,13 @@ function dateTimeOf(iso: string) {
   });
 }
 
-function exportCsv(rows: GuestRow[], eventName: string, showDrinks: boolean) {
+function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean) {
   const headers = [
     "Nafn", "Fyrirtæki", "Rekstrareining", "Staðsetning", "Fæðuóþol", "Sími", "Netfang",
     "Maki", "Maki mætt", "Staða", "Innritun",
     ...(showDrinks ? ["Drykkir nýttir", "Drykkir inneign", "Drykkir eftir", "Maki nýttir", "Maki eftir"] : []),
   ];
-  const esc = (v: unknown) => `"${(v ?? "").toString().replace(/"/g, '""')}"`;
-  const lines = rows.map((r) => [
+  const data: CellValue[][] = rows.map((r) => [
     r.name,
     r.company ?? "",
     r.unit ?? "",
@@ -77,18 +77,9 @@ function exportCsv(rows: GuestRow[], eventName: string, showDrinks: boolean) {
         ]
       : []),
   ]);
-  const body = [headers, ...lines].map((row) => row.map(esc).join(";")).join("\r\n");
-  const csv = "\uFEFFsep=;\r\n" + body;
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `gestalisti-${slugify(eventName) || "vidburdur"}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadXlsx(`gestalisti-${slugify(eventName) || "vidburdur"}.xlsx`, headers, data, "Gestalisti");
 }
+
 
 export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; eventName: string; showDrinks: boolean }) {
   const [tab, setTab] = useState<Tab>("all");
@@ -195,7 +186,7 @@ export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; e
         />
 
         <button
-          onClick={() => exportCsv(filtered, eventName, showDrinks)}
+          onClick={() => exportRows(filtered, eventName, showDrinks)}
           className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)]"
         >
           Flytja út (Excel)

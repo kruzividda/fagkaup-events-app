@@ -2,13 +2,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
+import { DrinksPanel } from "./DrinksPanel";
+
+export const dynamic = "force-dynamic";
 
 export default async function EventDetailPage({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
 
   const { data: event } = await supabase
     .from("events")
-    .select("name, status, starts_at, location, drinks_enabled, max_guests")
+    .select(
+      "name, status, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
+    )
     .eq("id", params.eventId)
     .single();
   if (!event) notFound();
@@ -30,41 +35,59 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <Card>
-          <p className="text-xs text-muted">Skráðir</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Skráðir</p>
           <p className="mt-1 font-display text-2xl text-text">{regCount ?? 0}</p>
         </Card>
         <Card>
-          <p className="text-xs text-muted">Hámark</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Hámark</p>
           <p className="mt-1 font-display text-2xl text-text">{event.max_guests ?? "—"}</p>
         </Card>
         <Card>
-          <p className="text-xs text-muted">Drykkir</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Drykkir</p>
           <p className="mt-1 font-display text-2xl text-text">{event.drinks_enabled ? "Já" : "Nei"}</p>
+        </Card>
+        <Card>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Borðaskipan</p>
+          <p className="mt-1 font-display text-2xl text-text">{event.uses_seating ? "Já" : "Nei"}</p>
         </Card>
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Link
           href={`/dashboard/events/${params.eventId}/stats`}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-[#0B121C] transition hover:brightness-110"
+          className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-sm font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105"
         >
           Skoða tölfræði
         </Link>
         <Link
+          href={`/dashboard/events/${params.eventId}/edit`}
+          className="rounded-xl border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
+        >
+          Breyta viðburði
+        </Link>
+        <Link
           href={`/dashboard/events/${params.eventId}/form`}
-          className="rounded-lg border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
+          className="rounded-xl border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
         >
           Skráningarform
         </Link>
         <Link
           href="/dashboard/events"
-          className="rounded-lg border border-border px-4 py-2 text-sm text-muted transition hover:text-text"
+          className="rounded-xl border border-border px-4 py-2 text-sm text-muted transition hover:text-text"
         >
-          Til baka í viðburði
+          Til baka
         </Link>
       </div>
+
+      <DrinksPanel
+        eventId={params.eventId}
+        drinksEnabled={event.drinks_enabled}
+        perPerson={event.drinks_per_person ?? 0}
+        spouseGets={event.spouse_gets_drinks}
+        perSpouse={event.drinks_per_spouse ?? 0}
+      />
     </div>
   );
 }

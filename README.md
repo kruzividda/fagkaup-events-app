@@ -268,3 +268,21 @@ serif fyrirsagnir (Fraunces) á móti hreinum texta (Manrope), fáguð spjöld m
 og hárfínni brass-línu, stærri og mýkri inntaksreitir með brass-fókus, sérsmíðaðir
 gátreitir, og pillur/hnappar með brass-gradient. Gestasíða, miðasíða og innskráning
 fengu sérstaka fínpússun. Engin SQL-breyting.
+
+---
+
+## Breyta viðburði + drykkjastjórnun
+
+### Breyta viðburði
+Viðburður → **Breyta viðburði**. Hægt að breyta öllu eftirá — líka að kveikja á
+drykkjamiðum eða borðaskipan sem ekki var hakað við í upphafi. Breytingar á drykkjafjölda
+hér gilda fyrir *nýjar* skráningar.
+
+### Drykkjastjórnun (á viðburðasíðunni)
+- **Beita á alla gesti** — setur inneign hjá öllum sem þegar eru skráðir (líka þeim sem
+  skráðu sig áður en drykkir voru virkir). Notuðum drykkjum er haldið. Notaðu þetta þegar
+  ákveðið er eftirá að bjóða drykki.
+- **Lifandi +1 / −1 á alla** — bætir við eða fækkar einum drykk hjá öllum gestum samstundis
+  um kvöldið. Inneign fer aldrei undir 0.
+
+> Krefst SQL: keyrðu `0011_drink_management.sql` í Supabase SQL editor (eftir 0010), svo cp + commit.

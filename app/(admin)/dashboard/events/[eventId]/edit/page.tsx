@@ -1,0 +1,28 @@
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { Eyebrow, PageTitle } from "@/components/ui";
+import { EditEventForm } from "./EditEventForm";
+
+export const dynamic = "force-dynamic";
+
+export default async function EditEventPage({ params }: { params: { eventId: string } }) {
+  const supabase = createClient();
+  const { data: event } = await supabase
+    .from("events")
+    .select(
+      "name, description, event_type, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
+    )
+    .eq("id", params.eventId)
+    .single();
+  if (!event) notFound();
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <div>
+        <Eyebrow>Viðburðir</Eyebrow>
+        <PageTitle>Breyta viðburði</PageTitle>
+      </div>
+      <EditEventForm eventId={params.eventId} initial={event} />
+    </div>
+  );
+}

@@ -46,9 +46,20 @@ export function RegistrationForm({
     setValues((prev) => ({ ...prev, [key]: v }));
   }
 
+  // Útibú ráðast af valinni deild
+  const selectedUnit = orgUnits.find((u) => u.name === values["business_unit"]);
+  const hasBusinessUnitField = fields.some((f) => f.field_key === "business_unit");
+
+  function locationShown(): boolean {
+    if (orgUnits.length === 0) return true; // engar deildir -> frjáls texti (t.d. golf)
+    if (!hasBusinessUnitField) return true; // engin deild í formi -> frjáls texti
+    return !!selectedUnit && selectedUnit.locations.length > 0; // aðeins ef deild á útibú
+  }
+
   function isVisible(f: FormField): boolean {
-    if (!f.visible_if) return true;
-    return values[f.visible_if.field] === f.visible_if.equals;
+    if (f.visible_if && values[f.visible_if.field] !== f.visible_if.equals) return false;
+    if (f.field_key === "location") return locationShown();
+    return true;
   }
 
   function validate(): string | null {
@@ -89,9 +100,6 @@ export function RegistrationForm({
     }
     router.push(`/t/${res.token}`);
   }
-
-  // Útibú ráðast af valinni deild
-  const selectedUnit = orgUnits.find((u) => u.name === values["business_unit"]);
 
   return (
     <div className="space-y-4">

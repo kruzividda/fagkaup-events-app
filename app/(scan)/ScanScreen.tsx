@@ -149,7 +149,7 @@ function DoorResult({ r }: { r: ScanResult }) {
         )}
         {!r.ok && r.checked_in_at != null && (
           <p className="mt-1 text-xs text-muted">
-            Innritað áður: {new Date(String(r.checked_in_at)).toLocaleTimeString("is-IS")}
+            Innritað áður: {new Date(String(r.checked_in_at)).toLocaleTimeString("is-IS", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Atlantic/Reykjavik" })}
           </p>
         )}
       </Card>

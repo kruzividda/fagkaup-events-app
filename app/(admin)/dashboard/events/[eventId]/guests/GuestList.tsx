@@ -28,7 +28,24 @@ type SortKey = "name" | "company" | "unit" | "location" | "status" | "drinks";
 
 function timeOf(iso: string | null) {
   if (!iso) return "";
-  return new Date(iso).toLocaleTimeString("is-IS", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("is-IS", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Atlantic/Reykjavik",
+  });
+}
+
+function dateTimeOf(iso: string) {
+  return new Date(iso).toLocaleString("is-IS", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Atlantic/Reykjavik",
+  });
 }
 
 function exportCsv(rows: GuestRow[], eventName: string, showDrinks: boolean) {
@@ -49,7 +66,7 @@ function exportCsv(rows: GuestRow[], eventName: string, showDrinks: boolean) {
     r.hasSpouse ? r.spouseName || "+1" : "",
     r.hasSpouse ? (r.spouseAttended ? "Já" : "Nei") : "",
     r.attended ? "Mætt" : "Ómætt",
-    r.attended && r.checkedInAt ? new Date(r.checkedInAt).toLocaleString("is-IS") : "",
+    r.attended && r.checkedInAt ? dateTimeOf(r.checkedInAt) : "",
     ...(showDrinks
       ? [
           r.drinks ? r.drinks.used : "",

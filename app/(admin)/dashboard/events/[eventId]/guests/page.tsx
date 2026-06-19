@@ -58,7 +58,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
   });
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-5xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <Eyebrow>Gestalisti</Eyebrow>
@@ -69,7 +69,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
         </Link>
       </div>
 
-      <GuestList rows={rows} />
+      <GuestList rows={rows} eventName={event.name} />
     </div>
   );
 }

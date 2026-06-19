@@ -168,6 +168,20 @@ function BarResult({ r }: { r: ScanResult }) {
         </Card>
       </div>
     );
+  if (r.reason === "not_checked_in") {
+    const name = (guestOf(r).full_name as string) ?? "Gesturinn";
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⛔ Ekki innritaður" />
+        <Card className="space-y-1 text-center">
+          <p className="font-display text-lg text-text">{name}</p>
+          <p className="text-sm text-muted">
+            Hefur ekki skráð sig inn við dyr. Vísaðu gestinum á dyravörð til innritunar áður en hægt er að afgreiða drykk.
+          </p>
+        </Card>
+      </div>
+    );
+  }
   if (r.reason === "no_credit")
     return (
       <div className="space-y-3">

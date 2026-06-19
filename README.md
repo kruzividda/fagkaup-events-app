@@ -286,3 +286,14 @@ hér gilda fyrir *nýjar* skráningar.
   um kvöldið. Inneign fer aldrei undir 0.
 
 > Krefst SQL: keyrðu `0011_drink_management.sql` í Supabase SQL editor (eftir 0010), svo cp + commit.
+
+---
+
+## Innritun skylda fyrir bar
+
+Gestur verður nú að vera **innritaður við dyr** áður en hægt er að afgreiða honum drykk.
+Skanni barþjónn QR sem hefur ekki verið innritaður birtist „⛔ Ekki innritaður“ með nafni
+gestsins og leiðbeiningu um að vísa honum á dyravörð fyrst. Á við hvern miða fyrir sig —
+maki þarf líka að vera innritaður á sínum eigin miða.
+
+> Krefst SQL: keyrðu `0012_require_checkin_for_drinks.sql` í Supabase SQL editor (eftir 0011), svo cp + commit.

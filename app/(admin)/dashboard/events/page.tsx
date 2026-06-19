@@ -45,7 +45,12 @@ export default async function EventsPage() {
           {events.map((e) => (
             <Card key={e.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="font-display text-lg text-text">{e.name}</p>
+                <Link
+                  href={`/dashboard/events/${e.id}`}
+                  className="font-display text-lg text-text transition hover:text-accent"
+                >
+                  {e.name}
+                </Link>
                 <p className="text-xs text-muted">
                   {new Date(e.starts_at).toLocaleString("is-IS", {
                     dateStyle: "medium",

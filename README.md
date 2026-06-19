@@ -160,3 +160,26 @@ símanum og skannað hann með vefmyndavél tölvunnar.
 Eftir innritun bætist röð í `check_ins`; eftir drykk í `drink_redemptions`.
 Endurteknar/ógildar skannanir fara í `scan_attempts`. Þetta er grunnurinn að
 tölfræðinni síðar (mæting, drykkjanotkun, afköst barþjóna).
+
+---
+
+## Tölfræði-mælaborð
+
+Hver viðburður er með tölfræðisíðu sem reiknast úr gögnunum sem kerfið safnar
+(engin sérstök uppsetning þarf).
+
+### Hvar
+- Stjórnborð → Viðburðir → smelltu „Tölfræði“ við viðburð (eða á heiti hans → „Skoða tölfræði“).
+- Forsíða stjórnborðs sýnir nú heildartölur yfir alla viðburði.
+
+### Hvað er sýnt
+- **Skráningar:** boðaðir, skráðir, mættir, ómættir, mætingarhlutfall.
+- **Drykkir:** í boði, nýttir, eftir, nýtingarhlutfall, og hverjir nýttu alla/hluta/enga.
+- **Tímalína:** drykkjanotkun yfir kvöldið (30 mín bil).
+- **Mæting eftir hópum:** fyrirtækjum, rekstrareiningum, staðsetningum.
+- **Afköst barþjóna:** drykkir og afgreiðslur á hvern barþjón.
+
+### Að prófa
+Stofnaðu viðburð með drykkjum, skráðu nokkra gesti (mismunandi fyrirtæki/rekstrareiningar
+gefa fjölbreyttari mælaborð), innritaðu suma í „Innritun (dyr)“ og skráðu drykki í „Bar“.
+Opnaðu svo „Tölfræði“ — tölurnar uppfærast eftir því sem þú innritar og afgreiðir.

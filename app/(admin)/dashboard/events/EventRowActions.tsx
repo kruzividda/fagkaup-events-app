@@ -37,6 +37,12 @@ export function EventRowActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Link
+        href={`/dashboard/events/${eventId}/stats`}
+        className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:text-text"
+      >
+        Tölfræði
+      </Link>
+      <Link
         href={publicPath}
         target="_blank"
         className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:text-text"

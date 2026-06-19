@@ -13,7 +13,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
   const { data: event } = await supabase.from("events").select("name, drinks_enabled").eq("id", id).single();
   if (!event) notFound();
 
-  const [regsRes, ticketsRes, checkinsRes, accountsRes, redemptionsRes] = await Promise.all([
+  const [regsRes, ticketsRes, checkinsRes, accountsRes, redemptionsRes, fieldsRes] = await Promise.all([
     supabase
       .from("registrations")
       .select("id, full_name, email, phone, company, business_unit, location, dietary, has_plus_one, spouse_name, created_at")
@@ -24,6 +24,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
     supabase.from("check_ins").select("ticket_id, checked_in_at").eq("event_id", id),
     supabase.from("drink_accounts").select("id, ticket_id, allowance").eq("event_id", id).eq("scope", "individual"),
     supabase.from("drink_redemptions").select("account_id, quantity").eq("event_id", id),
+    supabase.from("event_form_fields").select("field_key, requirement").eq("event_id", id),
   ]);
 
   const regs = regsRes.data ?? [];
@@ -31,6 +32,21 @@ export default async function GuestsPage({ params }: { params: { eventId: string
   const checkins = checkinsRes.data ?? [];
   const accounts = accountsRes.data ?? [];
   const redemptions = redemptionsRes.data ?? [];
+
+  const active = new Set(
+    ((fieldsRes.data ?? []) as { field_key: string; requirement: string }[])
+      .filter((f) => f.requirement !== "hidden")
+      .map((f) => f.field_key)
+  );
+  const cols = {
+    company: active.has("company"),
+    unit: active.has("business_unit"),
+    location: active.has("location"),
+    dietary: active.has("dietary"),
+    spouse: active.has("has_plus_one"),
+    phone: active.has("phone"),
+    email: active.has("email"),
+  };
 
   const checkinByTicket = new Map(checkins.map((c) => [c.ticket_id, c.checked_in_at]));
 
@@ -88,7 +104,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
         </Link>
       </div>
 
-      <GuestList rows={rows} eventName={event.name} showDrinks={event.drinks_enabled} />
+      <GuestList rows={rows} eventName={event.name} showDrinks={event.drinks_enabled} cols={cols} />
     </div>
   );
 }

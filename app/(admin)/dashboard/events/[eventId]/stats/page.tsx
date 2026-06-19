@@ -35,7 +35,7 @@ export default async function StatsPage({ params }: { params: { eventId: string 
     .single();
   if (!event) notFound();
 
-  const [regsRes, ticketsRes, checkinsRes, invitesRes, accountsRes, redemptionsRes, profilesRes] =
+  const [regsRes, ticketsRes, checkinsRes, invitesRes, accountsRes, redemptionsRes, profilesRes, fieldsRes] =
     await Promise.all([
       supabase.from("registrations").select("id, status, company, business_unit, location").eq("event_id", id),
       supabase.from("tickets").select("id, registration_id").eq("event_id", id),
@@ -44,6 +44,7 @@ export default async function StatsPage({ params }: { params: { eventId: string 
       supabase.from("drink_accounts").select("id, ticket_id, scope, allowance").eq("event_id", id),
       supabase.from("drink_redemptions").select("account_id, ticket_id, quantity, redeemed_by, redeemed_at").eq("event_id", id),
       supabase.from("profiles").select("id, full_name"),
+      supabase.from("event_form_fields").select("field_key, requirement").eq("event_id", id),
     ]);
 
   const regs = (regsRes.data ?? []) as Reg[];
@@ -53,6 +54,14 @@ export default async function StatsPage({ params }: { params: { eventId: string 
   const accounts = (accountsRes.data ?? []) as Account[];
   const redemptions = (redemptionsRes.data ?? []) as Redemption[];
   const profiles = (profilesRes.data ?? []) as Profile[];
+
+  // Reitir sem eru raunverulega í forminu (ekki faldir) — ráða hvaða sundurliðanir birtast
+  const activeFields = new Set(
+    ((fieldsRes.data ?? []) as { field_key: string; requirement: string }[])
+      .filter((f) => f.requirement !== "hidden")
+      .map((f) => f.field_key)
+  );
+
 
   // ---- Mæting ----
   const ticketToReg = new Map(tickets.map((t) => [t.id, t.registration_id]));
@@ -194,12 +203,23 @@ export default async function StatsPage({ params }: { params: { eventId: string 
         </section>
       )}
 
-      {/* Mæting eftir hópum */}
-      <section className="grid gap-4 md:grid-cols-3">
-        <GroupCard title="Eftir fyrirtækjum" rows={byCompany} />
-        <GroupCard title="Eftir rekstrareiningum" rows={byUnit} />
-        <GroupCard title="Eftir staðsetningum" rows={byLocation} />
-      </section>
+      {/* Mæting eftir hópum — aðeins reitir sem eru í forminu */}
+      {(() => {
+        const groups = [
+          { show: activeFields.has("company"), title: "Eftir fyrirtækjum", rows: byCompany },
+          { show: activeFields.has("business_unit"), title: "Eftir rekstrareiningum", rows: byUnit },
+          { show: activeFields.has("location"), title: "Eftir staðsetningum", rows: byLocation },
+        ].filter((g) => g.show);
+        if (groups.length === 0) return null;
+        const cols = groups.length === 1 ? "md:grid-cols-1" : groups.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3";
+        return (
+          <section className={`grid gap-4 ${cols}`}>
+            {groups.map((g) => (
+              <GroupCard key={g.title} title={g.title} rows={g.rows} />
+            ))}
+          </section>
+        );
+      })()}
 
       {/* Barþjónar */}
       {event.drinks_enabled && (

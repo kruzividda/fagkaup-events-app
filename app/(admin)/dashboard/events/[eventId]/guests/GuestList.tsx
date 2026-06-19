@@ -24,47 +24,51 @@ export type GuestRow = {
   spouseDrinks: Drinks | null;
 };
 
+export type Cols = {
+  company: boolean;
+  unit: boolean;
+  location: boolean;
+  dietary: boolean;
+  spouse: boolean;
+  phone: boolean;
+  email: boolean;
+};
+
 type Tab = "all" | "in" | "out";
 type SortKey = "name" | "company" | "unit" | "location" | "status" | "drinks";
 
 function timeOf(iso: string | null) {
   if (!iso) return "";
-  return new Date(iso).toLocaleTimeString("is-IS", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Atlantic/Reykjavik",
-  });
+  return new Date(iso).toLocaleTimeString("is-IS", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Atlantic/Reykjavik" });
 }
-
 function dateTimeOf(iso: string) {
   return new Date(iso).toLocaleString("is-IS", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Atlantic/Reykjavik",
+    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Atlantic/Reykjavik",
   });
 }
 
-function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean) {
+function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, cols: Cols) {
   const headers = [
-    "Nafn", "Fyrirtæki", "Rekstrareining", "Staðsetning", "Fæðuóþol", "Sími", "Netfang",
-    "Maki", "Maki mætt", "Staða", "Innritun",
-    ...(showDrinks ? ["Drykkir nýttir", "Drykkir inneign", "Drykkir eftir", "Maki nýttir", "Maki eftir"] : []),
+    "Nafn",
+    ...(cols.company ? ["Fyrirtæki"] : []),
+    ...(cols.unit ? ["Rekstrareining"] : []),
+    ...(cols.location ? ["Staðsetning"] : []),
+    ...(cols.dietary ? ["Fæðuóþol"] : []),
+    ...(cols.phone ? ["Sími"] : []),
+    ...(cols.email ? ["Netfang"] : []),
+    ...(cols.spouse ? ["Maki", "Maki mætt"] : []),
+    "Staða", "Innritun",
+    ...(showDrinks ? ["Drykkir nýttir", "Drykkir inneign", "Drykkir eftir", ...(cols.spouse ? ["Maki nýttir", "Maki eftir"] : [])] : []),
   ];
   const data: CellValue[][] = rows.map((r) => [
     r.name,
-    r.company ?? "",
-    r.unit ?? "",
-    r.location ?? "",
-    r.dietary ?? "",
-    r.phone ?? "",
-    r.email ?? "",
-    r.hasSpouse ? r.spouseName || "+1" : "",
-    r.hasSpouse ? (r.spouseAttended ? "Já" : "Nei") : "",
+    ...(cols.company ? [r.company ?? ""] : []),
+    ...(cols.unit ? [r.unit ?? ""] : []),
+    ...(cols.location ? [r.location ?? ""] : []),
+    ...(cols.dietary ? [r.dietary ?? ""] : []),
+    ...(cols.phone ? [r.phone ?? ""] : []),
+    ...(cols.email ? [r.email ?? ""] : []),
+    ...(cols.spouse ? [r.hasSpouse ? r.spouseName || "+1" : "", r.hasSpouse ? (r.spouseAttended ? "Já" : "Nei") : ""] : []),
     r.attended ? "Mætt" : "Ómætt",
     r.attended && r.checkedInAt ? dateTimeOf(r.checkedInAt) : "",
     ...(showDrinks
@@ -72,16 +76,24 @@ function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean) {
           r.drinks ? r.drinks.used : "",
           r.drinks ? r.drinks.allowance : "",
           r.drinks ? r.drinks.remaining : "",
-          r.spouseDrinks ? r.spouseDrinks.used : "",
-          r.spouseDrinks ? r.spouseDrinks.remaining : "",
+          ...(cols.spouse ? [r.spouseDrinks ? r.spouseDrinks.used : "", r.spouseDrinks ? r.spouseDrinks.remaining : ""] : []),
         ]
       : []),
   ]);
   downloadXlsx(`gestalisti-${slugify(eventName) || "vidburdur"}.xlsx`, headers, data, "Gestalisti");
 }
 
-
-export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; eventName: string; showDrinks: boolean }) {
+export function GuestList({
+  rows,
+  eventName,
+  showDrinks,
+  cols,
+}: {
+  rows: GuestRow[];
+  eventName: string;
+  showDrinks: boolean;
+  cols: Cols;
+}) {
   const [tab, setTab] = useState<Tab>("all");
   const [q, setQ] = useState("");
   const [unit, setUnit] = useState("");
@@ -138,7 +150,8 @@ export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; e
   ];
 
   const selectCls = "rounded-xl border border-border bg-elevated px-3 py-2 text-sm text-text outline-none focus:border-accent";
-  const colCount = 7 + (showDrinks ? 1 : 0);
+  const colCount =
+    1 + (cols.company ? 1 : 0) + (cols.unit ? 1 : 0) + (cols.location ? 1 : 0) + (cols.dietary ? 1 : 0) + (cols.spouse ? 1 : 0) + (showDrinks ? 1 : 0) + 1;
 
   const SortHead = ({ k, children, className = "" }: { k: SortKey; children: React.ReactNode; className?: string }) => (
     <th className={`cursor-pointer select-none whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted ${className}`} onClick={() => toggleSort(k)}>
@@ -168,15 +181,19 @@ export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; e
           ))}
         </div>
 
-        <select value={unit} onChange={(e) => setUnit(e.target.value)} className={selectCls}>
-          <option value="">Allar deildir</option>
-          {units.map((u) => <option key={u} value={u}>{u}</option>)}
-        </select>
+        {cols.unit && (
+          <select value={unit} onChange={(e) => setUnit(e.target.value)} className={selectCls}>
+            <option value="">Allar deildir</option>
+            {units.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        )}
 
-        <select value={loc} onChange={(e) => setLoc(e.target.value)} className={selectCls}>
-          <option value="">Allar staðsetningar</option>
-          {locs.map((l) => <option key={l} value={l}>{l}</option>)}
-        </select>
+        {cols.location && (
+          <select value={loc} onChange={(e) => setLoc(e.target.value)} className={selectCls}>
+            <option value="">Allar staðsetningar</option>
+            {locs.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+        )}
 
         <input
           value={q}
@@ -186,7 +203,7 @@ export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; e
         />
 
         <button
-          onClick={() => exportRows(filtered, eventName, showDrinks)}
+          onClick={() => exportRows(filtered, eventName, showDrinks, cols)}
           className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)]"
         >
           Flytja út (Excel)
@@ -204,11 +221,11 @@ export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; e
             <thead className="sticky top-0 z-10 bg-surface text-[13px]">
               <tr className="border-b border-border">
                 <SortHead k="name">Nafn</SortHead>
-                <SortHead k="company" className="hidden sm:table-cell">Fyrirtæki</SortHead>
-                <SortHead k="unit" className="hidden md:table-cell">Rekstrareining</SortHead>
-                <SortHead k="location" className="hidden md:table-cell">Staðsetning</SortHead>
-                <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Fæðuóþol</th>
-                <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Maki</th>
+                {cols.company && <SortHead k="company" className="hidden sm:table-cell">Fyrirtæki</SortHead>}
+                {cols.unit && <SortHead k="unit" className="hidden md:table-cell">Rekstrareining</SortHead>}
+                {cols.location && <SortHead k="location" className="hidden md:table-cell">Staðsetning</SortHead>}
+                {cols.dietary && <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Fæðuóþol</th>}
+                {cols.spouse && <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Maki</th>}
                 {showDrinks && <SortHead k="drinks" className="whitespace-nowrap">Drykkir</SortHead>}
                 <SortHead k="status" className="text-right">Staða</SortHead>
               </tr>
@@ -218,25 +235,33 @@ export function GuestList({ rows, eventName, showDrinks }: { rows: GuestRow[]; e
                 <tr key={r.id} className={`border-b border-border transition hover:bg-elevated ${i % 2 ? "bg-[rgba(255,255,255,0.012)]" : ""}`}>
                   <td className="px-3 py-2.5">
                     <span className="font-medium text-text">{r.name}</span>
-                    <span className="block text-[12px] text-muted sm:hidden">{[r.company, r.unit].filter(Boolean).join(" · ")}</span>
-                  </td>
-                  <td className="hidden px-3 py-2.5 text-muted sm:table-cell">{r.company ?? "—"}</td>
-                  <td className="hidden px-3 py-2.5 text-muted md:table-cell">{r.unit ?? "—"}</td>
-                  <td className="hidden px-3 py-2.5 text-muted md:table-cell">{r.location ?? "—"}</td>
-                  <td className="hidden px-3 py-2.5 lg:table-cell">
-                    {r.dietary ? <span className="text-accent">{r.dietary}</span> : <span className="text-muted">—</span>}
-                  </td>
-                  <td className="hidden px-3 py-2.5 text-muted lg:table-cell">
-                    {r.hasSpouse ? (
-                      <span>
-                        {r.spouseName || "+1"}{" "}
-                        <span className={r.spouseAttended ? "text-success" : "text-muted"}>· {r.spouseAttended ? "mætt" : "ómætt"}</span>
-                        {r.spouseDrinks && <span className="block text-[12px] text-muted">{r.spouseDrinks.used}/{r.spouseDrinks.allowance} drykkir</span>}
+                    {(cols.company || cols.unit) && (
+                      <span className="block text-[12px] text-muted sm:hidden">
+                        {[cols.company ? r.company : null, cols.unit ? r.unit : null].filter(Boolean).join(" · ")}
                       </span>
-                    ) : (
-                      "—"
                     )}
                   </td>
+                  {cols.company && <td className="hidden px-3 py-2.5 text-muted sm:table-cell">{r.company ?? "—"}</td>}
+                  {cols.unit && <td className="hidden px-3 py-2.5 text-muted md:table-cell">{r.unit ?? "—"}</td>}
+                  {cols.location && <td className="hidden px-3 py-2.5 text-muted md:table-cell">{r.location ?? "—"}</td>}
+                  {cols.dietary && (
+                    <td className="hidden px-3 py-2.5 lg:table-cell">
+                      {r.dietary ? <span className="text-accent">{r.dietary}</span> : <span className="text-muted">—</span>}
+                    </td>
+                  )}
+                  {cols.spouse && (
+                    <td className="hidden px-3 py-2.5 text-muted lg:table-cell">
+                      {r.hasSpouse ? (
+                        <span>
+                          {r.spouseName || "+1"}{" "}
+                          <span className={r.spouseAttended ? "text-success" : "text-muted"}>· {r.spouseAttended ? "mætt" : "ómætt"}</span>
+                          {showDrinks && r.spouseDrinks && <span className="block text-[12px] text-muted">{r.spouseDrinks.used}/{r.spouseDrinks.allowance} drykkir</span>}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  )}
                   {showDrinks && (
                     <td className="whitespace-nowrap px-3 py-2.5">
                       {r.drinks ? (

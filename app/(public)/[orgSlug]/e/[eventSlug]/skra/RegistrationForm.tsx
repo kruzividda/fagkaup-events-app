@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Field, TextInput, Checkbox, PrimaryButton } from "@/components/form";
+import { Field, TextInput, TextArea, Checkbox, Select, PrimaryButton } from "@/components/form";
 import { registerGuest } from "./actions";
 
 export type FormField = {
@@ -13,6 +13,7 @@ export type FormField = {
   requirement: "required" | "optional" | "hidden";
   is_custom: boolean;
   visible_if: { field: string; equals: unknown } | null;
+  options: { value: string; label: string }[];
 };
 
 const REASON_TEXT: Record<string, string> = {
@@ -52,6 +53,8 @@ export function RegistrationForm({
       const v = values[f.field_key];
       if (f.field_type === "consent" || f.field_type === "boolean") {
         if (v !== true) return `Vinsamlegast fylltu út: ${f.label}`;
+      } else if (f.field_type === "multiselect") {
+        if (!Array.isArray(v) || v.length === 0) return `Vinsamlegast fylltu út: ${f.label}`;
       } else if (!v || String(v).trim() === "") {
         return `Vinsamlegast fylltu út: ${f.label}`;
       }
@@ -111,9 +114,7 @@ function renderField(f: FormField, value: unknown, onChange: (v: unknown) => voi
   switch (f.field_type) {
     case "boolean":
     case "consent":
-      return (
-        <Checkbox checked={value === true} onChange={(v) => onChange(v)} label={f.label + (req ? " *" : "")} />
-      );
+      return <Checkbox checked={value === true} onChange={(v) => onChange(v)} label={f.label + (req ? " *" : "")} />;
     case "email":
       return (
         <Field label={f.label} required={req}>
@@ -126,6 +127,46 @@ function renderField(f: FormField, value: unknown, onChange: (v: unknown) => voi
           <TextInput type="tel" value={(value as string) ?? ""} onChange={onChange} />
         </Field>
       );
+    case "textarea":
+      return (
+        <Field label={f.label} required={req}>
+          <TextArea value={(value as string) ?? ""} onChange={onChange} />
+        </Field>
+      );
+    case "select":
+      return (
+        <Field label={f.label} required={req}>
+          <Select
+            value={(value as string) ?? ""}
+            onChange={onChange}
+            options={[{ value: "", label: "— veldu —" }, ...f.options.map((o) => ({ value: o.value || o.label, label: o.label }))]}
+          />
+        </Field>
+      );
+    case "multiselect": {
+      const arr = Array.isArray(value) ? (value as string[]) : [];
+      return (
+        <div>
+          <p className="mb-1 text-xs font-medium text-muted">
+            {f.label} {req && <span className="text-accent">*</span>}
+          </p>
+          <div className="space-y-1.5">
+            {f.options.map((o) => {
+              const ov = o.value || o.label;
+              const checked = arr.includes(ov);
+              return (
+                <Checkbox
+                  key={ov}
+                  checked={checked}
+                  onChange={(c) => onChange(c ? [...arr, ov] : arr.filter((x) => x !== ov))}
+                  label={o.label}
+                />
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
     default:
       return (
         <Field label={f.label} required={req}>

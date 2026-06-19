@@ -10,11 +10,7 @@ export default async function RegisterPage({
 }) {
   const admin = createAdminClient();
 
-  const { data: org } = await admin
-    .from("organizations")
-    .select("id")
-    .eq("slug", params.orgSlug)
-    .single();
+  const { data: org } = await admin.from("organizations").select("id").eq("slug", params.orgSlug).single();
   if (!org) notFound();
 
   const { data: event } = await admin
@@ -32,6 +28,29 @@ export default async function RegisterPage({
     .neq("requirement", "hidden")
     .order("sort_order", { ascending: true });
 
+  const ids = (fields ?? []).map((f) => f.id);
+  const { data: options } = ids.length
+    ? await admin.from("event_field_options").select("field_id, value, label, sort_order").in("field_id", ids).order("sort_order")
+    : { data: [] as { field_id: string; value: string; label: string }[] };
+
+  const optsByField = new Map<string, { value: string; label: string }[]>();
+  for (const o of options ?? []) {
+    const arr = optsByField.get(o.field_id) ?? [];
+    arr.push({ value: o.value, label: o.label });
+    optsByField.set(o.field_id, arr);
+  }
+
+  const formFields: FormField[] = (fields ?? []).map((f) => ({
+    id: f.id,
+    field_key: f.field_key,
+    label: f.label,
+    field_type: f.field_type as FormField["field_type"],
+    requirement: f.requirement as FormField["requirement"],
+    is_custom: f.is_custom,
+    visible_if: (f.visible_if as FormField["visible_if"]) ?? null,
+    options: optsByField.get(f.id) ?? [],
+  }));
+
   return (
     <main className="mx-auto max-w-lg p-5 space-y-6">
       <div>
@@ -48,7 +67,7 @@ export default async function RegisterPage({
           eventId={event.id}
           orgSlug={params.orgSlug}
           eventSlug={params.eventSlug}
-          fields={(fields ?? []) as FormField[]}
+          fields={formFields}
         />
       )}
     </main>

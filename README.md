@@ -209,3 +209,27 @@ sitt eigið nafn, merkt „· maki“).
 
 > Krefst SQL-uppfærslu: keyrðu `0009_spouse_ticket.sql` í Supabase SQL editor (eftir 0008),
 > síðan venjulega cp + commit.
+
+---
+
+## Form builder (skráningarform)
+
+Admin getur nú stýrt skráningarforminu fyrir hvern viðburð.
+
+### Hvar
+Stjórnborð → Viðburðir → smelltu á heiti viðburðar → „Skráningarform“.
+
+### Hvað er hægt
+- **Grunnreitir:** kveiktu/slökktu á nafni, pósti, síma, fyrirtæki, rekstrareiningu,
+  staðsetningu, starfsheiti, maka, fæðuóþoli, athugasemdum og samþykki.
+- **Skylda / valfrjálst / falinn** fyrir hvern reit.
+- **Eigin spurningar:** texti, langur texti, val (eitt), fjölval, já/nei.
+- **Valkostir** fyrir val/fjölval.
+- **Skilyrtar undirspurningar:** „Sýna aðeins ef …“ — t.d. „Nafn maka“ birtist
+  aðeins ef hakað er við maka, eða undirspurning birtist ef svar við „Mætir þú í golf?“ er Já.
+- **Röðun** með ↑/↓ og eyðing reita.
+
+Smelltu „Vista form“ til að vista. Opna skráningarsíðan endurspeglar breytingarnar strax.
+
+> Athugið: ef þú eyðir reit sem þegar hefur söfnuð svör, eyðast þau svör með honum.
+> Til að fela reit án þess að tapa gögnum skaltu velja „Falinn“ í stað þess að eyða.

@@ -53,6 +53,12 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
           Skoða tölfræði
         </Link>
         <Link
+          href={`/dashboard/events/${params.eventId}/form`}
+          className="rounded-lg border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
+        >
+          Skráningarform
+        </Link>
+        <Link
           href="/dashboard/events"
           className="rounded-lg border border-border px-4 py-2 text-sm text-muted transition hover:text-text"
         >

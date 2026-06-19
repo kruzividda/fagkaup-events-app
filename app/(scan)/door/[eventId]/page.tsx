@@ -24,7 +24,7 @@ export default async function DoorScan({ params }: { params: { eventId: string }
           ← Til baka
         </Link>
       </div>
-      <ScanScreen mode="door" eventName={event.name} />
+      <ScanScreen mode="door" eventId={params.eventId} eventName={event.name} />
     </main>
   );
 }

@@ -5,7 +5,15 @@ import { QrScanner } from "./QrScanner";
 import { scanCheckin, scanDrink, type ScanResult } from "./actions";
 import { Card } from "@/components/ui";
 
-export function ScanScreen({ mode, eventName }: { mode: "door" | "bar"; eventName: string }) {
+export function ScanScreen({
+  mode,
+  eventId,
+  eventName,
+}: {
+  mode: "door" | "bar";
+  eventId: string;
+  eventName: string;
+}) {
   const [paused, setPaused] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +26,7 @@ export function ScanScreen({ mode, eventName }: { mode: "door" | "bar"; eventNam
     busyRef.current = true;
     setPaused(true);
     setLoading(true);
-    const res = mode === "door" ? await scanCheckin(t) : await scanDrink(t);
+    const res = mode === "door" ? await scanCheckin(eventId, t) : await scanDrink(eventId, t);
     setResult(res);
     setLoading(false);
   }
@@ -100,6 +108,15 @@ function guestOf(r: ScanResult): Record<string, unknown> {
 
 function DoorResult({ r }: { r: ScanResult }) {
   if (r.reason === "invalid") return <Banner tone="bad" title="Ógildur miði" />;
+  if (r.reason === "wrong_event")
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⚠ Rangur viðburður" />
+        <Card className="text-center text-sm text-muted">
+          Þessi miði er á annan viðburð og gildir ekki hér.
+        </Card>
+      </div>
+    );
 
   const g = guestOf(r);
   const name = (g.full_name as string) ?? "—";
@@ -139,6 +156,15 @@ function DoorResult({ r }: { r: ScanResult }) {
 
 function BarResult({ r }: { r: ScanResult }) {
   if (r.reason === "invalid") return <Banner tone="bad" title="Ógildur miði" />;
+  if (r.reason === "wrong_event")
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⚠ Rangur viðburður" />
+        <Card className="text-center text-sm text-muted">
+          Þessi miði er á annan viðburð og gildir ekki hér.
+        </Card>
+      </div>
+    );
   if (r.reason === "no_credit")
     return (
       <div className="space-y-3">

@@ -24,7 +24,7 @@ export default async function BarScan({ params }: { params: { eventId: string } 
           ← Til baka
         </Link>
       </div>
-      <ScanScreen mode="bar" eventName={event.name} />
+      <ScanScreen mode="bar" eventId={params.eventId} eventName={event.name} />
     </main>
   );
 }

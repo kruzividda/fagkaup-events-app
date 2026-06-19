@@ -19,16 +19,25 @@ export default async function EventLanding({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, description, status, starts_at, location, location_address")
+    .select("id, name, description, status, starts_at, location, location_address, cover_image_path")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
   if (!event) notFound();
 
   const isOpen = event.status === "published";
+  const coverUrl = event.cover_image_path
+    ? admin.storage.from("event-media").getPublicUrl(event.cover_image_path).data.publicUrl
+    : null;
 
   return (
     <main className="mx-auto max-w-lg p-5 space-y-6">
+      {coverUrl && (
+        <div className="overflow-hidden rounded-2xl border border-border shadow-card">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={coverUrl} alt={event.name} className="aspect-[16/9] w-full object-cover" />
+        </div>
+      )}
       <div>
         <Eyebrow>{org.name}</Eyebrow>
         <h1 className="font-display text-3xl font-semibold text-text">{event.name}</h1>

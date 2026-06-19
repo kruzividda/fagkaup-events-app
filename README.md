@@ -297,3 +297,13 @@ gestsins og leiðbeiningu um að vísa honum á dyravörð fyrst. Á við hvern 
 maki þarf líka að vera innritaður á sínum eigin miða.
 
 > Krefst SQL: keyrðu `0012_require_checkin_for_drinks.sql` í Supabase SQL editor (eftir 0011), svo cp + commit.
+
+---
+
+## Hero mynd á skráningarsíðu
+
+Hver viðburður getur haft hero mynd í **16:9** sem birtist efst á skráningarsíðunni.
+Hún er hlaðin upp undir **Breyta viðburði** og geymd í Supabase Storage (bucket `event-media`, opið).
+Aðeins kerfisstjórar mega hlaða upp; myndin birtist öllum á opinberu skráningarsíðunni.
+
+> Krefst SQL: keyrðu `0013_event_media_storage.sql` í Supabase SQL editor (eftir 0012) til að búa til `event-media` bucket + reglur. Svo cp + commit.

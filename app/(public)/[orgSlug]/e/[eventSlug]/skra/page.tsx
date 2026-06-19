@@ -17,7 +17,7 @@ export default async function RegisterPage({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, status, description, starts_at, location")
+    .select("id, name, status, description, starts_at, location, cover_image_path")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -67,6 +67,16 @@ export default async function RegisterPage({
   return (
     <main className="mx-auto max-w-lg px-5 py-8 sm:py-12">
       <div className="fk-rise space-y-6">
+        {event.cover_image_path && (
+          <div className="overflow-hidden rounded-2xl border border-border shadow-card">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={admin.storage.from("event-media").getPublicUrl(event.cover_image_path).data.publicUrl}
+              alt={event.name}
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </div>
+        )}
         <header className="space-y-3">
           <Eyebrow>Skráning</Eyebrow>
           <h1 className="font-display text-[32px] font-semibold leading-[1.1] text-text">{event.name}</h1>

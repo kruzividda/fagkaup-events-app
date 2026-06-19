@@ -130,9 +130,17 @@ export default async function StatsPage({ params }: { params: { eventId: string 
           <Eyebrow>Tölfræði</Eyebrow>
           <PageTitle>{event.name}</PageTitle>
         </div>
-        <Link href="/dashboard/events" className="text-xs text-muted hover:text-text">
-          ← Viðburðir
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/dashboard/events/${params.eventId}/guests`}
+            className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-sm font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105"
+          >
+            Gestalisti
+          </Link>
+          <Link href="/dashboard/events" className="text-xs text-muted hover:text-text">
+            ← Viðburðir
+          </Link>
+        </div>
       </div>
 
       {/* Skráningar */}

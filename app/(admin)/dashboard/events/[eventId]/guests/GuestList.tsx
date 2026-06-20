@@ -234,7 +234,80 @@ export function GuestList({
         {(unit || loc || q || tab !== "all") && " (síað)"}
       </p>
 
-      <div className="overflow-hidden rounded-2xl border border-border shadow-card">
+      {/* Spjöld á síma */}
+      <div className="space-y-3 lg:hidden">
+        {filtered.map((r) => (
+          <div key={r.id} className="rounded-xl border border-border bg-surface p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium text-text">{r.name}</p>
+                {(cols.company || cols.unit || cols.location) && (
+                  <p className="text-[13px] text-muted">
+                    {[cols.company ? r.company : null, cols.unit ? r.unit : null, cols.location ? r.location : null]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
+              </div>
+              <span className="shrink-0 text-right text-[13px]">
+                {r.attended ? (
+                  <span className="text-success">✓ Mætt{r.checkedInAt ? ` · ${timeOf(r.checkedInAt)}` : ""}</span>
+                ) : (
+                  <span className="text-muted">Ómætt</span>
+                )}
+              </span>
+            </div>
+
+            {cols.spouse && r.hasSpouse && (
+              <p className="mt-2 text-[13px] text-muted">
+                Maki: <span className="text-text">{r.spouseName || "+1"}</span>
+                <span className={r.spouseAttended ? "text-success" : "text-muted"}> · {r.spouseAttended ? "mætt" : "ómætt"}</span>
+              </p>
+            )}
+            {cols.dietary && r.dietary && <p className="mt-1 text-[13px] text-accent">Fæðuóþol: {r.dietary}</p>}
+            {showDrinks && r.drinks && (
+              <p className="mt-1 text-[13px] text-muted">
+                Drykkir: <span className="text-text">{r.drinks.used}/{r.drinks.allowance}</span> ({r.drinks.remaining} eftir)
+                {cols.spouse && r.spouseDrinks && (
+                  <span className="block">Maki drykkir: {r.spouseDrinks.used}/{r.spouseDrinks.allowance}</span>
+                )}
+              </p>
+            )}
+
+            <div className="mt-3 flex justify-end">
+              {confirmId === r.id ? (
+                <span className="inline-flex gap-2">
+                  <button
+                    onClick={() => afskra(r.id)}
+                    disabled={busyId === r.id}
+                    className="rounded-lg bg-danger px-3 py-1.5 text-[13px] font-semibold text-white disabled:opacity-60"
+                  >
+                    {busyId === r.id ? "…" : "Staðfesta afskráningu"}
+                  </button>
+                  <button onClick={() => setConfirmId(null)} className="rounded-lg border border-border px-3 py-1.5 text-[13px] text-muted">
+                    Hætta
+                  </button>
+                </span>
+              ) : (
+                <button
+                  onClick={() => setConfirmId(r.id)}
+                  className="rounded-lg border border-border px-3 py-1.5 text-[13px] text-muted transition hover:border-danger hover:text-danger"
+                >
+                  Afskrá
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <p className="rounded-xl border border-border bg-surface px-3 py-8 text-center text-sm text-muted">
+            Enginn gestur passar við síuna.
+          </p>
+        )}
+      </div>
+
+      {/* Tafla á tölvuskjá */}
+      <div className="hidden overflow-hidden rounded-2xl border border-border shadow-card lg:block">
         <div className="max-h-[68vh] overflow-auto">
           <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 z-10 bg-surface text-[13px]">

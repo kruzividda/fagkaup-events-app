@@ -92,7 +92,7 @@ export function Checkbox(props: { checked: boolean; onChange: (v: boolean) => vo
         aria-hidden
       >
         {props.checked && (
-          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[#0A111B]" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-accent-ink" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
@@ -108,7 +108,7 @@ export function PrimaryButton(props: { onClick?: () => void; disabled?: boolean;
       type={props.type ?? "button"}
       onClick={props.onClick}
       disabled={props.disabled}
-      className="w-full rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-3.5 text-[15px] font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:opacity-50 disabled:shadow-none"
+      className="w-full rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-3.5 text-[15px] font-semibold text-accent-ink shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:opacity-50 disabled:shadow-none"
     >
       {props.children}
     </button>

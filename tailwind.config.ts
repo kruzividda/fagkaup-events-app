@@ -14,6 +14,7 @@ const config: Config = {
         accent: "var(--accent)",
         "accent-bright": "var(--accent-bright)",
         "accent-soft": "var(--accent-soft)",
+        "accent-ink": "var(--accent-ink)",
         danger: "var(--danger)",
         success: "var(--success)",
       },

@@ -17,7 +17,7 @@ export default async function RegisterPage({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, status, description, starts_at, location, cover_image_path, cover_image_path_mobile")
+    .select("id, name, status, description, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -70,9 +70,73 @@ export default async function RegisterPage({
   const heroDesktop = desk ?? mob;
   const heroMobile = mob ?? desk;
 
+  const theme = event.theme ?? "glamour";
+  const glam = theme !== "fagkaup";
+
+  const dateChip = event.starts_at
+    ? new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
+    : null;
+
+  const formSection = (
+    <>
+      <header className="space-y-3">
+        <Eyebrow>Skráning</Eyebrow>
+        <h1 className="font-display text-[32px] font-semibold leading-[1.1] text-text">{event.name}</h1>
+        {(dateChip || event.location) && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {dateChip && (
+              <span className="rounded-full border border-border bg-elevated px-3 py-1.5 text-[13px] text-text">{dateChip}</span>
+            )}
+            {event.location && (
+              <span className="rounded-full border border-border bg-elevated px-3 py-1.5 text-[13px] text-text">{event.location}</span>
+            )}
+          </div>
+        )}
+      </header>
+
+      {event.status !== "published" ? (
+        <Card>
+          <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
+        </Card>
+      ) : (
+        <Card accent className="sm:p-7">
+          <RegistrationForm
+            eventId={event.id}
+            orgSlug={params.orgSlug}
+            eventSlug={params.eventSlug}
+            fields={formFields}
+            orgUnits={orgUnits}
+          />
+        </Card>
+      )}
+
+      <p className="text-center text-[12px] text-muted">Fagkaup Events</p>
+    </>
+  );
+
+  // Fagkaup (ljóst): hrein uppsetning — hero efst, ljóst form fyrir neðan
+  if (!glam) {
+    return (
+      <div data-theme="fagkaup" className="min-h-screen bg-bg text-text">
+        <main className="mx-auto max-w-lg space-y-6 px-5 py-8 sm:py-10">
+          {heroDesktop && (
+            <div className="overflow-hidden rounded-2xl border border-border shadow-card">
+              <picture className="block">
+                {heroMobile && <source media="(max-width: 639px)" srcSet={heroMobile} />}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={heroDesktop} alt={event.name} className="h-auto w-full object-cover" />
+              </picture>
+            </div>
+          )}
+          {formSection}
+        </main>
+      </div>
+    );
+  }
+
+  // Glamúr (dökkt): hero fast í bakgrunni, sandblásið gler skrollar yfir
   return (
-    <div className="relative min-h-screen">
-      {/* Hero bakgrunnur — fastur, sést í gegnum sandblásna glerið */}
+    <div data-theme="glamour" className="relative min-h-screen">
       {heroDesktop && (
         <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
           <picture className="block h-full w-full">
@@ -85,57 +149,13 @@ export default async function RegisterPage({
       )}
 
       <main className="relative z-10 min-h-screen">
-        {/* Bil sem sýnir hero efst */}
         {heroDesktop && <div className="h-[36vh] sm:h-[40vh]" />}
-
-        {/* Glerflöturinn sem skrollar yfir hero */}
         <div
           className={`min-h-screen border-t border-white/10 ${
             heroDesktop ? "rounded-t-[28px] bg-[rgba(11,16,23,0.55)] backdrop-blur-2xl" : ""
           }`}
         >
-          <div className="mx-auto max-w-lg space-y-6 px-5 pb-20 pt-8 sm:pt-10">
-            <header className="space-y-3">
-              <Eyebrow>Skráning</Eyebrow>
-              <h1 className="font-display text-[32px] font-semibold leading-[1.1] text-text">{event.name}</h1>
-              {(event.starts_at || event.location) && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {event.starts_at && (
-                    <span className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-[13px] text-text backdrop-blur">
-                      {new Date(event.starts_at).toLocaleString("is-IS", {
-                        dateStyle: "long",
-                        timeStyle: "short",
-                        timeZone: "Atlantic/Reykjavik",
-                      })}
-                    </span>
-                  )}
-                  {event.location && (
-                    <span className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-[13px] text-text backdrop-blur">
-                      {event.location}
-                    </span>
-                  )}
-                </div>
-              )}
-            </header>
-
-            {event.status !== "published" ? (
-              <Card>
-                <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
-              </Card>
-            ) : (
-              <Card accent className="sm:p-7">
-                <RegistrationForm
-                  eventId={event.id}
-                  orgSlug={params.orgSlug}
-                  eventSlug={params.eventSlug}
-                  fields={formFields}
-                  orgUnits={orgUnits}
-                />
-              </Card>
-            )}
-
-            <p className="text-center text-[12px] text-muted">Fagkaup Events</p>
-          </div>
+          <div className="mx-auto max-w-lg space-y-6 px-5 pb-20 pt-8 sm:pt-10">{formSection}</div>
         </div>
       </main>
     </div>

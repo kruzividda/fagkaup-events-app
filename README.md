@@ -351,3 +351,17 @@ einstaklingur getur skráð sig aftur (tvískráningarvörnin telur aðeins virk
 
 > Krefst SQL: keyrðu `0016_booking_management.sql` (eftir 0015). Svo cp + commit.
 > Athugið: aðgangur að sjálfsafgreiðslu byggir á kennitölu — hún virkar fyrir viðburði sem safna kennitölu.
+
+---
+
+## Þemur skráningarsíðu (0017)
+
+Hver viðburður hefur **þema** sem stýrir útliti forsíðu, skráningarforms og sjálfsafgreiðslu:
+
+- **Glamúr** (sjálfgefið): dökkt með gylltum brass-blæ og sandblásnu gleri yfir hero-mynd. Hentar árshátíðum og skemmtunum.
+- **Fagkaup ljóst**: hvítur grunnur, Fagkaup-rautt (#EB2331) og svart skv. hönnunarstaðli, fyrirsagnir í sans/medium og vinstrijafnaðar. Hentar golfmótum og fl.
+
+Þema er valið í viðburðastofnun og undir „Breyta viðburði“. Stjórnborðið sjálft helst alltaf í Glamúr-útliti.
+
+> Letrið Neue Serie57 er leyfisbundið og er ekki vafið inn; ljósa þemað notar nálægt sans-letur (Helvetica Neue/Arial). Litir og uppsetning fylgja staðlinum.
+> Krefst SQL: keyrðu `0017_event_theme.sql` (eftir 0016). Svo cp + commit.

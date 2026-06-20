@@ -15,7 +15,7 @@ export default async function EventLanding({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, description, status, starts_at, location, cover_image_path, cover_image_path_mobile")
+    .select("id, name, description, status, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -38,14 +38,17 @@ export default async function EventLanding({
   const Cta = ({ className = "" }: { className?: string }) => (
     <Link
       href={skraHref}
-      className={`rounded-full bg-gradient-to-br from-accent to-accent-bright font-semibold text-[#0A111B] shadow-glow transition hover:brightness-110 ${className}`}
+      className={`rounded-full bg-gradient-to-br from-accent to-accent-bright font-semibold text-accent-ink shadow-glow transition hover:brightness-110 ${className}`}
     >
       Skrá mig
     </Link>
   );
 
   return (
-    <div className="min-h-screen">
+    <div
+      data-theme={event.theme ?? "glamour"}
+      className={`min-h-screen ${event.theme === "fagkaup" ? "bg-bg text-text" : ""}`}
+    >
       {/* Fastur efsti borði — birtir nafn/takka aðeins þegar skrollað er */}
       <LandingHeader eventName={event.name} isOpen={isOpen} skraHref={skraHref} />
 
@@ -102,10 +105,10 @@ export default async function EventLanding({
 
       {/* Fljótandi takki á síma */}
       {isOpen && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/5 bg-[rgba(10,15,22,0.8)] p-4 backdrop-blur-xl sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-[var(--bar-bg)] p-4 backdrop-blur-xl sm:hidden">
           <Link
             href={skraHref}
-            className="block rounded-xl bg-gradient-to-br from-accent to-accent-bright py-3 text-center text-[15px] font-semibold text-[#0A111B] shadow-glow"
+            className="block rounded-xl bg-gradient-to-br from-accent to-accent-bright py-3 text-center text-[15px] font-semibold text-accent-ink shadow-glow"
           >
             Skrá mig
           </Link>

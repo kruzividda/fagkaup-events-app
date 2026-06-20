@@ -24,7 +24,7 @@ export function LandingHeader({
   return (
     <div
       className={`sticky top-0 z-30 transition-colors duration-200 ${
-        scrolled ? "border-b border-white/5 bg-[rgba(10,15,22,0.72)] backdrop-blur-xl" : "border-b border-transparent"
+        scrolled ? "border-b border-border bg-[var(--bar-bg)] backdrop-blur-xl" : "border-b border-transparent"
       }`}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-5">
@@ -38,7 +38,7 @@ export function LandingHeader({
         {isOpen && (
           <Link
             href={skraHref}
-            className={`hidden shrink-0 rounded-full bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-[13px] font-semibold text-[#0A111B] shadow-glow transition-opacity duration-200 sm:inline-block ${
+            className={`hidden shrink-0 rounded-full bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-[13px] font-semibold text-accent-ink shadow-glow transition-opacity duration-200 sm:inline-block ${
               scrolled ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >

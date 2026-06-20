@@ -30,6 +30,7 @@ export default function NewEventPage() {
     drinks_per_spouse: "",
     drinks_alcoholic: true,
     uses_seating: false,
+    theme: "glamour",
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -65,6 +66,17 @@ export default function NewEventPage() {
 
         <Field label="Lýsing">
           <TextArea value={f.description} onChange={(v) => set("description", v)} />
+        </Field>
+
+        <Field label="Þema skráningarsíðu">
+          <Select
+            value={f.theme}
+            onChange={(v) => set("theme", v)}
+            options={[
+              { value: "glamour", label: "Glamúr (dökkt, gyllt) — fyrir árshátíðir og skemmtanir" },
+              { value: "fagkaup", label: "Fagkaup ljóst (hvítt, rautt) — fyrir golfmót og fleira" },
+            ]}
+          />
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">

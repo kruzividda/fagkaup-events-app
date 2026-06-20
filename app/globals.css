@@ -13,8 +13,33 @@
   --accent:       #C8A45C;   /* brass */
   --accent-bright:#E2C079;   /* ljósara brass fyrir gradient */
   --accent-soft:  #2A2417;
+  --accent-ink:   #0A111B;   /* texti ofan á accent-takka */
+  --bar-bg:       rgba(10, 17, 27, 0.72); /* fastir borðar / gler */
   --danger:       #E5675B;
   --success:      #5FB28A;
+}
+
+/* Ljóst Fagkaup-þema — hvítt/rautt/svart skv. hönnunarstaðli */
+[data-theme="fagkaup"] {
+  --bg:           #FFFFFF;
+  --surface:      #F4F4F5;
+  --elevated:     #EAEAEA;
+  --border:       #DCDCDC;
+  --text:         #0A0A0A;
+  --muted:        #5C5C5C;
+  --accent:       #EB2331;   /* Fagkaup rautt */
+  --accent-bright:#FF3D49;
+  --accent-soft:  #FCE7E8;
+  --accent-ink:   #FFFFFF;   /* hvítur texti ofan á rauðu */
+  --bar-bg:       rgba(255, 255, 255, 0.82);
+  --danger:       #C62828;
+  --success:      #2E7D32;
+}
+/* Fyrirsagnir í ljósa þemanu: sans, medium-vigt (ekki serif), vinstrijafnað */
+[data-theme="fagkaup"] .font-display {
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 * { border-color: var(--border); }
@@ -40,7 +65,7 @@ body {
 
 h1, h2, h3 { letter-spacing: -0.01em; }
 
-::selection { background: var(--accent); color: #0A111B; }
+::selection { background: var(--accent); color: var(--accent-ink); }
 
 /* Inntaksreitir: dökk sjálfvirk útfylling (Chrome autofill) */
 input:-webkit-autofill,

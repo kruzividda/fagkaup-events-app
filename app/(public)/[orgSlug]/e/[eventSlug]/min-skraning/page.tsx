@@ -16,14 +16,19 @@ export default async function MyRegistrationPage({
   if (!org) notFound();
   const { data: event } = await admin
     .from("events")
-    .select("id, name")
+    .select("id, name, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
   if (!event) notFound();
 
+  const theme = event.theme ?? "glamour";
+
   return (
-    <main className="mx-auto max-w-lg px-5 py-8 sm:py-12">
+    <main
+      data-theme={theme}
+      className={`mx-auto min-h-screen max-w-lg px-5 py-8 sm:py-12 ${theme === "fagkaup" ? "bg-bg text-text" : ""}`}
+    >
       <div className="fk-rise space-y-6">
         <header className="space-y-2">
           <Eyebrow>Mín skráning</Eyebrow>

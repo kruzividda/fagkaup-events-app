@@ -16,6 +16,7 @@ export type NewEventInput = {
   drinks_per_spouse: number | "";
   drinks_alcoholic: boolean;
   uses_seating: boolean;
+  theme: string;
 };
 
 const DEFAULT_FIELDS = [
@@ -73,6 +74,7 @@ export async function createEvent(
       drinks_per_spouse:
         input.drinks_enabled && input.spouse_gets_drinks ? Number(input.drinks_per_spouse || 0) : 0,
       drinks_alcoholic: input.drinks_enabled ? input.drinks_alcoholic : false,
+      theme: input.theme === "fagkaup" ? "fagkaup" : "glamour",
       uses_seating: input.uses_seating,
       created_by: user.id,
     })

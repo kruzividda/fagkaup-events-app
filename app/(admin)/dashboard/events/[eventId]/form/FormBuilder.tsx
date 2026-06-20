@@ -32,6 +32,7 @@ const CUSTOM_TYPES = ["text", "textarea", "select", "multiselect", "boolean"];
 
 const CORE_FIELDS: { key: string; label: string; type: string }[] = [
   { key: "full_name", label: "Nafn", type: "text" },
+  { key: "kennitala", label: "Kennitala", type: "text" },
   { key: "email", label: "Tölvupóstur", type: "email" },
   { key: "phone", label: "Símanúmer", type: "phone" },
   { key: "company", label: "Fyrirtæki", type: "text" },

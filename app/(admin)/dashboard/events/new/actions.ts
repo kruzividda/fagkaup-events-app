@@ -14,19 +14,21 @@ export type NewEventInput = {
   drinks_per_person: number | "";
   spouse_gets_drinks: boolean;
   drinks_per_spouse: number | "";
+  drinks_alcoholic: boolean;
   uses_seating: boolean;
 };
 
 const DEFAULT_FIELDS = [
   { field_key: "full_name", label: "Nafn", field_type: "text", requirement: "required", sort_order: 1, visible_if: null },
-  { field_key: "email", label: "Tölvupóstur", field_type: "email", requirement: "required", sort_order: 2, visible_if: null },
-  { field_key: "phone", label: "Símanúmer", field_type: "phone", requirement: "optional", sort_order: 3, visible_if: null },
-  { field_key: "company", label: "Fyrirtæki", field_type: "text", requirement: "optional", sort_order: 4, visible_if: null },
-  { field_key: "dietary", label: "Fæðuóþol", field_type: "text", requirement: "optional", sort_order: 5, visible_if: null },
-  { field_key: "has_plus_one", label: "Ég kem með maka / +1", field_type: "boolean", requirement: "optional", sort_order: 6, visible_if: null },
-  { field_key: "spouse_name", label: "Nafn maka", field_type: "text", requirement: "optional", sort_order: 7, visible_if: { field: "has_plus_one", equals: true } },
-  { field_key: "spouse_email", label: "Tölvupóstur maka (fyrir hans miða)", field_type: "email", requirement: "optional", sort_order: 8, visible_if: { field: "has_plus_one", equals: true } },
-  { field_key: "consent", label: "Ég samþykki að upplýsingar mínar séu unnar vegna viðburðarins", field_type: "consent", requirement: "required", sort_order: 9, visible_if: null },
+  { field_key: "kennitala", label: "Kennitala", field_type: "text", requirement: "required", sort_order: 2, visible_if: null },
+  { field_key: "email", label: "Tölvupóstur", field_type: "email", requirement: "required", sort_order: 3, visible_if: null },
+  { field_key: "phone", label: "Símanúmer", field_type: "phone", requirement: "optional", sort_order: 4, visible_if: null },
+  { field_key: "company", label: "Fyrirtæki", field_type: "text", requirement: "optional", sort_order: 5, visible_if: null },
+  { field_key: "dietary", label: "Fæðuóþol", field_type: "text", requirement: "optional", sort_order: 6, visible_if: null },
+  { field_key: "has_plus_one", label: "Ég kem með maka / +1", field_type: "boolean", requirement: "optional", sort_order: 7, visible_if: null },
+  { field_key: "spouse_name", label: "Nafn maka", field_type: "text", requirement: "optional", sort_order: 8, visible_if: { field: "has_plus_one", equals: true } },
+  { field_key: "spouse_email", label: "Tölvupóstur maka (fyrir hans miða)", field_type: "email", requirement: "optional", sort_order: 9, visible_if: { field: "has_plus_one", equals: true } },
+  { field_key: "consent", label: "Ég samþykki að upplýsingar mínar séu unnar vegna viðburðarins", field_type: "consent", requirement: "required", sort_order: 10, visible_if: null },
 ];
 
 export async function createEvent(
@@ -70,6 +72,7 @@ export async function createEvent(
       spouse_gets_drinks: input.drinks_enabled && input.spouse_gets_drinks,
       drinks_per_spouse:
         input.drinks_enabled && input.spouse_gets_drinks ? Number(input.drinks_per_spouse || 0) : 0,
+      drinks_alcoholic: input.drinks_enabled ? input.drinks_alcoholic : false,
       uses_seating: input.uses_seating,
       created_by: user.id,
     })

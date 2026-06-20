@@ -9,6 +9,7 @@ type Drinks = { allowance: number; used: number; remaining: number };
 export type GuestRow = {
   id: string;
   name: string;
+  kennitala: string | null;
   email: string | null;
   phone: string | null;
   company: string | null;
@@ -25,6 +26,7 @@ export type GuestRow = {
 };
 
 export type Cols = {
+  kennitala: boolean;
   company: boolean;
   unit: boolean;
   location: boolean;
@@ -50,6 +52,7 @@ function dateTimeOf(iso: string) {
 function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, cols: Cols) {
   const headers = [
     "Nafn",
+    ...(cols.kennitala ? ["Kennitala"] : []),
     ...(cols.company ? ["Fyrirtæki"] : []),
     ...(cols.unit ? ["Rekstrareining"] : []),
     ...(cols.location ? ["Staðsetning"] : []),
@@ -62,6 +65,7 @@ function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, co
   ];
   const data: CellValue[][] = rows.map((r) => [
     r.name,
+    ...(cols.kennitala ? [r.kennitala ?? ""] : []),
     ...(cols.company ? [r.company ?? ""] : []),
     ...(cols.unit ? [r.unit ?? ""] : []),
     ...(cols.location ? [r.location ?? ""] : []),

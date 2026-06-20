@@ -20,6 +20,7 @@ type Initial = {
   drinks_per_person: number;
   spouse_gets_drinks: boolean;
   drinks_per_spouse: number;
+  drinks_alcoholic: boolean;
   uses_seating: boolean;
 };
 
@@ -53,6 +54,7 @@ export function EditEventForm({
     drinks_per_person: initial.drinks_per_person || "",
     spouse_gets_drinks: initial.spouse_gets_drinks,
     drinks_per_spouse: initial.drinks_per_spouse || "",
+    drinks_alcoholic: initial.drinks_alcoholic,
     uses_seating: initial.uses_seating,
   });
   const [error, setError] = useState<string | null>(null);
@@ -140,6 +142,11 @@ export function EditEventForm({
                 <NumberInput value={f.drinks_per_spouse} onChange={(v) => set("drinks_per_spouse", v)} />
               </Field>
             )}
+            <Checkbox
+              checked={f.drinks_alcoholic}
+              onChange={(v) => set("drinks_alcoholic", v)}
+              label="Drykkir innihalda áfengi (20 ára aldurstakmark á barnum)"
+            />
             <p className="text-xs text-muted">
               Þetta gildir fyrir <em>nýjar</em> skráningar. Til að beita á gesti sem eru þegar skráðir,
               notaðu „Drykkjastjórnun“ á viðburðasíðunni.

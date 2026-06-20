@@ -28,6 +28,7 @@ export default function NewEventPage() {
     drinks_per_person: "",
     spouse_gets_drinks: false,
     drinks_per_spouse: "",
+    drinks_alcoholic: true,
     uses_seating: false,
   });
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +103,11 @@ export default function NewEventPage() {
                 <NumberInput value={f.drinks_per_spouse} onChange={(v) => set("drinks_per_spouse", v)} />
               </Field>
             )}
+            <Checkbox
+              checked={f.drinks_alcoholic}
+              onChange={(v) => set("drinks_alcoholic", v)}
+              label="Drykkir innihalda áfengi (20 ára aldurstakmark á barnum)"
+            />
           </div>
         )}
       </Card>

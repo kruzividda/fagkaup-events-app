@@ -24,6 +24,7 @@ const REASON_TEXT: Record<string, string> = {
   closed: "Skráningu er lokið.",
   full: "Viðburðurinn er fullbókaður.",
   event_not_found: "Viðburður fannst ekki.",
+  already_registered: "Þú ert þegar skráð(ur) á þennan viðburð (nafn, kennitala eða netfang fannst þegar).",
 };
 
 export function RegistrationForm({
@@ -73,6 +74,12 @@ export function RegistrationForm({
       } else if (!v || String(v).trim() === "") {
         return `Vinsamlegast fylltu út: ${f.label}`;
       }
+    }
+    // Kennitala (ef sýnileg og slegin inn) verður að vera 10 tölustafir
+    const ktField = fields.find((f) => f.field_key === "kennitala");
+    if (ktField && isVisible(ktField)) {
+      const kt = String(values["kennitala"] ?? "").replace(/\D/g, "");
+      if (kt.length > 0 && kt.length !== 10) return "Kennitala þarf að vera 10 tölustafir.";
     }
     return null;
   }
@@ -162,6 +169,20 @@ function renderField(
   if (f.field_key === "location" && selectedUnit && selectedUnit.locations.length > 0) {
     const single = selectedUnit.locations.length === 1;
     return <PillField label={f.label} required={req} options={selectedUnit.locations} value={(value as string) ?? ""} onChange={onChange} allowOther={!single} />;
+  }
+
+  // Kennitala: aðeins 10 tölustafir
+  if (f.field_key === "kennitala") {
+    return (
+      <Field label={f.label} required={req}>
+        <TextInput
+          value={(value as string) ?? ""}
+          onChange={(v) => onChange(v.replace(/\D/g, "").slice(0, 10))}
+          inputMode="numeric"
+          placeholder="10 tölustafir"
+        />
+      </Field>
+    );
   }
 
   switch (f.field_type) {

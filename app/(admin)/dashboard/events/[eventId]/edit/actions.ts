@@ -36,6 +36,7 @@ export async function updateEvent(
       spouse_gets_drinks: input.drinks_enabled && input.spouse_gets_drinks,
       drinks_per_spouse:
         input.drinks_enabled && input.spouse_gets_drinks ? Number(input.drinks_per_spouse || 0) : 0,
+      drinks_alcoholic: input.drinks_enabled ? input.drinks_alcoholic : false,
       uses_seating: input.uses_seating,
     })
     .eq("id", eventId);

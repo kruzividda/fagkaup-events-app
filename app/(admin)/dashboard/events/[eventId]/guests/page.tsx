@@ -16,7 +16,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
   const [regsRes, ticketsRes, checkinsRes, accountsRes, redemptionsRes, fieldsRes] = await Promise.all([
     supabase
       .from("registrations")
-      .select("id, full_name, email, phone, company, business_unit, location, dietary, has_plus_one, spouse_name, created_at")
+      .select("id, full_name, kennitala, email, phone, company, business_unit, location, dietary, has_plus_one, spouse_name, created_at")
       .eq("event_id", id)
       .eq("status", "registered")
       .order("full_name", { ascending: true }),
@@ -39,6 +39,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
       .map((f) => f.field_key)
   );
   const cols = {
+    kennitala: active.has("kennitala"),
     company: active.has("company"),
     unit: active.has("business_unit"),
     location: active.has("location"),
@@ -76,6 +77,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
     return {
       id: r.id,
       name: r.full_name ?? "—",
+      kennitala: r.kennitala ?? null,
       email: r.email ?? null,
       phone: r.phone ?? null,
       company: r.company ?? null,

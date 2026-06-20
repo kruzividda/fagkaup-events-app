@@ -320,3 +320,18 @@ Hver viðburður getur haft **tvær** hero myndir: breiða (16:9) fyrir tölvusk
 fyrir síma. Sé aðeins önnur sett er hún notuð fyrir báðar. Hlaðið upp undir **Breyta viðburði**.
 
 > Krefst SQL: keyrðu `0014_cover_mobile.sql` (eftir 0013). Svo cp + commit.
+
+---
+
+## Kennitölur (áfangi 2)
+
+- Kennitala er nú **sjálfgefinn** reitur í nýjum viðburðum (skyldureitur). Hægt að fela/fjarlægja í forsmiðnum.
+- Innsláttur leyfir aðeins **10 tölustafi**.
+- **Tvískráningarvörn**: sami einstaklingur kemst ekki tvisvar á viðburð. Kerfið ber saman nafn,
+  kennitölu og tölvupóst — passi eitthvað þeirra birtist „þú ert þegar skráð(ur)“.
+- **Aldursmörk á áfengi**: ef viðburður er merktur með áfengi (gátreitur við drykkjamiða), hafnar
+  barinn áfengi til þeirra sem eru undir 20 ára (reiknað út frá kennitölu). Ekkert um þetta birtist í
+  skráningu (svo ekki sé hægt að plata kerfið). Á við aðalhandhafa; maki/lögaðili/óþekkt → engin hindrun.
+- Kennitala fylgir með í **Excel-útflutningi** gestalista (fyrir skattskil) þegar reiturinn er í forminu.
+
+> Krefst SQL: keyrðu `0015_kennitala.sql` (eftir 0014). Svo cp + commit.

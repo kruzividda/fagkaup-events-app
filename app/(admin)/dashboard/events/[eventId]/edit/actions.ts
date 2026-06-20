@@ -39,6 +39,7 @@ export async function updateEvent(
       drinks_alcoholic: input.drinks_enabled ? input.drinks_alcoholic : false,
       theme: input.theme === "fagkaup" ? "fagkaup" : "glamour",
       uses_seating: input.uses_seating,
+      registration_opens_at: input.registration_opens_at ? new Date(input.registration_opens_at).toISOString() : null,
     })
     .eq("id", eventId);
 

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Eyebrow, Card } from "@/components/ui";
 import { RegistrationForm, type FormField } from "./RegistrationForm";
+import { Countdown } from "../Countdown";
 
 export default async function RegisterPage({
   params,
@@ -17,7 +18,7 @@ export default async function RegisterPage({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, status, description, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
+    .select("id, name, status, cancelled, registration_opens_at, description, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -73,6 +74,13 @@ export default async function RegisterPage({
   const theme = event.theme ?? "glamour";
   const glam = theme !== "fagkaup";
 
+  const opensAt = event.registration_opens_at ? new Date(event.registration_opens_at) : null;
+  const notYetOpen = !!opensAt && Date.now() < opensAt.getTime();
+  const isCancelled = !!event.cancelled;
+  const opensStr = opensAt
+    ? opensAt.toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
+    : "";
+
   const dateChip = event.starts_at
     ? new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
     : null;
@@ -94,7 +102,16 @@ export default async function RegisterPage({
         )}
       </header>
 
-      {event.status !== "published" ? (
+      {isCancelled ? (
+        <Card>
+          <p className="text-sm font-semibold text-danger">Þessum viðburði hefur verið aflýst.</p>
+        </Card>
+      ) : notYetOpen ? (
+        <Card className="space-y-3">
+          <p className="text-sm text-muted">Skráning opnar {opensStr}.</p>
+          <Countdown target={event.registration_opens_at as string} />
+        </Card>
+      ) : event.status !== "published" ? (
         <Card>
           <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
         </Card>

@@ -18,7 +18,7 @@ export default async function EventsPage() {
 
   const { data: events } = await supabase
     .from("events")
-    .select("id, name, slug, status, starts_at, max_guests")
+    .select("id, name, slug, status, cancelled, starts_at, max_guests")
     .order("starts_at", { ascending: false });
 
   return (
@@ -58,6 +58,7 @@ export default async function EventsPage() {
                   })}
                   {" · "}
                   <span className="text-accent">{STATUS_LABEL[e.status] ?? e.status}</span>
+                  {e.cancelled && <span className="ml-2 rounded-full border border-danger px-2 py-0.5 text-[11px] text-danger">Felld niður</span>}
                 </p>
               </div>
               <EventRowActions

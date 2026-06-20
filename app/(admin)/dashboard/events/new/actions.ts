@@ -17,6 +17,7 @@ export type NewEventInput = {
   drinks_alcoholic: boolean;
   uses_seating: boolean;
   theme: string;
+  registration_opens_at: string;
 };
 
 const DEFAULT_FIELDS = [
@@ -95,6 +96,7 @@ export async function createEvent(
       drinks_alcoholic: input.drinks_enabled ? input.drinks_alcoholic : false,
       theme: input.theme === "fagkaup" ? "fagkaup" : "glamour",
       uses_seating: input.uses_seating,
+      registration_opens_at: input.registration_opens_at ? new Date(input.registration_opens_at).toISOString() : null,
       created_by: user.id,
     })
     .select("id")
@@ -111,4 +113,16 @@ export async function createEvent(
   if (fieldErr) return { ok: false, error: fieldErr.message };
 
   return { ok: true, eventId: event.id };
+}
+
+export async function setCover(
+  eventId: string,
+  slot: "desktop" | "mobile",
+  path: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = createClient();
+  const column = slot === "mobile" ? "cover_image_path_mobile" : "cover_image_path";
+  const { error } = await supabase.from("events").update({ [column]: path }).eq("id", eventId);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LandingHeader } from "./LandingHeader";
+import { Countdown } from "./Countdown";
 
 export default async function EventLanding({
   params,
@@ -15,13 +16,16 @@ export default async function EventLanding({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, description, status, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
+    .select("id, name, description, status, cancelled, registration_opens_at, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
   if (!event) notFound();
 
-  const isOpen = event.status === "published";
+  const opensAt = event.registration_opens_at ? new Date(event.registration_opens_at) : null;
+  const notYetOpen = !!opensAt && Date.now() < opensAt.getTime();
+  const isCancelled = !!event.cancelled;
+  const isOpen = event.status === "published" && !isCancelled && !notYetOpen;
   const pub = (p: string | null) => (p ? admin.storage.from("event-media").getPublicUrl(p).data.publicUrl : null);
   const desk = pub(event.cover_image_path);
   const mob = pub(event.cover_image_path_mobile);
@@ -34,6 +38,9 @@ export default async function EventLanding({
     timeZone: "Atlantic/Reykjavik",
   });
   const skraHref = `/${params.orgSlug}/e/${params.eventSlug}/skra`;
+  const opensStr = opensAt
+    ? opensAt.toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
+    : "";
 
   const Cta = ({ className = "" }: { className?: string }) => (
     <Link
@@ -81,7 +88,19 @@ export default async function EventLanding({
           </div>
         )}
 
-        {isOpen ? (
+        {isCancelled ? (
+          <div className="mt-7 rounded-2xl border border-danger bg-[rgba(229,103,91,0.08)] p-5">
+            <p className="text-sm font-semibold text-danger">Þessum viðburði hefur verið aflýst.</p>
+          </div>
+        ) : notYetOpen && event.status === "published" ? (
+          <div className="mt-7 space-y-3 rounded-2xl border border-border bg-surface p-5">
+            <p className="text-sm text-muted">Skráning opnar {opensStr}.</p>
+            <Countdown target={event.registration_opens_at as string} />
+            <span className="inline-block cursor-not-allowed rounded-full bg-elevated px-7 py-3 text-[15px] font-semibold text-muted">
+              Skrá mig
+            </span>
+          </div>
+        ) : isOpen ? (
           <div className="mt-7 hidden sm:block">
             <Cta className="inline-block px-7 py-3 text-[15px]" />
           </div>

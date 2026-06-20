@@ -23,6 +23,7 @@ type Initial = {
   drinks_alcoholic: boolean;
   uses_seating: boolean;
   theme: string;
+  registration_opens_at: string | null;
 };
 
 function toLocalInput(iso?: string) {
@@ -58,6 +59,7 @@ export function EditEventForm({
     drinks_alcoholic: initial.drinks_alcoholic,
     uses_seating: initial.uses_seating,
     theme: initial.theme ?? "glamour",
+    registration_opens_at: toLocalInput(initial.registration_opens_at ?? undefined),
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -111,6 +113,12 @@ export function EditEventForm({
             <NumberInput value={f.max_guests} onChange={(v) => set("max_guests", v)} min={1} />
           </Field>
         </div>
+        <Field label="Skráning opnar (valfrjálst)">
+          <TextInput type="datetime-local" value={f.registration_opens_at} onChange={(v) => set("registration_opens_at", v)} />
+          <p className="mt-1.5 text-[12px] text-muted">
+            Ef sett: fram að þessum tíma sýnir skráningarsíðan niðurtalningu og „Skrá mig“ er óvirkt. Skildu eftir autt til að opna strax.
+          </p>
+        </Field>
       </Card>
 
       <Card className="space-y-4">

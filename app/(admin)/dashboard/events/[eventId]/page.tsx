@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
 import { DrinksPanel } from "./DrinksPanel";
+import { EventCancelButton } from "./EventCancelButton";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
   const { data: event } = await supabase
     .from("events")
     .select(
-      "name, status, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
+      "name, status, cancelled, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
     )
     .eq("id", params.eventId)
     .single();
@@ -34,6 +35,12 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
           {event.location ? ` · ${event.location}` : ""}
         </p>
       </div>
+
+      {event.cancelled && (
+        <div className="rounded-xl border border-danger bg-[rgba(229,103,91,0.08)] px-4 py-3 text-sm text-danger">
+          ⛔ Þessum viðburði hefur verið aflýst. Skráningarsíðan sýnir gestum að viðburðinum sé aflýst og engar nýjar skráningar berast.
+        </div>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-4">
         <Card>
@@ -85,6 +92,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         >
           Til baka
         </Link>
+        <EventCancelButton eventId={params.eventId} cancelled={!!event.cancelled} />
       </div>
 
       <DrinksPanel

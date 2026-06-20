@@ -375,3 +375,13 @@ Hver viðburður hefur **þema** sem stýrir útliti forsíðu, skráningarforms
 - **Tölfræði tekur mark á sérsniðnum reitum**: sundurliðun birtist sjálfkrafa fyrir flokkaða reiti (Já/Nei, val) og fyrir frítexta með fá ólík svör (t.d. Golfklúbbur). Háklassa frítexti (t.d. Golfbox-númer) fær ekki sundurliðun en sést í gestalista/Excel.
 
 > Engin SQL-breyting fyrir þennan hluta.
+
+---
+
+## Líftími viðburðar (0018)
+
+- **Hero myndir strax í stofnun**: nýja viðburðaformið er með myndareiti (tölva 16:9 og sími 9:16). Myndum er hlaðið upp um leið og viðburður er stofnaður — ekki þarf lengur að fara í „Breyta viðburði“ fyrst. (Má samt enn breyta þeim þar síðar.)
+- **Fella niður viðburð**: „Fella niður viðburð“ á viðburðasíðunni (með staðfestingu) aflýsir viðburðinum. Skráningarsíðan sýnir þá „Þessum viðburði hefur verið aflýst“ og engar nýjar skráningar berast. „Virkja viðburð aftur“ afturkallar. Listinn sýnir „Felld niður“ merki.
+- **Upphafstími skráningar**: valfrjáls reitur „Skráning opnar“. Fram að þeim tíma sýnir forsíða/skráningarsíða niðurtalningu og „Skrá mig“ er óvirkt; opnast sjálfkrafa þegar tíminn rennur upp.
+
+> Krefst SQL: keyrðu `0018_event_cancel.sql` (eftir 0017). `registration_opens_at` var þegar til.

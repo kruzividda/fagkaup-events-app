@@ -13,10 +13,53 @@ import {
   PrimaryButton,
   EVENT_TYPE_OPTIONS,
 } from "@/components/form";
-import { createEvent, type NewEventInput } from "./actions";
+import { createEvent, setCover, type NewEventInput } from "./actions";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
+
+function CoverInput({
+  label,
+  hint,
+  file,
+  onPick,
+}: {
+  label: string;
+  hint: string;
+  file: File | null;
+  onPick: (f: File | null) => void;
+}) {
+  const preview = file ? URL.createObjectURL(file) : null;
+  return (
+    <div className="space-y-2">
+      <p className="text-sm text-text">{label}</p>
+      <p className="text-[12px] text-muted">{hint}</p>
+      {preview ? (
+        <div className="space-y-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={preview} alt="" className="max-h-40 w-full rounded-xl border border-border object-cover" />
+          <button onClick={() => onPick(null)} className="text-[12px] text-muted underline-offset-2 hover:text-danger hover:underline">
+            Fjarlægja mynd
+          </button>
+        </div>
+      ) : (
+        <label className="flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted transition hover:border-accent hover:text-text">
+          Veldu mynd
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => onPick(e.target.files?.[0] ?? null)}
+          />
+        </label>
+      )}
+    </div>
+  );
+}
 
 export default function NewEventPage() {
   const router = useRouter();
+  const supa = createBrowserClient();
+  const [desktopFile, setDesktopFile] = useState<File | null>(null);
+  const [mobileFile, setMobileFile] = useState<File | null>(null);
   const [f, setF] = useState<NewEventInput>({
     name: "",
     description: "",
@@ -31,6 +74,7 @@ export default function NewEventPage() {
     drinks_alcoholic: true,
     uses_seating: false,
     theme: "glamour",
+    registration_opens_at: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -39,15 +83,32 @@ export default function NewEventPage() {
     setF((prev) => ({ ...prev, [k]: v }));
   }
 
+  async function uploadCover(eventId: string, slot: "desktop" | "mobile", file: File) {
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `covers/${eventId}-${slot}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supa.storage
+        .from("event-media")
+        .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+      if (upErr) return;
+      await setCover(eventId, slot, path);
+    } catch {
+      /* mynd má hlaða upp síðar undir „Breyta viðburði“ */
+    }
+  }
+
   async function submit() {
     setSaving(true);
     setError(null);
     const res = await createEvent(f);
-    setSaving(false);
-    if (!res.ok) {
+    if (!res.ok || !res.eventId) {
+      setSaving(false);
       setError(res.error ?? "Eitthvað fór úrskeiðis.");
       return;
     }
+    if (desktopFile) await uploadCover(res.eventId, "desktop", desktopFile);
+    if (mobileFile) await uploadCover(res.eventId, "mobile", mobileFile);
+    setSaving(false);
     router.push(`/dashboard/events/${res.eventId}/form`);
     router.refresh();
   }
@@ -95,6 +156,33 @@ export default function NewEventPage() {
           <Field label="Hámarksfjöldi gesta">
             <NumberInput value={f.max_guests} onChange={(v) => set("max_guests", v)} min={1} />
           </Field>
+        </div>
+        <Field label="Skráning opnar (valfrjálst)">
+          <TextInput type="datetime-local" value={f.registration_opens_at} onChange={(v) => set("registration_opens_at", v)} />
+          <p className="mt-1.5 text-[12px] text-muted">
+            Ef sett: fram að þessum tíma sýnir skráningarsíðan niðurtalningu og „Skrá mig“ er óvirkt. Skildu eftir autt til að opna strax.
+          </p>
+        </Field>
+      </Card>
+
+      <Card className="space-y-4">
+        <div>
+          <p className="text-sm font-medium text-text">Hero myndir (valfrjálst)</p>
+          <p className="text-[12px] text-muted">Þú getur líka bætt þeim við síðar undir „Breyta viðburði“.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CoverInput
+            label="Tölva (16:9)"
+            hint="Breið mynd fyrir tölvuskjá."
+            file={desktopFile}
+            onPick={setDesktopFile}
+          />
+          <CoverInput
+            label="Sími (9:16)"
+            hint="Há mynd fyrir síma. Ef sleppt er tölvumyndin notuð."
+            file={mobileFile}
+            onPick={setMobileFile}
+          />
         </div>
       </Card>
 

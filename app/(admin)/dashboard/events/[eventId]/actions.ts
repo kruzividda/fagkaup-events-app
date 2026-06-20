@@ -44,3 +44,15 @@ export async function adjustDrinks(
   revalidatePath(`/dashboard/events/${eventId}/stats`);
   return { ok: true };
 }
+
+export async function setEventCancelled(
+  eventId: string,
+  cancelled: boolean
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase.from("events").update({ cancelled }).eq("id", eventId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath("/dashboard/events");
+  return { ok: true };
+}

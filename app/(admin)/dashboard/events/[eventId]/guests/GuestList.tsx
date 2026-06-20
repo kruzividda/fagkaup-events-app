@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/slug";
 import { downloadXlsx, type CellValue } from "@/lib/xlsx";
+import { cancelRegistrationAdmin } from "./actions";
 
 type Drinks = { allowance: number; used: number; remaining: number };
 
@@ -89,20 +91,33 @@ function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, co
 
 export function GuestList({
   rows,
+  eventId,
   eventName,
   showDrinks,
   cols,
 }: {
   rows: GuestRow[];
+  eventId: string;
   eventName: string;
   showDrinks: boolean;
   cols: Cols;
 }) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("all");
   const [q, setQ] = useState("");
   const [unit, setUnit] = useState("");
   const [loc, setLoc] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "name", dir: 1 });
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function afskra(id: string) {
+    setBusyId(id);
+    const res = await cancelRegistrationAdmin(id, eventId);
+    setBusyId(null);
+    setConfirmId(null);
+    if (res.ok) router.refresh();
+  }
 
   const units = useMemo(
     () => [...new Set(rows.map((r) => r.unit).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, "is")),
@@ -155,7 +170,7 @@ export function GuestList({
 
   const selectCls = "rounded-xl border border-border bg-elevated px-3 py-2 text-sm text-text outline-none focus:border-accent";
   const colCount =
-    1 + (cols.company ? 1 : 0) + (cols.unit ? 1 : 0) + (cols.location ? 1 : 0) + (cols.dietary ? 1 : 0) + (cols.spouse ? 1 : 0) + (showDrinks ? 1 : 0) + 1;
+    1 + (cols.company ? 1 : 0) + (cols.unit ? 1 : 0) + (cols.location ? 1 : 0) + (cols.dietary ? 1 : 0) + (cols.spouse ? 1 : 0) + (showDrinks ? 1 : 0) + 2;
 
   const SortHead = ({ k, children, className = "" }: { k: SortKey; children: React.ReactNode; className?: string }) => (
     <th className={`cursor-pointer select-none whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted ${className}`} onClick={() => toggleSort(k)}>
@@ -232,6 +247,7 @@ export function GuestList({
                 {cols.spouse && <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Maki</th>}
                 {showDrinks && <SortHead k="drinks" className="whitespace-nowrap">Drykkir</SortHead>}
                 <SortHead k="status" className="text-right">Staða</SortHead>
+                <th className="px-3 py-2.5"></th>
               </tr>
             </thead>
             <tbody>
@@ -283,6 +299,29 @@ export function GuestList({
                       <span className="text-success">✓ Mætt{r.checkedInAt ? ` · ${timeOf(r.checkedInAt)}` : ""}</span>
                     ) : (
                       <span className="text-muted">Ómætt</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right">
+                    {confirmId === r.id ? (
+                      <span className="inline-flex gap-2">
+                        <button
+                          onClick={() => afskra(r.id)}
+                          disabled={busyId === r.id}
+                          className="rounded-lg bg-danger px-2.5 py-1 text-[12px] font-semibold text-white disabled:opacity-60"
+                        >
+                          {busyId === r.id ? "…" : "Staðfesta"}
+                        </button>
+                        <button onClick={() => setConfirmId(null)} className="rounded-lg border border-border px-2.5 py-1 text-[12px] text-muted">
+                          Hætta
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmId(r.id)}
+                        className="rounded-lg border border-border px-2.5 py-1 text-[12px] text-muted transition hover:border-danger hover:text-danger"
+                      >
+                        Afskrá
+                      </button>
                     )}
                   </td>
                 </tr>

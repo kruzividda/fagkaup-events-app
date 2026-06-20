@@ -117,6 +117,18 @@ function DoorResult({ r }: { r: ScanResult }) {
         </Card>
       </div>
     );
+  if (r.reason === "cancelled") {
+    const name = (guestOf(r).full_name as string) ?? "Gesturinn";
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⛔ Afbókað" />
+        <Card className="space-y-1 text-center">
+          <p className="font-display text-lg text-text">{name}</p>
+          <p className="text-sm text-muted">Þessi skráning hefur verið afboðuð og miðinn gildir ekki.</p>
+        </Card>
+      </div>
+    );
+  }
 
   const g = guestOf(r);
   const name = (g.full_name as string) ?? "—";
@@ -168,6 +180,18 @@ function BarResult({ r }: { r: ScanResult }) {
         </Card>
       </div>
     );
+  if (r.reason === "cancelled") {
+    const name = (guestOf(r).full_name as string) ?? "Gesturinn";
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⛔ Afbókað" />
+        <Card className="space-y-1 text-center">
+          <p className="font-display text-lg text-text">{name}</p>
+          <p className="text-sm text-muted">Þessi skráning hefur verið afboðuð.</p>
+        </Card>
+      </div>
+    );
+  }
   if (r.reason === "underage") {
     const name = (guestOf(r).full_name as string) ?? "Gesturinn";
     return (

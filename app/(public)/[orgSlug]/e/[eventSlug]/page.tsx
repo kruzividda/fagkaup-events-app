@@ -88,6 +88,15 @@ export default async function EventLanding({
           </div>
         )}
 
+        <p className="mt-4">
+          <Link
+            href={`/${params.orgSlug}/e/${params.eventSlug}/min-skraning`}
+            className="text-[13px] text-muted underline-offset-4 hover:text-accent hover:underline"
+          >
+            Ert þú þegar skráð(ur)? Breyta, bæta við maka eða afboða →
+          </Link>
+        </p>
+
         <p className="mt-10 text-[12px] text-muted">Fagkaup Events</p>
       </main>
 

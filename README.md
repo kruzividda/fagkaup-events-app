@@ -335,3 +335,19 @@ fyrir síma. Sé aðeins önnur sett er hún notuð fyrir báðar. Hlaðið upp 
 - Kennitala fylgir með í **Excel-útflutningi** gestalista (fyrir skattskil) þegar reiturinn er í forminu.
 
 > Krefst SQL: keyrðu `0015_kennitala.sql` (eftir 0014). Svo cp + commit.
+
+---
+
+## Bókunarstjórnun (áfangi 3)
+
+**Gestir — sjálfsafgreiðsla** (`/<org>/e/<viðburður>/min-skraning`, tengill á forsíðu viðburðar):
+gestur slær inn kennitöluna sína og getur þá breytt síma/fæðuóþoli, bætt við eða afboðað maka,
+endursent staðfestingu + QR, eða afboðað sig. Afboði aðalgestur sig fylgir maki sjálfkrafa.
+
+**Kerfisstjóri**: „Afskrá“ hnappur við hvern gest í gestalistanum (með staðfestingu) afbókar skráninguna.
+
+Afbókaðir miðar gilda ekki lengur — dyravörður og bar sýna „⛔ Afbókað“ við skönnun. Afbókaður
+einstaklingur getur skráð sig aftur (tvískráningarvörnin telur aðeins virkar skráningar).
+
+> Krefst SQL: keyrðu `0016_booking_management.sql` (eftir 0015). Svo cp + commit.
+> Athugið: aðgangur að sjálfsafgreiðslu byggir á kennitölu — hún virkar fyrir viðburði sem safna kennitölu.

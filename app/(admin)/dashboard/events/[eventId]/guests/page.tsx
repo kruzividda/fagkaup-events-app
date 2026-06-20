@@ -106,7 +106,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
         </Link>
       </div>
 
-      <GuestList rows={rows} eventName={event.name} showDrinks={event.drinks_enabled} cols={cols} />
+      <GuestList rows={rows} eventId={id} eventName={event.name} showDrinks={event.drinks_enabled} cols={cols} />
     </div>
   );
 }

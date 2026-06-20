@@ -49,7 +49,7 @@ export default async function EventLanding({
       <div className="sticky top-0 z-30 border-b border-white/5 bg-[rgba(10,15,22,0.72)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-3">
           <span className="truncate font-display text-[15px] font-semibold text-text">{event.name}</span>
-          {isOpen && <Cta className="shrink-0 px-4 py-2 text-[13px]" />}
+          {isOpen && <Cta className="hidden shrink-0 px-4 py-2 text-[13px] sm:inline-block" />}
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default async function EventLanding({
         )}
 
         {isOpen ? (
-          <div className="mt-7">
+          <div className="mt-7 hidden sm:block">
             <Cta className="inline-block px-7 py-3 text-[15px]" />
           </div>
         ) : (

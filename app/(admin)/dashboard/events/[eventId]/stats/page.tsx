@@ -24,6 +24,39 @@ function groupAttendance(regs: Reg[], attended: Set<string>, key: keyof Reg) {
     .sort((a, b) => b.total - a.total);
 }
 
+function statLabel(raw: unknown, type: string): string {
+  if (raw === null || raw === undefined || raw === "") return "Óskráð";
+  if (type === "boolean" || typeof raw === "boolean") return raw ? "Já" : "Nei";
+  if (Array.isArray(raw)) return raw.join(", ");
+  return String(raw);
+}
+
+function groupByAnswer(
+  regs: Reg[],
+  attended: Set<string>,
+  fieldId: string,
+  type: string,
+  answersByReg: Map<string, Map<string, unknown>>
+) {
+  const map = new Map<string, { total: number; attended: number }>();
+  const bump = (label: string, rid: string) => {
+    const cur = map.get(label) ?? { total: 0, attended: 0 };
+    cur.total++;
+    if (attended.has(rid)) cur.attended++;
+    map.set(label, cur);
+  };
+  for (const r of regs) {
+    const raw = answersByReg.get(r.id)?.get(fieldId);
+    if (type === "multiselect" && Array.isArray(raw)) {
+      if (raw.length === 0) bump("Óskráð", r.id);
+      else for (const o of raw) bump(String(o), r.id);
+    } else {
+      bump(statLabel(raw, type), r.id);
+    }
+  }
+  return [...map.entries()].map(([label, v]) => ({ label, ...v })).sort((a, b) => b.total - a.total);
+}
+
 export default async function StatsPage({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
   const id = params.eventId;
@@ -44,7 +77,7 @@ export default async function StatsPage({ params }: { params: { eventId: string 
       supabase.from("drink_accounts").select("id, ticket_id, scope, allowance").eq("event_id", id),
       supabase.from("drink_redemptions").select("account_id, ticket_id, quantity, redeemed_by, redeemed_at").eq("event_id", id),
       supabase.from("profiles").select("id, full_name"),
-      supabase.from("event_form_fields").select("field_key, requirement").eq("event_id", id),
+      supabase.from("event_form_fields").select("id, field_key, label, field_type, requirement, is_custom, sort_order").eq("event_id", id).order("sort_order", { ascending: true }),
     ]);
 
   const regs = (regsRes.data ?? []) as Reg[];
@@ -56,11 +89,11 @@ export default async function StatsPage({ params }: { params: { eventId: string 
   const profiles = (profilesRes.data ?? []) as Profile[];
 
   // Reitir sem eru raunverulega í forminu (ekki faldir) — ráða hvaða sundurliðanir birtast
-  const activeFields = new Set(
-    ((fieldsRes.data ?? []) as { field_key: string; requirement: string }[])
-      .filter((f) => f.requirement !== "hidden")
-      .map((f) => f.field_key)
-  );
+  type FieldRow = { id: string; field_key: string; label: string; field_type: string; requirement: string; is_custom: boolean; sort_order: number };
+  const allFields = (fieldsRes.data ?? []) as FieldRow[];
+  const activeFieldRows = allFields.filter((f) => f.requirement !== "hidden");
+  const activeFields = new Set(activeFieldRows.map((f) => f.field_key));
+  const customStatFields = activeFieldRows.filter((f) => f.is_custom && f.field_type !== "consent");
 
 
   // ---- Mæting ----
@@ -131,6 +164,32 @@ export default async function StatsPage({ params }: { params: { eventId: string 
   const byCompany = groupAttendance(registered, attendedRegIds, "company");
   const byUnit = groupAttendance(registered, attendedRegIds, "business_unit");
   const byLocation = groupAttendance(registered, attendedRegIds, "location");
+
+  // ---- Sundurliðun eftir sérsniðnum reitum (t.d. Golfklúbbur, Vantar golfbíl) ----
+  const answersByReg = new Map<string, Map<string, unknown>>();
+  if (customStatFields.length > 0) {
+    const { data: answers } = await supabase
+      .from("registration_answers")
+      .select("registration_id, field_id, value")
+      .in("field_id", customStatFields.map((f) => f.id));
+    for (const a of (answers ?? []) as { registration_id: string; field_id: string; value: unknown }[]) {
+      if (!answersByReg.has(a.registration_id)) answersByReg.set(a.registration_id, new Map());
+      answersByReg.get(a.registration_id)!.set(a.field_id, a.value);
+    }
+  }
+  const customGroups = customStatFields
+    .map((f) => ({
+      title: f.label,
+      type: f.field_type,
+      rows: groupByAnswer(registered, attendedRegIds, f.id, f.field_type, answersByReg),
+    }))
+    // Flokkar (já/nei, val) alltaf; frítexti aðeins ef fá ólík svör (sleppum t.d. golfbox-númerum)
+    .filter((g) => {
+      const meaningful = g.rows.filter((r) => r.label !== "Óskráð");
+      if (meaningful.length === 0) return false;
+      if (g.type === "boolean" || g.type === "select" || g.type === "multiselect") return true;
+      return meaningful.length <= 15;
+    });
 
   return (
     <div className="max-w-3xl space-y-8">
@@ -209,6 +268,7 @@ export default async function StatsPage({ params }: { params: { eventId: string 
           { show: activeFields.has("company"), title: "Eftir fyrirtækjum", rows: byCompany },
           { show: activeFields.has("business_unit"), title: "Eftir rekstrareiningum", rows: byUnit },
           { show: activeFields.has("location"), title: "Eftir staðsetningum", rows: byLocation },
+          ...customGroups.map((g) => ({ show: true, title: g.title, rows: g.rows })),
         ].filter((g) => g.show);
         if (groups.length === 0) return null;
         const cols = groups.length === 1 ? "md:grid-cols-1" : groups.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3";

@@ -2,9 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle } from "@/components/ui";
-import { GuestList, type GuestRow } from "./GuestList";
+import { GuestList, type GuestRow, type CustomCol } from "./GuestList";
 
 export const dynamic = "force-dynamic";
+
+function formatAnswer(value: unknown, type: string): string {
+  if (value === null || value === undefined || value === "") return "";
+  if (type === "boolean" || typeof value === "boolean") return value ? "Já" : "Nei";
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
+}
 
 export default async function GuestsPage({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
@@ -24,7 +31,11 @@ export default async function GuestsPage({ params }: { params: { eventId: string
     supabase.from("check_ins").select("ticket_id, checked_in_at").eq("event_id", id),
     supabase.from("drink_accounts").select("id, ticket_id, allowance").eq("event_id", id).eq("scope", "individual"),
     supabase.from("drink_redemptions").select("account_id, quantity").eq("event_id", id),
-    supabase.from("event_form_fields").select("field_key, requirement").eq("event_id", id),
+    supabase
+      .from("event_form_fields")
+      .select("id, field_key, label, field_type, requirement, is_custom, sort_order")
+      .eq("event_id", id)
+      .order("sort_order", { ascending: true }),
   ]);
 
   const regs = regsRes.data ?? [];
@@ -33,11 +44,10 @@ export default async function GuestsPage({ params }: { params: { eventId: string
   const accounts = accountsRes.data ?? [];
   const redemptions = redemptionsRes.data ?? [];
 
-  const active = new Set(
-    ((fieldsRes.data ?? []) as { field_key: string; requirement: string }[])
-      .filter((f) => f.requirement !== "hidden")
-      .map((f) => f.field_key)
-  );
+  type FieldRow = { id: string; field_key: string; label: string; field_type: string; requirement: string; is_custom: boolean; sort_order: number };
+  const allFields = (fieldsRes.data ?? []) as FieldRow[];
+  const activeFields = allFields.filter((f) => f.requirement !== "hidden");
+  const active = new Set(activeFields.map((f) => f.field_key));
   const cols = {
     kennitala: active.has("kennitala"),
     company: active.has("company"),
@@ -48,6 +58,24 @@ export default async function GuestsPage({ params }: { params: { eventId: string
     phone: active.has("phone"),
     email: active.has("email"),
   };
+
+  // Sérsniðnir reitir (eigin spurningar admins) — sýndir sem dálkar
+  const customFields = activeFields.filter((f) => f.is_custom && f.field_type !== "consent");
+  const customCols: CustomCol[] = customFields.map((f) => ({ id: f.id, label: f.label, type: f.field_type }));
+
+  // Sækja svör við sérsniðnum reitum
+  const answersByReg = new Map<string, Map<string, string>>();
+  if (customFields.length > 0) {
+    const { data: answers } = await supabase
+      .from("registration_answers")
+      .select("registration_id, field_id, value")
+      .in("field_id", customFields.map((f) => f.id));
+    const typeById = new Map(customFields.map((f) => [f.id, f.field_type]));
+    for (const a of (answers ?? []) as { registration_id: string; field_id: string; value: unknown }[]) {
+      if (!answersByReg.has(a.registration_id)) answersByReg.set(a.registration_id, new Map());
+      answersByReg.get(a.registration_id)!.set(a.field_id, formatAnswer(a.value, typeById.get(a.field_id) ?? "text"));
+    }
+  }
 
   const checkinByTicket = new Map(checkins.map((c) => [c.ticket_id, c.checked_in_at]));
 
@@ -91,6 +119,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
       spouseAttended: st ? checkinByTicket.has(st) : false,
       drinks: pd,
       spouseDrinks: sd,
+      custom: customCols.length ? Object.fromEntries(customCols.map((c) => [c.id, answersByReg.get(r.id)?.get(c.id) ?? ""])) : undefined,
     };
   });
 
@@ -106,7 +135,7 @@ export default async function GuestsPage({ params }: { params: { eventId: string
         </Link>
       </div>
 
-      <GuestList rows={rows} eventId={id} eventName={event.name} showDrinks={event.drinks_enabled} cols={cols} />
+      <GuestList rows={rows} eventId={id} eventName={event.name} showDrinks={event.drinks_enabled} cols={cols} customCols={customCols} />
     </div>
   );
 }

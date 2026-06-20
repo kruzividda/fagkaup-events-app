@@ -32,6 +32,25 @@ const DEFAULT_FIELDS = [
   { field_key: "consent", label: "Ég samþykki að upplýsingar mínar séu unnar vegna viðburðarins", field_type: "consent", requirement: "required", sort_order: 10, visible_if: null },
 ];
 
+// Golfmót: golf-sértækir reitir, enginn maki
+const GOLF_FIELDS = [
+  { field_key: "full_name", label: "Nafn", field_type: "text", requirement: "required", sort_order: 1, visible_if: null, is_custom: false },
+  { field_key: "kennitala", label: "Kennitala", field_type: "text", requirement: "required", sort_order: 2, visible_if: null, is_custom: false },
+  { field_key: "forgjof", label: "Forgjöf", field_type: "text", requirement: "optional", sort_order: 3, visible_if: null, is_custom: true },
+  { field_key: "golfklubbur", label: "Golfklúbbur", field_type: "text", requirement: "optional", sort_order: 4, visible_if: null, is_custom: true },
+  { field_key: "golfbox_numer", label: "Golfbox númer", field_type: "text", requirement: "optional", sort_order: 5, visible_if: null, is_custom: true },
+  { field_key: "email", label: "Netfang", field_type: "email", requirement: "required", sort_order: 6, visible_if: null, is_custom: false },
+  { field_key: "phone", label: "Símanúmer", field_type: "phone", requirement: "optional", sort_order: 7, visible_if: null, is_custom: false },
+  { field_key: "company", label: "Fyrirtæki", field_type: "text", requirement: "optional", sort_order: 8, visible_if: null, is_custom: false },
+  { field_key: "dietary", label: "Annað (t.d. fæðuóþol)", field_type: "text", requirement: "optional", sort_order: 9, visible_if: null, is_custom: false },
+  { field_key: "vantar_golfbil", label: "Vantar golfbíl?", field_type: "boolean", requirement: "optional", sort_order: 10, visible_if: null, is_custom: true },
+  { field_key: "consent", label: "Ég samþykki að upplýsingar mínar séu unnar vegna viðburðarins", field_type: "consent", requirement: "required", sort_order: 11, visible_if: null, is_custom: false },
+];
+
+function templateFor(eventType: string) {
+  return eventType === "golfmot" ? GOLF_FIELDS : DEFAULT_FIELDS;
+}
+
 export async function createEvent(
   input: NewEventInput
 ): Promise<{ ok: boolean; eventId?: string; error?: string }> {
@@ -83,7 +102,11 @@ export async function createEvent(
 
   if (error || !event) return { ok: false, error: error?.message ?? "Vistun mistókst." };
 
-  const fields = DEFAULT_FIELDS.map((f) => ({ ...f, event_id: event.id }));
+  const fields = templateFor(input.event_type).map((f) => ({
+    is_custom: false,
+    ...f,
+    event_id: event.id,
+  }));
   const { error: fieldErr } = await supabase.from("event_form_fields").insert(fields);
   if (fieldErr) return { ok: false, error: fieldErr.message };
 

@@ -25,7 +25,10 @@ export type GuestRow = {
   spouseAttended: boolean;
   drinks: Drinks | null;
   spouseDrinks: Drinks | null;
+  custom?: Record<string, string>;
 };
+
+export type CustomCol = { id: string; label: string; type: string };
 
 export type Cols = {
   kennitala: boolean;
@@ -51,7 +54,7 @@ function dateTimeOf(iso: string) {
   });
 }
 
-function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, cols: Cols) {
+function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, cols: Cols, customCols: CustomCol[]) {
   const headers = [
     "Nafn",
     ...(cols.kennitala ? ["Kennitala"] : []),
@@ -62,6 +65,7 @@ function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, co
     ...(cols.phone ? ["Sími"] : []),
     ...(cols.email ? ["Netfang"] : []),
     ...(cols.spouse ? ["Maki", "Maki mætt"] : []),
+    ...customCols.map((c) => c.label),
     "Staða", "Innritun",
     ...(showDrinks ? ["Drykkir nýttir", "Drykkir inneign", "Drykkir eftir", ...(cols.spouse ? ["Maki nýttir", "Maki eftir"] : [])] : []),
   ];
@@ -75,6 +79,7 @@ function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, co
     ...(cols.phone ? [r.phone ?? ""] : []),
     ...(cols.email ? [r.email ?? ""] : []),
     ...(cols.spouse ? [r.hasSpouse ? r.spouseName || "+1" : "", r.hasSpouse ? (r.spouseAttended ? "Já" : "Nei") : ""] : []),
+    ...customCols.map((c) => r.custom?.[c.id] ?? ""),
     r.attended ? "Mætt" : "Ómætt",
     r.attended && r.checkedInAt ? dateTimeOf(r.checkedInAt) : "",
     ...(showDrinks
@@ -95,12 +100,14 @@ export function GuestList({
   eventName,
   showDrinks,
   cols,
+  customCols,
 }: {
   rows: GuestRow[];
   eventId: string;
   eventName: string;
   showDrinks: boolean;
   cols: Cols;
+  customCols: CustomCol[];
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("all");
@@ -170,7 +177,7 @@ export function GuestList({
 
   const selectCls = "rounded-xl border border-border bg-elevated px-3 py-2 text-sm text-text outline-none focus:border-accent";
   const colCount =
-    1 + (cols.company ? 1 : 0) + (cols.unit ? 1 : 0) + (cols.location ? 1 : 0) + (cols.dietary ? 1 : 0) + (cols.spouse ? 1 : 0) + (showDrinks ? 1 : 0) + 2;
+    1 + (cols.company ? 1 : 0) + (cols.unit ? 1 : 0) + (cols.location ? 1 : 0) + (cols.dietary ? 1 : 0) + (cols.spouse ? 1 : 0) + customCols.length + (showDrinks ? 1 : 0) + 2;
 
   const SortHead = ({ k, children, className = "" }: { k: SortKey; children: React.ReactNode; className?: string }) => (
     <th className={`cursor-pointer select-none whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted ${className}`} onClick={() => toggleSort(k)}>
@@ -222,7 +229,7 @@ export function GuestList({
         />
 
         <button
-          onClick={() => exportRows(filtered, eventName, showDrinks, cols)}
+          onClick={() => exportRows(filtered, eventName, showDrinks, cols, customCols)}
           className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)]"
         >
           Flytja út (Excel)
@@ -265,6 +272,13 @@ export function GuestList({
               </p>
             )}
             {cols.dietary && r.dietary && <p className="mt-1 text-[13px] text-accent">Fæðuóþol: {r.dietary}</p>}
+            {customCols.map((c) =>
+              r.custom?.[c.id] ? (
+                <p key={c.id} className="mt-1 text-[13px] text-muted">
+                  {c.label}: <span className="text-text">{r.custom[c.id]}</span>
+                </p>
+              ) : null
+            )}
             {showDrinks && r.drinks && (
               <p className="mt-1 text-[13px] text-muted">
                 Drykkir: <span className="text-text">{r.drinks.used}/{r.drinks.allowance}</span> ({r.drinks.remaining} eftir)
@@ -318,6 +332,11 @@ export function GuestList({
                 {cols.location && <SortHead k="location" className="hidden md:table-cell">Staðsetning</SortHead>}
                 {cols.dietary && <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Fæðuóþol</th>}
                 {cols.spouse && <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Maki</th>}
+                {customCols.map((c) => (
+                  <th key={c.id} className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">
+                    {c.label}
+                  </th>
+                ))}
                 {showDrinks && <SortHead k="drinks" className="whitespace-nowrap">Drykkir</SortHead>}
                 <SortHead k="status" className="text-right">Staða</SortHead>
                 <th className="sticky right-0 z-20 border-l border-border bg-surface px-3 py-2.5 text-right text-muted">Aðgerð</th>
@@ -355,6 +374,11 @@ export function GuestList({
                       )}
                     </td>
                   )}
+                  {customCols.map((c) => (
+                    <td key={c.id} className="hidden px-3 py-2.5 text-muted lg:table-cell">
+                      {r.custom?.[c.id] ? <span className="text-text">{r.custom[c.id]}</span> : "—"}
+                    </td>
+                  ))}
                   {showDrinks && (
                     <td className="whitespace-nowrap px-3 py-2.5">
                       {r.drinks ? (

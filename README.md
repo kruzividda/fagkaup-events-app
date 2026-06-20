@@ -365,3 +365,13 @@ Hver viðburður hefur **þema** sem stýrir útliti forsíðu, skráningarforms
 
 > Letrið Neue Serie57 er leyfisbundið og er ekki vafið inn; ljósa þemað notar nálægt sans-letur (Helvetica Neue/Arial). Litir og uppsetning fylgja staðlinum.
 > Krefst SQL: keyrðu `0017_event_theme.sql` (eftir 0016). Svo cp + commit.
+
+---
+
+## Sérsniðin svör, golf-form og tölfræði
+
+- **Sérsniðnar spurningar birtast núna** í gestalistanum, Excel-skránni og tölfræðinni. Áður voru svör við eigin spurningum vistuð (í `registration_answers`) en hvergi sýnd — það er lagað: hver virk sérsniðin spurning fær eigin dálk og er tekin með í útflutning og sundurliðun.
+- **Golfmót fær sjálfgefið form**: þegar tegundin „Golfmót“ er valin í viðburðastofnun verður formið Nafn, Kennitala, Forgjöf, Golfklúbbur, Golfbox númer, Netfang, Símanúmer, Fyrirtæki, Annað (t.d. fæðuóþol) og Vantar golfbíl? (Já/Nei) — enginn maki.
+- **Tölfræði tekur mark á sérsniðnum reitum**: sundurliðun birtist sjálfkrafa fyrir flokkaða reiti (Já/Nei, val) og fyrir frítexta með fá ólík svör (t.d. Golfklúbbur). Háklassa frítexti (t.d. Golfbox-númer) fær ekki sundurliðun en sést í gestalista/Excel.
+
+> Engin SQL-breyting fyrir þennan hluta.

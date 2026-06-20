@@ -114,29 +114,13 @@ export default async function RegisterPage({
     </>
   );
 
-  // Fagkaup (ljóst): hrein uppsetning — hero efst, ljóst form fyrir neðan
-  if (!glam) {
-    return (
-      <div data-theme="fagkaup" className="min-h-screen bg-bg text-text">
-        <main className="mx-auto max-w-lg space-y-6 px-5 py-8 sm:py-10">
-          {heroDesktop && (
-            <div className="overflow-hidden rounded-2xl border border-border shadow-card">
-              <picture className="block">
-                {heroMobile && <source media="(max-width: 639px)" srcSet={heroMobile} />}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={heroDesktop} alt={event.name} className="h-auto w-full object-cover" />
-              </picture>
-            </div>
-          )}
-          {formSection}
-        </main>
-      </div>
-    );
-  }
-
-  // Glamúr (dökkt): hero fast í bakgrunni, sandblásið gler skrollar yfir
+  // Bæði þemu: hero fyllir skjáinn, sandblásið gler skrollar yfir.
+  // Litur á gleri/yfirlögn kemur úr þema-tokens (--glass-bg / --hero-overlay).
   return (
-    <div data-theme="glamour" className="relative min-h-screen">
+    <div
+      data-theme={theme}
+      className={`relative min-h-screen ${!glam ? "bg-bg text-text" : ""}`}
+    >
       {heroDesktop && (
         <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
           <picture className="block h-full w-full">
@@ -144,15 +128,15 @@ export default async function RegisterPage({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={heroDesktop} alt="" className="h-full w-full object-cover" />
           </picture>
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(8,12,18,0.30)] via-[rgba(8,12,18,0.55)] to-[rgba(8,12,18,0.94)]" />
+          <div className="absolute inset-0" style={{ background: "var(--hero-overlay)" }} />
         </div>
       )}
 
       <main className="relative z-10 min-h-screen">
         {heroDesktop && <div className="h-[36vh] sm:h-[40vh]" />}
         <div
-          className={`min-h-screen border-t border-white/10 ${
-            heroDesktop ? "rounded-t-[28px] bg-[rgba(11,16,23,0.55)] backdrop-blur-2xl" : ""
+          className={`min-h-screen border-t border-[var(--glass-border)] ${
+            heroDesktop ? "rounded-t-[28px] bg-[var(--glass-bg)] backdrop-blur-2xl" : ""
           }`}
         >
           <div className="mx-auto max-w-lg space-y-6 px-5 pb-20 pt-8 sm:pt-10">{formSection}</div>

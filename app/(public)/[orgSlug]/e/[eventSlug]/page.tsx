@@ -93,7 +93,7 @@ export default async function EventLanding({
             href={`/${params.orgSlug}/e/${params.eventSlug}/min-skraning`}
             className="text-[13px] text-muted underline-offset-4 hover:text-accent hover:underline"
           >
-            Ert þú þegar skráð(ur)? Breyta, bæta við maka eða afboða →
+            Breyttu skráningu þinni eða afbókaðu hér. →
           </Link>
         </p>
 

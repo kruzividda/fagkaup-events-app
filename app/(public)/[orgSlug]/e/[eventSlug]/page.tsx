@@ -50,13 +50,16 @@ export default async function EventLanding({
       <LandingHeader eventName={event.name} isOpen={isOpen} skraHref={skraHref} />
 
       <main className="mx-auto max-w-6xl px-5 pb-28 pt-4 sm:pb-14">
-        <header className="space-y-2">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">{org.name}</p>
-          <h1 className="font-display text-3xl font-semibold leading-[1.08] text-text sm:text-[44px]">{event.name}</h1>
-          <p className="text-sm text-muted">
-            {event.location ? `${event.location} · ` : ""}
-            {dateStr}
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-2">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">{org.name}</p>
+            <h1 className="font-display text-3xl font-semibold leading-[1.08] text-text sm:text-[44px]">{event.name}</h1>
+            <p className="text-sm text-muted">
+              {event.location ? `${event.location} · ` : ""}
+              {dateStr}
+            </p>
+          </div>
+          {isOpen && <Cta className="mt-1 hidden shrink-0 px-6 py-3 text-[15px] sm:inline-block" />}
         </header>
 
         {heroDesktop && (

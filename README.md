@@ -385,3 +385,11 @@ Hver viðburður hefur **þema** sem stýrir útliti forsíðu, skráningarforms
 - **Upphafstími skráningar**: valfrjáls reitur „Skráning opnar“. Fram að þeim tíma sýnir forsíða/skráningarsíða niðurtalningu og „Skrá mig“ er óvirkt; opnast sjálfkrafa þegar tíminn rennur upp.
 
 > Krefst SQL: keyrðu `0018_event_cancel.sql` (eftir 0017). `registration_opens_at` var þegar til.
+
+---
+
+## Bakendavörn skráninga (0019)
+
+`create_registration` hafnar nú skráningu þegar viðburður er **aflýstur** (`cancelled`), til viðbótar við þær varnir sem voru þegar til staðar: viðburður ekki birtur, skráning ekki hafin (`registration_opens_at`) eða skráningu lokið (`registration_closes_at`). Þetta gildir óháð viðmótinu — ekki er hægt að senda inn skráningu fram hjá forminu.
+
+> Krefst SQL: keyrðu `0019_reject_cancelled_registration.sql` (eftir 0018).

@@ -22,6 +22,7 @@ const REASON_TEXT: Record<string, string> = {
   not_open: "Skráning er ekki opin.",
   not_open_yet: "Skráning er ekki hafin.",
   closed: "Skráningu er lokið.",
+  cancelled: "Þessum viðburði hefur verið aflýst.",
   full: "Viðburðurinn er fullbókaður.",
   event_not_found: "Viðburður fannst ekki.",
   already_registered: "Þú ert þegar skráð(ur) á þennan viðburð (nafn, kennitala eða netfang fannst þegar).",

@@ -247,7 +247,7 @@ export function GuestList({
                 {cols.spouse && <th className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium text-muted lg:table-cell">Maki</th>}
                 {showDrinks && <SortHead k="drinks" className="whitespace-nowrap">Drykkir</SortHead>}
                 <SortHead k="status" className="text-right">Staða</SortHead>
-                <th className="px-3 py-2.5"></th>
+                <th className="sticky right-0 z-20 border-l border-border bg-surface px-3 py-2.5 text-right text-muted">Aðgerð</th>
               </tr>
             </thead>
             <tbody>
@@ -301,7 +301,7 @@ export function GuestList({
                       <span className="text-muted">Ómætt</span>
                     )}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right">
+                  <td className="sticky right-0 z-[1] whitespace-nowrap border-l border-border bg-surface px-3 py-2.5 text-right">
                     {confirmId === r.id ? (
                       <span className="inline-flex gap-2">
                         <button

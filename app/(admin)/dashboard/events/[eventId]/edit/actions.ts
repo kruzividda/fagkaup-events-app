@@ -49,6 +49,7 @@ export async function updateEvent(
 
 export async function setEventCover(
   eventId: string,
+  slot: "desktop" | "mobile",
   path: string | null
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = createClient();
@@ -61,7 +62,8 @@ export async function setEventCover(
     return { ok: false, error: "Aðeins kerfisstjóri má breyta viðburðum." };
   }
 
-  const { error } = await supabase.from("events").update({ cover_image_path: path }).eq("id", eventId);
+  const column = slot === "mobile" ? "cover_image_path_mobile" : "cover_image_path";
+  const { error } = await supabase.from("events").update({ [column]: path }).eq("id", eventId);
   if (error) return { ok: false, error: error.message };
 
   revalidatePath(`/dashboard/events/${eventId}`);

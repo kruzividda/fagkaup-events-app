@@ -307,3 +307,16 @@ Hún er hlaðin upp undir **Breyta viðburði** og geymd í Supabase Storage (bu
 Aðeins kerfisstjórar mega hlaða upp; myndin birtist öllum á opinberu skráningarsíðunni.
 
 > Krefst SQL: keyrðu `0013_event_media_storage.sql` í Supabase SQL editor (eftir 0012) til að búa til `event-media` bucket + reglur. Svo cp + commit.
+
+---
+
+## Endurhönnuð skráningarsíða + tvær hero myndir
+
+Forsíða viðburðar og skráningarformið hafa fengið nýtt útlit (innblásið af miðasölusíðum):
+fastur „Skrá mig“ takki efst, fljótandi takki neðst á síma, og á skráningarforminu er hero
+myndin föst í bakgrunni og sést í gegnum „sandblásið gler“ (backdrop-blur) þegar skrollað er.
+
+Hver viðburður getur haft **tvær** hero myndir: breiða (16:9) fyrir tölvuskjá og háa (9:16)
+fyrir síma. Sé aðeins önnur sett er hún notuð fyrir báðar. Hlaðið upp undir **Breyta viðburði**.
+
+> Krefst SQL: keyrðu `0014_cover_mobile.sql` (eftir 0013). Svo cp + commit.

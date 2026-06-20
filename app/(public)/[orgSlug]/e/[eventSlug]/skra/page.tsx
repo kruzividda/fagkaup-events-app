@@ -64,59 +64,80 @@ export default async function RegisterPage({
     locations: (locs ?? []).filter((l) => l.business_unit_id === u.id).map((l) => l.name),
   }));
 
+  const pub = (p: string | null) => (p ? admin.storage.from("event-media").getPublicUrl(p).data.publicUrl : null);
+  const desk = pub(event.cover_image_path);
+  const mob = pub(event.cover_image_path_mobile);
+  const heroDesktop = desk ?? mob;
+  const heroMobile = mob ?? desk;
+
   return (
-    <main className="mx-auto max-w-lg px-5 py-8 sm:py-12">
-      <div className="fk-rise space-y-6">
-        {event.cover_image_path && (
-          <div className="overflow-hidden rounded-2xl border border-border shadow-card">
+    <div className="relative min-h-screen">
+      {/* Hero bakgrunnur — fastur, sést í gegnum sandblásna glerið */}
+      {heroDesktop && (
+        <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+          <picture>
+            {heroMobile && <source media="(max-width: 639px)" srcSet={heroMobile} />}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={admin.storage.from("event-media").getPublicUrl(event.cover_image_path).data.publicUrl}
-              alt={event.name}
-              className="aspect-[16/9] w-full object-cover"
-            />
+            <img src={heroDesktop} alt="" className="h-full w-full object-cover" />
+          </picture>
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(8,12,18,0.30)] via-[rgba(8,12,18,0.55)] to-[rgba(8,12,18,0.94)]" />
+        </div>
+      )}
+
+      <main className="relative z-10 min-h-screen">
+        {/* Bil sem sýnir hero efst */}
+        {heroDesktop && <div className="h-[36vh] sm:h-[40vh]" />}
+
+        {/* Glerflöturinn sem skrollar yfir hero */}
+        <div
+          className={`min-h-screen border-t border-white/10 ${
+            heroDesktop ? "rounded-t-[28px] bg-[rgba(11,16,23,0.55)] backdrop-blur-2xl" : ""
+          }`}
+        >
+          <div className="mx-auto max-w-lg space-y-6 px-5 pb-20 pt-8 sm:pt-10">
+            <header className="space-y-3">
+              <Eyebrow>Skráning</Eyebrow>
+              <h1 className="font-display text-[32px] font-semibold leading-[1.1] text-text">{event.name}</h1>
+              {(event.starts_at || event.location) && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {event.starts_at && (
+                    <span className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-[13px] text-text backdrop-blur">
+                      {new Date(event.starts_at).toLocaleString("is-IS", {
+                        dateStyle: "long",
+                        timeStyle: "short",
+                        timeZone: "Atlantic/Reykjavik",
+                      })}
+                    </span>
+                  )}
+                  {event.location && (
+                    <span className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-[13px] text-text backdrop-blur">
+                      {event.location}
+                    </span>
+                  )}
+                </div>
+              )}
+            </header>
+
+            {event.status !== "published" ? (
+              <Card>
+                <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
+              </Card>
+            ) : (
+              <Card accent className="sm:p-7">
+                <RegistrationForm
+                  eventId={event.id}
+                  orgSlug={params.orgSlug}
+                  eventSlug={params.eventSlug}
+                  fields={formFields}
+                  orgUnits={orgUnits}
+                />
+              </Card>
+            )}
+
+            <p className="text-center text-[12px] text-muted">Fagkaup Events</p>
           </div>
-        )}
-        <header className="space-y-3">
-          <Eyebrow>Skráning</Eyebrow>
-          <h1 className="font-display text-[32px] font-semibold leading-[1.1] text-text">{event.name}</h1>
-          {event.description && (
-            <p className="text-[15px] leading-relaxed text-muted">{event.description}</p>
-          )}
-          {(event.starts_at || event.location) && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {event.starts_at && (
-                <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] text-text">
-                  {new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short" })}
-                </span>
-              )}
-              {event.location && (
-                <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] text-text">
-                  {event.location}
-                </span>
-              )}
-            </div>
-          )}
-        </header>
-
-        {event.status !== "published" ? (
-          <Card>
-            <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
-          </Card>
-        ) : (
-          <Card accent className="sm:p-7">
-            <RegistrationForm
-              eventId={event.id}
-              orgSlug={params.orgSlug}
-              eventSlug={params.eventSlug}
-              fields={formFields}
-              orgUnits={orgUnits}
-            />
-          </Card>
-        )}
-
-        <p className="text-center text-[12px] text-muted">Fagkaup Events</p>
-      </div>
-    </main>
+        </div>
+      </main>
+    </div>
   );
 }

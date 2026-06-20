@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Eyebrow, Card } from "@/components/ui";
 
 export default async function EventLanding({
   params,
@@ -10,61 +9,100 @@ export default async function EventLanding({
 }) {
   const admin = createAdminClient();
 
-  const { data: org } = await admin
-    .from("organizations")
-    .select("id, name")
-    .eq("slug", params.orgSlug)
-    .single();
+  const { data: org } = await admin.from("organizations").select("id, name").eq("slug", params.orgSlug).single();
   if (!org) notFound();
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, description, status, starts_at, location, location_address, cover_image_path")
+    .select("id, name, description, status, starts_at, location, cover_image_path, cover_image_path_mobile")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
   if (!event) notFound();
 
   const isOpen = event.status === "published";
-  const coverUrl = event.cover_image_path
-    ? admin.storage.from("event-media").getPublicUrl(event.cover_image_path).data.publicUrl
-    : null;
+  const pub = (p: string | null) => (p ? admin.storage.from("event-media").getPublicUrl(p).data.publicUrl : null);
+  const desk = pub(event.cover_image_path);
+  const mob = pub(event.cover_image_path_mobile);
+  const heroDesktop = desk ?? mob;
+  const heroMobile = mob ?? desk;
+
+  const dateStr = new Date(event.starts_at).toLocaleString("is-IS", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "Atlantic/Reykjavik",
+  });
+  const skraHref = `/${params.orgSlug}/e/${params.eventSlug}/skra`;
+
+  const Cta = ({ className = "" }: { className?: string }) => (
+    <Link
+      href={skraHref}
+      className={`rounded-full bg-gradient-to-br from-accent to-accent-bright font-semibold text-[#0A111B] shadow-glow transition hover:brightness-110 ${className}`}
+    >
+      Skrá mig
+    </Link>
+  );
 
   return (
-    <main className="mx-auto max-w-lg p-5 space-y-6">
-      {coverUrl && (
-        <div className="overflow-hidden rounded-2xl border border-border shadow-card">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={coverUrl} alt={event.name} className="aspect-[16/9] w-full object-cover" />
+    <div className="min-h-screen">
+      {/* Fastur efsti borði */}
+      <div className="sticky top-0 z-30 border-b border-white/5 bg-[rgba(10,15,22,0.72)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-3">
+          <span className="truncate font-display text-[15px] font-semibold text-text">{event.name}</span>
+          {isOpen && <Cta className="shrink-0 px-4 py-2 text-[13px]" />}
         </div>
-      )}
-      <div>
-        <Eyebrow>{org.name}</Eyebrow>
-        <h1 className="font-display text-3xl font-semibold text-text">{event.name}</h1>
-        <p className="mt-2 text-sm text-muted">
-          {new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short" })}
-        </p>
-        {event.location && <p className="text-sm text-muted">{event.location}</p>}
       </div>
 
-      {event.description && (
-        <Card>
-          <p className="whitespace-pre-line text-sm text-text">{event.description}</p>
-        </Card>
-      )}
+      <main className="mx-auto max-w-3xl px-5 pb-28 pt-6 sm:pb-14">
+        <header className="space-y-2">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">{org.name}</p>
+          <h1 className="font-display text-3xl font-semibold leading-[1.08] text-text sm:text-[40px]">{event.name}</h1>
+          <p className="text-sm text-muted">
+            {event.location ? `${event.location} · ` : ""}
+            {dateStr}
+          </p>
+        </header>
 
-      {isOpen ? (
-        <Link
-          href={`/${params.orgSlug}/e/${params.eventSlug}/skra`}
-          className="inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-[#0B121C] transition hover:brightness-110"
-        >
-          Skrá mig
-        </Link>
-      ) : (
-        <Card>
-          <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
-        </Card>
+        {heroDesktop && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border shadow-card">
+            <picture>
+              {heroMobile && <source media="(max-width: 639px)" srcSet={heroMobile} />}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={heroDesktop} alt={event.name} className="h-auto w-full object-cover" />
+            </picture>
+          </div>
+        )}
+
+        {event.description && (
+          <div className="mt-6 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+            <p className="whitespace-pre-line text-[15px] leading-relaxed text-text">{event.description}</p>
+          </div>
+        )}
+
+        {isOpen ? (
+          <div className="mt-7">
+            <Cta className="inline-block px-7 py-3 text-[15px]" />
+          </div>
+        ) : (
+          <div className="mt-7 rounded-2xl border border-border bg-surface p-5">
+            <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
+          </div>
+        )}
+
+        <p className="mt-10 text-[12px] text-muted">Fagkaup Events</p>
+      </main>
+
+      {/* Fljótandi takki á síma */}
+      {isOpen && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/5 bg-[rgba(10,15,22,0.8)] p-4 backdrop-blur-xl sm:hidden">
+          <Link
+            href={skraHref}
+            className="block rounded-xl bg-gradient-to-br from-accent to-accent-bright py-3 text-center text-[15px] font-semibold text-[#0A111B] shadow-glow"
+          >
+            Skrá mig
+          </Link>
+        </div>
       )}
-    </main>
+    </div>
   );
 }

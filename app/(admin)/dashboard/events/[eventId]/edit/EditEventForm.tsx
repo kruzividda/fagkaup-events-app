@@ -34,14 +34,14 @@ export function EditEventForm({
   eventId,
   initial,
   initialCoverPath,
+  initialCoverPathMobile,
 }: {
   eventId: string;
   initial: Initial;
   initialCoverPath: string | null;
+  initialCoverPathMobile: string | null;
 }) {
   const router = useRouter();
-  const supa = useMemo(() => createBrowserClient(), []);
-  const publicUrl = (p: string) => supa.storage.from("event-media").getPublicUrl(p).data.publicUrl;
   const [f, setF] = useState<NewEventInput>({
     name: initial.name,
     description: initial.description ?? "",
@@ -60,61 +60,6 @@ export function EditEventForm({
 
   function set<K extends keyof NewEventInput>(k: K, v: NewEventInput[K]) {
     setF((prev) => ({ ...prev, [k]: v }));
-  }
-
-  // --- Hero mynd ---
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [coverUrl, setCoverUrl] = useState<string | null>(initialCoverPath ? publicUrl(initialCoverPath) : null);
-  const [coverBusy, setCoverBusy] = useState(false);
-  const [coverMsg, setCoverMsg] = useState<string | null>(null);
-
-  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (fileRef.current) fileRef.current.value = ""; // leyfa að velja sömu skrá aftur
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setCoverMsg("Veldu myndaskrá (jpg, png, webp).");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setCoverMsg("Myndin má mest vera 5MB.");
-      return;
-    }
-    setCoverBusy(true);
-    setCoverMsg(null);
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-    const path = `covers/${eventId}-${Date.now()}.${ext}`;
-    const { error: upErr } = await supa.storage
-      .from("event-media")
-      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
-    if (upErr) {
-      setCoverBusy(false);
-      setCoverMsg(`Upphleðsla mistókst: ${upErr.message}`);
-      return;
-    }
-    const res = await setEventCover(eventId, path);
-    setCoverBusy(false);
-    if (!res.ok) {
-      setCoverMsg(res.error ?? "Vistun mistókst.");
-      return;
-    }
-    setCoverUrl(`${publicUrl(path)}?v=${Date.now()}`);
-    setCoverMsg("Mynd vistuð.");
-    router.refresh();
-  }
-
-  async function removeCover() {
-    setCoverBusy(true);
-    setCoverMsg(null);
-    const res = await setEventCover(eventId, null);
-    setCoverBusy(false);
-    if (!res.ok) {
-      setCoverMsg(res.error ?? "Tókst ekki að fjarlægja.");
-      return;
-    }
-    setCoverUrl(null);
-    setCoverMsg("Mynd fjarlægð.");
-    router.refresh();
   }
 
   async function submit() {
@@ -154,47 +99,32 @@ export function EditEventForm({
         </div>
       </Card>
 
-      <Card className="space-y-3">
+      <Card className="space-y-4">
         <div>
-          <p className="text-sm font-medium text-text">Hero mynd (16:9)</p>
+          <p className="text-sm font-medium text-text">Hero myndir</p>
           <p className="text-[13px] text-muted">
-            Birtist efst á skráningarsíðunni. Best 1600×900 px (16:9), mest 5MB. Myndin er klippt í 16:9 ef hlutföll passa ekki.
+            Birtast efst á skráningarsíðunni. Tvær myndir: ein breið fyrir tölvuskjá og ein há fyrir síma.
+            Ef aðeins önnur er sett er hún notuð fyrir báðar gerðir skjáa. Mest 5MB hvor.
           </p>
         </div>
-
-        {coverUrl ? (
-          <div className="overflow-hidden rounded-xl border border-border">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coverUrl} alt="" className="aspect-[16/9] w-full object-cover" />
-          </div>
-        ) : (
-          <div className="flex aspect-[16/9] w-full items-center justify-center rounded-xl border border-dashed border-border bg-elevated text-sm text-muted">
-            Engin mynd
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2">
-          <label
-            className={`cursor-pointer rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)] ${
-              coverBusy ? "pointer-events-none opacity-60" : ""
-            }`}
-          >
-            {coverUrl ? "Skipta um mynd" : "Hlaða upp mynd"}
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickFile} disabled={coverBusy} />
-          </label>
-          {coverUrl && (
-            <button
-              type="button"
-              onClick={removeCover}
-              disabled={coverBusy}
-              className="rounded-xl border border-border px-4 py-2 text-sm text-muted transition hover:border-danger hover:text-danger disabled:opacity-60"
-            >
-              Fjarlægja
-            </button>
-          )}
-          {coverBusy && <span className="text-sm text-muted">Hleð upp…</span>}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CoverUploader
+            eventId={eventId}
+            slot="desktop"
+            initialPath={initialCoverPath}
+            label="Tölvuskjár — 16:9"
+            hint="Best 1600×900 px"
+            aspectClass="aspect-[16/9]"
+          />
+          <CoverUploader
+            eventId={eventId}
+            slot="mobile"
+            initialPath={initialCoverPathMobile}
+            label="Sími — 9:16"
+            hint="Best 1080×1920 px"
+            aspectClass="aspect-[9/16] max-h-72 mx-auto"
+          />
         </div>
-        {coverMsg && <p className="text-sm text-muted">{coverMsg}</p>}
       </Card>
 
       <Card className="space-y-4">
@@ -234,6 +164,101 @@ export function EditEventForm({
           Hætta við
         </Link>
       </div>
+    </div>
+  );
+}
+
+function CoverUploader({
+  eventId,
+  slot,
+  initialPath,
+  label,
+  hint,
+  aspectClass,
+}: {
+  eventId: string;
+  slot: "desktop" | "mobile";
+  initialPath: string | null;
+  label: string;
+  hint: string;
+  aspectClass: string;
+}) {
+  const supa = useMemo(() => createBrowserClient(), []);
+  const publicUrl = (p: string) => supa.storage.from("event-media").getPublicUrl(p).data.publicUrl;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [url, setUrl] = useState<string | null>(initialPath ? publicUrl(initialPath) : null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return setMsg("Veldu myndaskrá (jpg, png, webp).");
+    if (file.size > 5 * 1024 * 1024) return setMsg("Myndin má mest vera 5MB.");
+    setBusy(true);
+    setMsg(null);
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `covers/${eventId}-${slot}-${Date.now()}.${ext}`;
+    const { error: upErr } = await supa.storage
+      .from("event-media")
+      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+    if (upErr) {
+      setBusy(false);
+      return setMsg(`Upphleðsla mistókst: ${upErr.message}`);
+    }
+    const res = await setEventCover(eventId, slot, path);
+    setBusy(false);
+    if (!res.ok) return setMsg(res.error ?? "Vistun mistókst.");
+    setUrl(`${publicUrl(path)}?v=${Date.now()}`);
+    setMsg("Mynd vistuð.");
+  }
+
+  async function remove() {
+    setBusy(true);
+    setMsg(null);
+    const res = await setEventCover(eventId, slot, null);
+    setBusy(false);
+    if (!res.ok) return setMsg(res.error ?? "Tókst ekki að fjarlægja.");
+    setUrl(null);
+    setMsg("Mynd fjarlægð.");
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[13px] font-medium text-text">{label}</p>
+      {url ? (
+        <div className="overflow-hidden rounded-xl border border-border">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={url} alt="" className={`w-full object-cover ${aspectClass}`} />
+        </div>
+      ) : (
+        <div className={`flex w-full items-center justify-center rounded-xl border border-dashed border-border bg-elevated text-[13px] text-muted ${aspectClass}`}>
+          {hint}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <label
+          className={`cursor-pointer rounded-lg border border-accent px-3 py-1.5 text-[13px] font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)] ${
+            busy ? "pointer-events-none opacity-60" : ""
+          }`}
+        >
+          {url ? "Skipta um" : "Hlaða upp"}
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} disabled={busy} />
+        </label>
+        {url && (
+          <button
+            type="button"
+            onClick={remove}
+            disabled={busy}
+            className="rounded-lg border border-border px-3 py-1.5 text-[13px] text-muted transition hover:border-danger hover:text-danger disabled:opacity-60"
+          >
+            Fjarlægja
+          </button>
+        )}
+        {busy && <span className="text-[13px] text-muted">Hleð upp…</span>}
+      </div>
+      {msg && <p className="text-[12px] text-muted">{msg}</p>}
     </div>
   );
 }

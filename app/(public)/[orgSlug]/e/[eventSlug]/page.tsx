@@ -16,7 +16,7 @@ export default async function EventLanding({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, description, status, cancelled, registration_opens_at, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
+    .select("id, name, description, status, cancelled, registration_opens_at, registration_closes_at, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -24,8 +24,10 @@ export default async function EventLanding({
 
   const opensAt = event.registration_opens_at ? new Date(event.registration_opens_at) : null;
   const notYetOpen = !!opensAt && Date.now() < opensAt.getTime();
+  const closesAt = event.registration_closes_at ? new Date(event.registration_closes_at) : null;
+  const closed = !!closesAt && Date.now() > closesAt.getTime();
   const isCancelled = !!event.cancelled;
-  const isOpen = event.status === "published" && !isCancelled && !notYetOpen;
+  const isOpen = event.status === "published" && !isCancelled && !notYetOpen && !closed;
   const pub = (p: string | null) => (p ? admin.storage.from("event-media").getPublicUrl(p).data.publicUrl : null);
   const desk = pub(event.cover_image_path);
   const mob = pub(event.cover_image_path_mobile);
@@ -40,6 +42,9 @@ export default async function EventLanding({
   const skraHref = `/${params.orgSlug}/e/${params.eventSlug}/skra`;
   const opensStr = opensAt
     ? opensAt.toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
+    : "";
+  const closesStr = closesAt
+    ? closesAt.toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
     : "";
 
   const Cta = ({ className = "" }: { className?: string }) => (
@@ -100,6 +105,10 @@ export default async function EventLanding({
               Skrá mig
             </span>
           </div>
+        ) : closed && event.status === "published" ? (
+          <div className="mt-7 rounded-2xl border border-border bg-surface p-5">
+            <p className="text-sm text-muted">Skráningu er lokið{closesStr ? ` (lokaðist ${closesStr})` : ""}.</p>
+          </div>
         ) : isOpen ? (
           <div className="mt-7 hidden sm:block">
             <Cta className="inline-block px-7 py-3 text-[15px]" />
@@ -108,6 +117,10 @@ export default async function EventLanding({
           <div className="mt-7 rounded-2xl border border-border bg-surface p-5">
             <p className="text-sm text-muted">Skráning er ekki opin sem stendur.</p>
           </div>
+        )}
+
+        {isOpen && closesStr && (
+          <p className="mt-3 text-[13px] text-muted">Skráning er opin til {closesStr}.</p>
         )}
 
         <p className="mt-4">

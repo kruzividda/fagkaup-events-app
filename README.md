@@ -413,3 +413,9 @@ Gestalistinn og tölfræðisíðan uppfærast nú **sjálfkrafa** þegar breytin
 Í sjálfsafgreiðslu (`/min-skraning`) getur sá sem afbókaði sig slegið inn kennitöluna á sama stað og fengið **„Endurskrá mig“** — og svo uppfært upplýsingar (t.d. fjarlægt maka sem kemur ekki). Endurskráning virðir sömu varnir og nýskráning (aflýstur/lokaður/fullur viðburður hafnar).
 
 > Krefst SQL: keyrðu `0021_reactivate_registration.sql` (eftir 0020).
+
+---
+
+## Lokatími skráningar
+
+Viðburðir hafa nú valfrjálsan reit **„Skráning lokar“** (við hlið „Skráning opnar“) í stofnun og breytingu. Eftir þann tíma lokast fyrir nýjar skráningar: forsíða og skráningarsíða sýna „Skráningu er lokið“, og bakendinn hafnar skráningu/endurskráningu (var þegar varið — `registration_closes_at`). Þegar opið er sést „Skráning er opin til …“. Engin SQL-breyting þurfti.

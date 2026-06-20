@@ -75,6 +75,7 @@ export default function NewEventPage() {
     uses_seating: false,
     theme: "glamour",
     registration_opens_at: "",
+    registration_closes_at: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -157,12 +158,16 @@ export default function NewEventPage() {
             <NumberInput value={f.max_guests} onChange={(v) => set("max_guests", v)} min={1} />
           </Field>
         </div>
-        <Field label="Skráning opnar (valfrjálst)">
-          <TextInput type="datetime-local" value={f.registration_opens_at} onChange={(v) => set("registration_opens_at", v)} />
-          <p className="mt-1.5 text-[12px] text-muted">
-            Ef sett: fram að þessum tíma sýnir skráningarsíðan niðurtalningu og „Skrá mig“ er óvirkt. Skildu eftir autt til að opna strax.
-          </p>
-        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Skráning opnar (valfrjálst)">
+            <TextInput type="datetime-local" value={f.registration_opens_at} onChange={(v) => set("registration_opens_at", v)} />
+            <p className="mt-1.5 text-[12px] text-muted">Fram að þessum tíma er niðurtalning og „Skrá mig“ óvirkt. Autt = opnar strax.</p>
+          </Field>
+          <Field label="Skráning lokar (valfrjálst)">
+            <TextInput type="datetime-local" value={f.registration_closes_at} onChange={(v) => set("registration_closes_at", v)} />
+            <p className="mt-1.5 text-[12px] text-muted">Eftir þennan tíma lokast fyrir nýjar skráningar. Autt = engin lokun.</p>
+          </Field>
+        </div>
       </Card>
 
       <Card className="space-y-4">

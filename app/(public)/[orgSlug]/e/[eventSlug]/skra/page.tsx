@@ -18,7 +18,7 @@ export default async function RegisterPage({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, status, cancelled, registration_opens_at, description, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
+    .select("id, name, status, cancelled, registration_opens_at, registration_closes_at, description, starts_at, location, cover_image_path, cover_image_path_mobile, theme")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -76,9 +76,14 @@ export default async function RegisterPage({
 
   const opensAt = event.registration_opens_at ? new Date(event.registration_opens_at) : null;
   const notYetOpen = !!opensAt && Date.now() < opensAt.getTime();
+  const closesAt = event.registration_closes_at ? new Date(event.registration_closes_at) : null;
+  const closed = !!closesAt && Date.now() > closesAt.getTime();
   const isCancelled = !!event.cancelled;
   const opensStr = opensAt
     ? opensAt.toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
+    : "";
+  const closesStr = closesAt
+    ? closesAt.toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
     : "";
 
   const dateChip = event.starts_at
@@ -110,6 +115,10 @@ export default async function RegisterPage({
         <Card className="space-y-3">
           <p className="text-sm text-muted">Skráning opnar {opensStr}.</p>
           <Countdown target={event.registration_opens_at as string} />
+        </Card>
+      ) : closed ? (
+        <Card>
+          <p className="text-sm text-muted">Skráningu er lokið{closesStr ? ` (lokaðist ${closesStr})` : ""}.</p>
         </Card>
       ) : event.status !== "published" ? (
         <Card>

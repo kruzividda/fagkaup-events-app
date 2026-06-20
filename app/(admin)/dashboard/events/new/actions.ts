@@ -18,6 +18,7 @@ export type NewEventInput = {
   uses_seating: boolean;
   theme: string;
   registration_opens_at: string;
+  registration_closes_at: string;
 };
 
 const DEFAULT_FIELDS = [
@@ -97,6 +98,7 @@ export async function createEvent(
       theme: input.theme === "fagkaup" ? "fagkaup" : "glamour",
       uses_seating: input.uses_seating,
       registration_opens_at: input.registration_opens_at ? new Date(input.registration_opens_at).toISOString() : null,
+      registration_closes_at: input.registration_closes_at ? new Date(input.registration_closes_at).toISOString() : null,
       created_by: user.id,
     })
     .select("id")

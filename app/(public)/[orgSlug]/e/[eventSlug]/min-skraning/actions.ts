@@ -13,10 +13,12 @@ export type MyBooking = {
   spouseName: string | null;
   primaryCheckedIn: boolean;
   spouseCheckedIn: boolean;
+  cancelled: boolean;
 };
 
 type FindResult = {
   found: boolean;
+  cancelled?: boolean;
   full_name?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -52,6 +54,7 @@ export async function lookupMyBooking(
       spouseName: r.spouse_name ?? null,
       primaryCheckedIn: !!r.primary_checked_in,
       spouseCheckedIn: !!r.spouse_checked_in,
+      cancelled: !!r.cancelled,
     },
   };
 }
@@ -79,6 +82,16 @@ export async function cancelMyBooking(
 ): Promise<{ ok: boolean; reason?: string }> {
   const admin = createAdminClient();
   const { data, error } = await admin.rpc("cancel_my_registration", { p_event_id: eventId, p_kennitala: kennitala });
+  if (error) return { ok: false, reason: error.message };
+  return (data as { ok: boolean; reason?: string }) ?? { ok: false };
+}
+
+export async function reactivateMyBooking(
+  eventId: string,
+  kennitala: string
+): Promise<{ ok: boolean; reason?: string }> {
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("reactivate_my_registration", { p_event_id: eventId, p_kennitala: kennitala });
   if (error) return { ok: false, reason: error.message };
   return (data as { ok: boolean; reason?: string }) ?? { ok: false };
 }

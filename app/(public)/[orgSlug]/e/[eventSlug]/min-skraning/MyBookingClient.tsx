@@ -7,6 +7,7 @@ import {
   lookupMyBooking,
   updateMyBooking,
   cancelMyBooking,
+  reactivateMyBooking,
   cancelMySpouse,
   addMySpouse,
   resendMyBooking,
@@ -98,17 +99,30 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
     setNote(null);
     const res = await cancelMyBooking(eventId, kt);
     setBusy(false);
+    setConfirmCancel(false);
     if (!res.ok) return setErr("Tókst ekki að afboða.");
-    setPhase("cancelled");
+    await refresh(); // skráning verður afbókuð — sýnir endurskráningarvalkost
   }
 
-  if (phase === "cancelled") {
-    return (
-      <Card className="space-y-2 text-center">
-        <p className="font-display text-xl text-text">Þú hefur verið afskráð(ur)</p>
-        <p className="text-sm text-muted">Skráning þín á {eventName} hefur verið afboðuð. Þú getur skráð þig aftur ef þú vilt.</p>
-      </Card>
-    );
+  async function reactivate() {
+    setBusy(true);
+    setNote(null);
+    setErr(null);
+    const res = await reactivateMyBooking(eventId, kt);
+    setBusy(false);
+    if (!res.ok) {
+      const map: Record<string, string> = {
+        cancelled: "Þessum viðburði hefur verið aflýst.",
+        not_open: "Skráning er ekki opin.",
+        not_open_yet: "Skráning er ekki hafin.",
+        closed: "Skráningu er lokið.",
+        full: "Viðburðurinn er fullbókaður.",
+        already_registered: "Þú ert þegar með virka skráningu.",
+      };
+      return setErr(map[res.reason ?? ""] ?? "Tókst ekki að endurskrá.");
+    }
+    setNote("Þú ert skráð(ur) aftur.");
+    await refresh();
   }
 
   if (phase === "lookup") {
@@ -146,8 +160,20 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
       {note && <p className="rounded-xl border border-success bg-[rgba(106,168,107,0.08)] px-4 py-3 text-sm text-success">{note}</p>}
       {err && <p className="rounded-xl border border-danger bg-[rgba(229,103,91,0.08)] px-4 py-3 text-sm text-danger">{err}</p>}
 
-      <Card className="space-y-4">
-        <p className="font-display text-base text-text">Mínar upplýsingar</p>
+      {booking?.cancelled ? (
+        <Card accent className="space-y-3">
+          <p className="font-display text-base text-text">Þú afbókaðir þig</p>
+          <p className="text-sm text-muted">
+            Skráning þín á {eventName} er afbókuð. Þú getur skráð þig aftur og uppfært upplýsingar á eftir (t.d. fjarlægt maka ef hann kemur ekki).
+          </p>
+          <PrimaryButton onClick={reactivate} disabled={busy}>
+            {busy ? "…" : "Endurskrá mig"}
+          </PrimaryButton>
+        </Card>
+      ) : (
+        <>
+          <Card className="space-y-4">
+            <p className="font-display text-base text-text">Mínar upplýsingar</p>
         <Field label="Símanúmer">
           <TextInput value={phone} onChange={setPhone} type="tel" />
         </Field>
@@ -227,6 +253,8 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
           </button>
         )}
       </Card>
+        </>
+      )}
     </div>
   );
 }

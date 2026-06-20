@@ -4,13 +4,14 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/slug";
 import { downloadXlsx, type CellValue } from "@/lib/xlsx";
-import { cancelRegistrationAdmin } from "./actions";
+import { cancelRegistrationAdmin, reactivateRegistrationAdmin } from "./actions";
 
 type Drinks = { allowance: number; used: number; remaining: number };
 
 export type GuestRow = {
   id: string;
   name: string;
+  cancelled: boolean;
   kennitala: string | null;
   email: string | null;
   phone: string | null;
@@ -41,7 +42,7 @@ export type Cols = {
   email: boolean;
 };
 
-type Tab = "all" | "in" | "out";
+type Tab = "all" | "in" | "out" | "cancelled";
 type SortKey = "name" | "company" | "unit" | "location" | "status" | "drinks";
 
 function timeOf(iso: string | null) {
@@ -80,7 +81,7 @@ function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, co
     ...(cols.email ? [r.email ?? ""] : []),
     ...(cols.spouse ? [r.hasSpouse ? r.spouseName || "+1" : "", r.hasSpouse ? (r.spouseAttended ? "Já" : "Nei") : ""] : []),
     ...customCols.map((c) => r.custom?.[c.id] ?? ""),
-    r.attended ? "Mætt" : "Ómætt",
+    r.cancelled ? "Afskráð" : r.attended ? "Mætt" : "Ómætt",
     r.attended && r.checkedInAt ? dateTimeOf(r.checkedInAt) : "",
     ...(showDrinks
       ? [
@@ -126,6 +127,13 @@ export function GuestList({
     if (res.ok) router.refresh();
   }
 
+  async function reactivate(id: string) {
+    setBusyId(id);
+    const res = await reactivateRegistrationAdmin(id, eventId);
+    setBusyId(null);
+    if (res.ok) router.refresh();
+  }
+
   const units = useMemo(
     () => [...new Set(rows.map((r) => r.unit).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, "is")),
     [rows]
@@ -135,12 +143,16 @@ export function GuestList({
     [rows]
   );
 
-  const attendedCount = rows.filter((r) => r.attended).length;
-  const counts = { all: rows.length, in: attendedCount, out: rows.length - attendedCount };
+  const activeRows = rows.filter((r) => !r.cancelled);
+  const cancelledCount = rows.length - activeRows.length;
+  const attendedCount = activeRows.filter((r) => r.attended).length;
+  const counts = { all: activeRows.length, in: attendedCount, out: activeRows.length - attendedCount, cancelled: cancelledCount };
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = rows.filter((r) => {
+      if (tab === "cancelled" && !r.cancelled) return false;
+      if (tab !== "cancelled" && tab !== "all" && r.cancelled) return false; // afskráðir aðeins í Allir/Afskráð
       if (tab === "in" && !r.attended) return false;
       if (tab === "out" && r.attended) return false;
       if (unit && r.unit !== unit) return false;
@@ -156,6 +168,8 @@ export function GuestList({
       return ((r[sort.key] as string) || "").toLowerCase();
     };
     out.sort((a, b) => {
+      // virkir efst, afskráðir neðst
+      if (a.cancelled !== b.cancelled) return a.cancelled ? 1 : -1;
       const av = val(a);
       const bv = val(b);
       if (av < bv) return -1 * sort.dir;
@@ -173,6 +187,7 @@ export function GuestList({
     { key: "all", label: `Allir ${counts.all}` },
     { key: "in", label: `Mættir ${counts.in}` },
     { key: "out", label: `Ómættir ${counts.out}` },
+    ...(counts.cancelled > 0 ? [{ key: "cancelled" as Tab, label: `Afskráð ${counts.cancelled}` }] : []),
   ];
 
   const selectCls = "rounded-xl border border-border bg-elevated px-3 py-2 text-sm text-text outline-none focus:border-accent";
@@ -244,7 +259,7 @@ export function GuestList({
       {/* Spjöld á síma */}
       <div className="space-y-3 lg:hidden">
         {filtered.map((r) => (
-          <div key={r.id} className="rounded-xl border border-border bg-surface p-4">
+          <div key={r.id} className={`rounded-xl border border-border bg-surface p-4 ${r.cancelled ? "opacity-60" : ""}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium text-text">{r.name}</p>
@@ -257,7 +272,9 @@ export function GuestList({
                 )}
               </div>
               <span className="shrink-0 text-right text-[13px]">
-                {r.attended ? (
+                {r.cancelled ? (
+                  <span className="text-danger">⛔ Afskráð</span>
+                ) : r.attended ? (
                   <span className="text-success">✓ Mætt{r.checkedInAt ? ` · ${timeOf(r.checkedInAt)}` : ""}</span>
                 ) : (
                   <span className="text-muted">Ómætt</span>
@@ -289,7 +306,15 @@ export function GuestList({
             )}
 
             <div className="mt-3 flex justify-end">
-              {confirmId === r.id ? (
+              {r.cancelled ? (
+                <button
+                  onClick={() => reactivate(r.id)}
+                  disabled={busyId === r.id}
+                  className="rounded-lg border border-success px-3 py-1.5 text-[13px] font-semibold text-success transition hover:bg-[rgba(95,178,138,0.08)] disabled:opacity-60"
+                >
+                  {busyId === r.id ? "…" : "Endurskrá"}
+                </button>
+              ) : confirmId === r.id ? (
                 <span className="inline-flex gap-2">
                   <button
                     onClick={() => afskra(r.id)}
@@ -344,7 +369,7 @@ export function GuestList({
             </thead>
             <tbody>
               {filtered.map((r, i) => (
-                <tr key={r.id} className={`border-b border-border transition hover:bg-elevated ${i % 2 ? "bg-[rgba(255,255,255,0.012)]" : ""}`}>
+                <tr key={r.id} className={`border-b border-border transition hover:bg-elevated ${i % 2 ? "bg-[rgba(255,255,255,0.012)]" : ""} ${r.cancelled ? "opacity-55" : ""}`}>
                   <td className="px-3 py-2.5">
                     <span className="font-medium text-text">{r.name}</span>
                     {(cols.company || cols.unit) && (
@@ -392,14 +417,24 @@ export function GuestList({
                     </td>
                   )}
                   <td className="whitespace-nowrap px-3 py-2.5 text-right">
-                    {r.attended ? (
+                    {r.cancelled ? (
+                      <span className="text-danger">⛔ Afskráð</span>
+                    ) : r.attended ? (
                       <span className="text-success">✓ Mætt{r.checkedInAt ? ` · ${timeOf(r.checkedInAt)}` : ""}</span>
                     ) : (
                       <span className="text-muted">Ómætt</span>
                     )}
                   </td>
                   <td className="sticky right-0 z-[1] whitespace-nowrap border-l border-border bg-surface px-3 py-2.5 text-right">
-                    {confirmId === r.id ? (
+                    {r.cancelled ? (
+                      <button
+                        onClick={() => reactivate(r.id)}
+                        disabled={busyId === r.id}
+                        className="rounded-lg border border-success px-2.5 py-1 text-[12px] font-semibold text-success transition hover:bg-[rgba(95,178,138,0.08)] disabled:opacity-60"
+                      >
+                        {busyId === r.id ? "…" : "Endurskrá"}
+                      </button>
+                    ) : confirmId === r.id ? (
                       <span className="inline-flex gap-2">
                         <button
                           onClick={() => afskra(r.id)}

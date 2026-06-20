@@ -403,3 +403,13 @@ Gestalistinn og tölfræðisíðan uppfærast nú **sjálfkrafa** þegar breytin
 Þetta byggir á Supabase Realtime: vefurinn áskrifist að breytingum á `registrations`, `check_ins`, `tickets`, `drink_redemptions`, `drink_accounts` og `invitations` (síað á viðburðinn) og endurhleður gögnin þegar eitthvað breytist. Realtime virðir RLS, svo aðeins er hlustað á það sem notandinn má sjá.
 
 > Krefst SQL: keyrðu `0020_realtime_publication.sql` (eftir 0019). Það bætir töflunum við `supabase_realtime` publication (idempotent).
+
+---
+
+## Afskráðir hverfa ekki — endurskráning (0021)
+
+Þegar gestur er afskráður (af honum sjálfum eða kerfisstjóra) er hann **ekki eyddur** heldur sýndur **grár** í gestalistanum með stöðunni „⛔ Afskráð“. Í stað „Afskrá“ takkans kemur **„Endurskrá“**. Nýr „Afskráð“ flipi telur þá; þeir teljast ekki með í mætingu eða tölfræði fyrr en þeir eru endurskráðir.
+
+Í sjálfsafgreiðslu (`/min-skraning`) getur sá sem afbókaði sig slegið inn kennitöluna á sama stað og fengið **„Endurskrá mig“** — og svo uppfært upplýsingar (t.d. fjarlægt maka sem kemur ekki). Endurskráning virðir sömu varnir og nýskráning (aflýstur/lokaður/fullur viðburður hafnar).
+
+> Krefst SQL: keyrðu `0021_reactivate_registration.sql` (eftir 0020).

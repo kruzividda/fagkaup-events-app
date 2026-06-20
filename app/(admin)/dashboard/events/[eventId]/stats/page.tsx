@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card, StatCard, BarRow } from "@/components/ui";
+import { LiveRefresh } from "@/components/LiveRefresh";
 
 type Reg = { id: string; status: string; company: string | null; business_unit: string | null; location: string | null };
 type Ticket = { id: string; registration_id: string };
@@ -197,6 +198,9 @@ export default async function StatsPage({ params }: { params: { eventId: string 
         <div>
           <Eyebrow>Tölfræði</Eyebrow>
           <PageTitle>{event.name}</PageTitle>
+          <div className="mt-1">
+            <LiveRefresh eventId={params.eventId} tables={["registrations", "check_ins", "drink_redemptions", "drink_accounts", "invitations"]} />
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Link

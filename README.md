@@ -393,3 +393,13 @@ Hver viðburður hefur **þema** sem stýrir útliti forsíðu, skráningarforms
 `create_registration` hafnar nú skráningu þegar viðburður er **aflýstur** (`cancelled`), til viðbótar við þær varnir sem voru þegar til staðar: viðburður ekki birtur, skráning ekki hafin (`registration_opens_at`) eða skráningu lokið (`registration_closes_at`). Þetta gildir óháð viðmótinu — ekki er hægt að senda inn skráningu fram hjá forminu.
 
 > Krefst SQL: keyrðu `0019_reject_cancelled_registration.sql` (eftir 0018).
+
+---
+
+## Live gestalisti og tölfræði (0020)
+
+Gestalistinn og tölfræðisíðan uppfærast nú **sjálfkrafa** þegar breytingar verða — ný skráning, afbókun, innritun við dyr eða drykkur á bar — án þess að smella á endurhlaða. Lítill „● Lifandi“ vísir sýnir að tengingin sé virk.
+
+Þetta byggir á Supabase Realtime: vefurinn áskrifist að breytingum á `registrations`, `check_ins`, `tickets`, `drink_redemptions`, `drink_accounts` og `invitations` (síað á viðburðinn) og endurhleður gögnin þegar eitthvað breytist. Realtime virðir RLS, svo aðeins er hlustað á það sem notandinn má sjá.
+
+> Krefst SQL: keyrðu `0020_realtime_publication.sql` (eftir 0019). Það bætir töflunum við `supabase_realtime` publication (idempotent).

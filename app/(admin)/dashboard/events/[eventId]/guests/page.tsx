@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle } from "@/components/ui";
 import { GuestList, type GuestRow, type CustomCol } from "./GuestList";
+import { LiveRefresh } from "@/components/LiveRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -134,6 +135,8 @@ export default async function GuestsPage({ params }: { params: { eventId: string
           ← Tölfræði
         </Link>
       </div>
+
+      <LiveRefresh eventId={id} tables={["registrations", "check_ins", "tickets", "drink_redemptions", "drink_accounts"]} />
 
       <GuestList rows={rows} eventId={id} eventName={event.name} showDrinks={event.drinks_enabled} cols={cols} customCols={customCols} />
     </div>

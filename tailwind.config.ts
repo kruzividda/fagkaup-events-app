@@ -29,9 +29,9 @@ const config: Config = {
         "3xl": "26px",
       },
       boxShadow: {
-        card: "0 1px 0 0 rgba(255,255,255,0.03) inset, 0 18px 40px -24px rgba(0,0,0,0.7)",
+        card: "var(--shadow-card)",
         pop: "0 24px 60px -28px rgba(0,0,0,0.8)",
-        glow: "0 10px 28px -10px rgba(200,164,92,0.45)",
+        glow: "var(--shadow-glow)",
       },
     },
   },

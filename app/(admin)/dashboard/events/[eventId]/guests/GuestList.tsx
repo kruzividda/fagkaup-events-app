@@ -213,7 +213,7 @@ export function GuestList({
               onClick={() => setTab(t.key)}
               className={`rounded-full border px-3.5 py-2 text-sm font-medium transition ${
                 tab === t.key
-                  ? "border-accent bg-gradient-to-br from-accent to-accent-bright text-[#0A111B] shadow-glow"
+                  ? "border-accent bg-gradient-to-br from-accent to-accent-bright text-accent-ink shadow-glow"
                   : "border-border bg-elevated text-text hover:border-accent"
               }`}
             >
@@ -240,12 +240,12 @@ export function GuestList({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Leita…"
-          className="min-w-[140px] flex-1 rounded-xl border border-border bg-elevated px-3 py-2 text-sm text-text placeholder:text-[#5C6B7D] outline-none focus:border-accent"
+          className="min-w-[140px] flex-1 rounded-xl border border-border bg-elevated px-3 py-2 text-sm text-text placeholder:text-muted outline-none focus:border-accent"
         />
 
         <button
           onClick={() => exportRows(filtered, eventName, showDrinks, cols, customCols)}
-          className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)]"
+          className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent-soft"
         >
           Flytja út (Excel)
         </button>
@@ -369,7 +369,7 @@ export function GuestList({
             </thead>
             <tbody>
               {filtered.map((r, i) => (
-                <tr key={r.id} className={`border-b border-border transition hover:bg-elevated ${i % 2 ? "bg-[rgba(255,255,255,0.012)]" : ""} ${r.cancelled ? "opacity-55" : ""}`}>
+                <tr key={r.id} className={`border-b border-border transition hover:bg-elevated ${i % 2 ? "bg-[var(--row-alt)]" : ""} ${r.cancelled ? "opacity-55" : ""}`}>
                   <td className="px-3 py-2.5">
                     <span className="font-medium text-text">{r.name}</span>
                     {(cols.company || cols.unit) && (

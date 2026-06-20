@@ -272,7 +272,7 @@ function CoverUploader({
       )}
       <div className="flex flex-wrap items-center gap-2">
         <label
-          className={`cursor-pointer rounded-lg border border-accent px-3 py-1.5 text-[13px] font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)] ${
+          className={`cursor-pointer rounded-lg border border-accent px-3 py-1.5 text-[13px] font-semibold text-accent transition hover:bg-accent-soft ${
             busy ? "pointer-events-none opacity-60" : ""
           }`}
         >

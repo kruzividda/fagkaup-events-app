@@ -30,7 +30,7 @@ export default async function EventsPage() {
         </div>
         <Link
           href="/dashboard/events/new"
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-[#0B121C] transition hover:brightness-110"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-ink transition hover:brightness-110"
         >
           Nýr viðburður
         </Link>

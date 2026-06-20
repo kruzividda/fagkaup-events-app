@@ -24,7 +24,7 @@ export function Card({
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
-      <span className="inline-block h-px w-5 bg-[rgba(200,164,92,0.7)]" aria-hidden />
+      <span className="inline-block h-px w-5 bg-accent" aria-hidden />
       {children}
     </p>
   );

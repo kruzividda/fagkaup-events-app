@@ -64,7 +64,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
       <div className="flex flex-wrap gap-2">
         <Link
           href={`/dashboard/events/${params.eventId}/stats`}
-          className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-sm font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105"
+          className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-sm font-semibold text-accent-ink shadow-glow transition hover:brightness-105"
         >
           Skoða tölfræði
         </Link>

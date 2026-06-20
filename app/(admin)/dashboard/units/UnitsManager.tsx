@@ -101,7 +101,7 @@ export function UnitsManager({ initial }: { initial: Unit[] }) {
       </button>
 
       <div className="flex items-center gap-3">
-        <button onClick={save} disabled={saving} className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-[#0B121C] hover:brightness-110 disabled:opacity-50">
+        <button onClick={save} disabled={saving} className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink hover:brightness-110 disabled:opacity-50">
           {saving ? "Vista…" : "Vista"}
         </button>
         {msg && <span className="text-sm text-muted">{msg}</span>}

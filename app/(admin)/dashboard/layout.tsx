@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getProfile } from "@/lib/auth";
 import { NavLinks } from "@/components/NavLinks";
 import { MobileNav } from "@/components/MobileNav";
+import { DashboardThemeToggle } from "@/components/DashboardThemeToggle";
 
 const NAV = [
   { href: "/dashboard", label: "Yfirlit" },
@@ -15,7 +17,7 @@ const NAV = [
 function Brand() {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[rgba(200,164,92,0.4)] bg-gradient-to-br from-[rgba(200,164,92,0.18)] to-transparent">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-accent-soft">
         <span className="font-display text-base font-semibold text-accent">F</span>
       </div>
       <div>
@@ -30,8 +32,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const profile = await getProfile();
   if (!profile) redirect("/login");
 
+  // Þema stjórnborðs úr vafraköku — ljóst (fagkaup) er sjálfgefið
+  const theme = cookies().get("dashboard-theme")?.value === "glamour" ? "glamour" : "fagkaup";
+
   return (
-    <div className="min-h-[100dvh]">
+    <div data-theme={theme} className={`min-h-[100dvh] ${theme === "fagkaup" ? "bg-bg text-text" : ""}`}>
       {/* Föst hliðarstika (tölvuskjár) */}
       <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-20 md:flex md:w-60 md:flex-col md:border-r md:border-border md:bg-surface">
         <div className="p-5">
@@ -44,15 +49,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Aðalsvæði */}
       <div className="md:pl-60">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-[rgba(10,17,27,0.85)] px-4 backdrop-blur md:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-[var(--bar-bg)] px-4 backdrop-blur md:px-6">
           <div className="flex items-center gap-3">
             <MobileNav items={NAV} />
             <span className="hidden text-[13px] uppercase tracking-[0.14em] text-muted md:inline">Stjórnborð</span>
             <span className="font-display text-base text-text md:hidden">Events</span>
           </div>
           <div className="flex items-center gap-3">
+            <DashboardThemeToggle current={theme} />
             <span className="hidden text-sm text-text sm:inline">{profile.full_name}</span>
-            <span className="rounded-full border border-[rgba(200,164,92,0.4)] px-2.5 py-0.5 text-[11px] uppercase tracking-wide text-accent">
+            <span className="rounded-full border border-accent px-2.5 py-0.5 text-[11px] uppercase tracking-wide text-accent">
               {profile.role}
             </span>
             <form action="/auth/signout" method="post">

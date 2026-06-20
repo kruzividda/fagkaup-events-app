@@ -419,3 +419,13 @@ Gestalistinn og tölfræðisíðan uppfærast nú **sjálfkrafa** þegar breytin
 ## Lokatími skráningar
 
 Viðburðir hafa nú valfrjálsan reit **„Skráning lokar“** (við hlið „Skráning opnar“) í stofnun og breytingu. Eftir þann tíma lokast fyrir nýjar skráningar: forsíða og skráningarsíða sýna „Skráningu er lokið“, og bakendinn hafnar skráningu/endurskráningu (var þegar varið — `registration_closes_at`). Þegar opið er sést „Skráning er opin til …“. Engin SQL-breyting þurfti.
+
+---
+
+## Þema stjórnborðs (ljóst / dökkt)
+
+Stjórnborðið styður nú **ljóst** (Fagkaup — hvítt/rautt/svart, *sjálfgefið*) og **dökkt** (núverandi gyllta útlitið). Lítill rofi efst í hægra horni skiptir á milli; valið geymist í vafraköku (`dashboard-theme`) og helst milli heimsókna. Server les kökuna, svo ekkert flökt verður við hleðslu.
+
+Litir, skuggar, fókus-hringir og raða-rendur eru drifin af þema-breytum (CSS variables) svo bæði þemu líti heilstætt út. Innskráning og skönnunarsíður (dyr/bar) eru áfram dökkar.
+
+> Engin SQL-breyting.

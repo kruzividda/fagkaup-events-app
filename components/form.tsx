@@ -14,7 +14,7 @@ export function Field({ label, required, children }: { label: string; required?:
 }
 
 const inputCls =
-  "w-full rounded-xl border border-border bg-elevated px-4 py-3 text-[15px] text-text placeholder:text-[#5C6B7D] outline-none transition focus:border-accent focus:ring-2 focus:ring-[rgba(200,164,92,0.22)]";
+  "w-full rounded-xl border border-border bg-elevated px-4 py-3 text-[15px] text-text placeholder:text-muted outline-none transition focus:border-accent focus:ring-2 focus:ring-[var(--focus-ring)]";
 
 const selectCls =
   inputCls +
@@ -86,7 +86,7 @@ export function Checkbox(props: { checked: boolean; onChange: (v: boolean) => vo
         className="peer sr-only"
       />
       <span
-        className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[7px] border transition peer-focus-visible:ring-2 peer-focus-visible:ring-[rgba(200,164,92,0.4)] ${
+        className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[7px] border transition peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--focus-ring)] ${
           props.checked ? "border-accent bg-gradient-to-br from-accent to-accent-bright" : "border-border bg-elevated"
         }`}
         aria-hidden

@@ -60,7 +60,7 @@ export function EventRowActions({
       <button
         onClick={toggle}
         disabled={pending}
-        className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-[#0B121C] transition hover:brightness-110 disabled:opacity-50"
+        className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-ink transition hover:brightness-110 disabled:opacity-50"
       >
         {status === "published" ? "Afbirta" : "Birta"}
       </button>

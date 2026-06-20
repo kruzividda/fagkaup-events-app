@@ -82,7 +82,7 @@ export function DrinksPanel({
         <button
           onClick={() => run(() => applyDrinks(eventId, Number(pp || 0), spouseOn ? Number(ps || 0) : 0), "Drykkjum beitt á alla gesti ✓")}
           disabled={busy}
-          className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2.5 text-sm font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105 disabled:opacity-50"
+          className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2.5 text-sm font-semibold text-accent-ink shadow-glow transition hover:brightness-105 disabled:opacity-50"
         >
           Beita á alla gesti
         </button>

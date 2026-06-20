@@ -205,7 +205,7 @@ export default async function StatsPage({ params }: { params: { eventId: string 
         <div className="flex items-center gap-3">
           <Link
             href={`/dashboard/events/${params.eventId}/guests`}
-            className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-sm font-semibold text-[#0A111B] shadow-glow transition hover:brightness-105"
+            className="rounded-xl bg-gradient-to-br from-accent to-accent-bright px-4 py-2 text-sm font-semibold text-accent-ink shadow-glow transition hover:brightness-105"
           >
             Gestalisti
           </Link>

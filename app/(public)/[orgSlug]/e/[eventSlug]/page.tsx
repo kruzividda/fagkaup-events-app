@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LandingHeader } from "./LandingHeader";
 
 export default async function EventLanding({
   params,
@@ -45,18 +46,13 @@ export default async function EventLanding({
 
   return (
     <div className="min-h-screen">
-      {/* Fastur efsti borði */}
-      <div className="sticky top-0 z-30 border-b border-white/5 bg-[rgba(10,15,22,0.72)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-3">
-          <span className="truncate font-display text-[15px] font-semibold text-text">{event.name}</span>
-          {isOpen && <Cta className="hidden shrink-0 px-4 py-2 text-[13px] sm:inline-block" />}
-        </div>
-      </div>
+      {/* Fastur efsti borði — birtir nafn/takka aðeins þegar skrollað er */}
+      <LandingHeader eventName={event.name} isOpen={isOpen} skraHref={skraHref} />
 
-      <main className="mx-auto max-w-3xl px-5 pb-28 pt-6 sm:pb-14">
+      <main className="mx-auto max-w-6xl px-5 pb-28 pt-4 sm:pb-14">
         <header className="space-y-2">
           <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-accent">{org.name}</p>
-          <h1 className="font-display text-3xl font-semibold leading-[1.08] text-text sm:text-[40px]">{event.name}</h1>
+          <h1 className="font-display text-3xl font-semibold leading-[1.08] text-text sm:text-[44px]">{event.name}</h1>
           <p className="text-sm text-muted">
             {event.location ? `${event.location} · ` : ""}
             {dateStr}
@@ -65,7 +61,7 @@ export default async function EventLanding({
 
         {heroDesktop && (
           <div className="mt-6 overflow-hidden rounded-2xl border border-border shadow-card">
-            <picture>
+            <picture className="block">
               {heroMobile && <source media="(max-width: 639px)" srcSet={heroMobile} />}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={heroDesktop} alt={event.name} className="h-auto w-full object-cover" />
@@ -74,7 +70,7 @@ export default async function EventLanding({
         )}
 
         {event.description && (
-          <div className="mt-6 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+          <div className="mt-6 max-w-3xl rounded-2xl border border-border bg-surface p-5 sm:p-6">
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-text">{event.description}</p>
           </div>
         )}

@@ -17,7 +17,7 @@ export default async function RegisterPage({
 
   const { data: event } = await admin
     .from("events")
-    .select("id, name, status, description, starts_at, location, cover_image_path")
+    .select("id, name, status, description, starts_at, location, cover_image_path, cover_image_path_mobile")
     .eq("org_id", org.id)
     .eq("slug", params.eventSlug)
     .single();
@@ -75,7 +75,7 @@ export default async function RegisterPage({
       {/* Hero bakgrunnur — fastur, sést í gegnum sandblásna glerið */}
       {heroDesktop && (
         <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-          <picture>
+          <picture className="block h-full w-full">
             {heroMobile && <source media="(max-width: 639px)" srcSet={heroMobile} />}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={heroDesktop} alt="" className="h-full w-full object-cover" />

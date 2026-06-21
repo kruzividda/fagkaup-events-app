@@ -196,7 +196,7 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
             <button
               onClick={removeSpouse}
               disabled={busy}
-              className="rounded-xl border border-border px-4 py-2.5 text-sm text-muted transition hover:border-danger hover:text-danger disabled:opacity-60"
+              className="btn-secondary-danger rounded-xl px-4 py-2.5 text-sm disabled:opacity-60"
             >
               Afboða maka
             </button>
@@ -222,7 +222,7 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
         <button
           onClick={resend}
           disabled={busy}
-          className="rounded-xl border border-accent px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-[rgba(200,164,92,0.08)] disabled:opacity-60"
+          className="rounded-xl border border-accent px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent-soft disabled:opacity-60"
         >
           Endursenda staðfestingu og QR
         </button>
@@ -240,14 +240,14 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
             >
               Já, afboða mig
             </button>
-            <button onClick={() => setConfirmCancel(false)} className="rounded-xl border border-border px-4 py-2.5 text-sm text-muted">
+            <button onClick={() => setConfirmCancel(false)} className="btn-secondary rounded-xl px-4 py-2.5 text-sm">
               Hætta við
             </button>
           </div>
         ) : (
           <button
             onClick={() => setConfirmCancel(true)}
-            className="rounded-xl border border-border px-4 py-2.5 text-sm text-muted transition hover:border-danger hover:text-danger"
+            className="btn-secondary-danger rounded-xl px-4 py-2.5 text-sm"
           >
             Afboða skráninguna mína
           </button>

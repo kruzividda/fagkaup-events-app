@@ -211,10 +211,10 @@ export function GuestList({
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`rounded-full border px-3.5 py-2 text-sm font-medium transition ${
+              className={`rounded-full px-3.5 py-2 text-sm font-medium transition ${
                 tab === t.key
-                  ? "border-accent bg-gradient-to-br from-accent to-accent-bright text-accent-ink shadow-glow"
-                  : "border-border bg-elevated text-text hover:border-accent"
+                  ? "border border-accent bg-gradient-to-br from-accent to-accent-bright text-accent-ink shadow-glow"
+                  : "btn-secondary"
               }`}
             >
               {t.label}
@@ -323,14 +323,14 @@ export function GuestList({
                   >
                     {busyId === r.id ? "…" : "Staðfesta afskráningu"}
                   </button>
-                  <button onClick={() => setConfirmId(null)} className="rounded-lg border border-border px-3 py-1.5 text-[13px] text-muted">
+                  <button onClick={() => setConfirmId(null)} className="btn-secondary rounded-lg px-3 py-1.5 text-[13px]">
                     Hætta
                   </button>
                 </span>
               ) : (
                 <button
                   onClick={() => setConfirmId(r.id)}
-                  className="rounded-lg border border-border px-3 py-1.5 text-[13px] text-muted transition hover:border-danger hover:text-danger"
+                  className="btn-secondary-danger rounded-lg px-3 py-1.5 text-[13px]"
                 >
                   Afskrá
                 </button>
@@ -443,14 +443,14 @@ export function GuestList({
                         >
                           {busyId === r.id ? "…" : "Staðfesta"}
                         </button>
-                        <button onClick={() => setConfirmId(null)} className="rounded-lg border border-border px-2.5 py-1 text-[12px] text-muted">
+                        <button onClick={() => setConfirmId(null)} className="btn-secondary rounded-lg px-2.5 py-1 text-[12px]">
                           Hætta
                         </button>
                       </span>
                     ) : (
                       <button
                         onClick={() => setConfirmId(r.id)}
-                        className="rounded-lg border border-border px-2.5 py-1 text-[12px] text-muted transition hover:border-danger hover:text-danger"
+                        className="btn-secondary-danger rounded-lg px-2.5 py-1 text-[12px]"
                       >
                         Afskrá
                       </button>

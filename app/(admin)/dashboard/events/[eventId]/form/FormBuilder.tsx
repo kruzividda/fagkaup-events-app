@@ -155,8 +155,8 @@ export function FormBuilder({ eventId, initialFields }: { eventId: string; initi
               <option value="hidden">Falinn</option>
             </select>
             <div className="flex gap-1">
-              <button onClick={() => move(i, -1)} className="rounded-md border border-border px-2 py-1 text-xs text-muted hover:text-text">↑</button>
-              <button onClick={() => move(i, 1)} className="rounded-md border border-border px-2 py-1 text-xs text-muted hover:text-text">↓</button>
+              <button onClick={() => move(i, -1)} className="btn-secondary rounded-md px-2 py-1 text-xs">↑</button>
+              <button onClick={() => move(i, 1)} className="btn-secondary rounded-md px-2 py-1 text-xs">↓</button>
               <button onClick={() => remove(i)} className="rounded-md border border-danger px-2 py-1 text-xs text-danger">Eyða</button>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function FormBuilder({ eventId, initialFields }: { eventId: string; initi
           ) : (
             <div className="flex flex-wrap gap-2">
               {availableCore.map((c) => (
-                <button key={c.key} onClick={() => addCore(c.key)} className="rounded-lg border border-border px-3 py-1.5 text-sm text-text hover:border-accent">
+                <button key={c.key} onClick={() => addCore(c.key)} className="btn-secondary rounded-lg px-3 py-1.5 text-sm">
                   + {c.label}
                 </button>
               ))}
@@ -224,7 +224,7 @@ function OptionsEditor({ field, onChange }: { field: BuilderField; onChange: (o:
             onChange={(e) => onChange(opts.map((x, idx) => (idx === oi ? { value: x.value, label: e.target.value } : x)))}
             className={`${inputCls} flex-1`}
           />
-          <button onClick={() => onChange(opts.filter((_, idx) => idx !== oi))} className="rounded-md border border-border px-2 text-xs text-muted hover:text-danger">×</button>
+          <button onClick={() => onChange(opts.filter((_, idx) => idx !== oi))} className="btn-secondary-danger rounded-md px-2 text-xs">×</button>
         </div>
       ))}
       <button onClick={() => onChange([...opts, { value: "", label: `Valkostur ${opts.length + 1}` }])} className="text-xs text-accent">+ Bæta við valkosti</button>

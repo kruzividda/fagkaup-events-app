@@ -429,3 +429,15 @@ Stjórnborðið styður nú **ljóst** (Fagkaup — hvítt/rautt/svart, *sjálfg
 Litir, skuggar, fókus-hringir og raða-rendur eru drifin af þema-breytum (CSS variables) svo bæði þemu líti heilstætt út. Innskráning og skönnunarsíður (dyr/bar) eru áfram dökkar.
 
 > Engin SQL-breyting.
+
+---
+
+## Sýnilegri aukatakkar
+
+Útlínu-takkar (allir sem eru ekki rauðir/gylltir — t.d. „Tölfræði“, „Skoða skráningarsíðu“, „Afrita hlekk“, „Til baka“) voru of daufir, sérstaklega í ljósa þemanu. Þeir eru nú **fylltir með sýnilegri brún og sterkari texta** í báðum þemum, í gegnum sameiginlega stíla `.btn-secondary` og `.btn-secondary-danger` (drifnir af `--btn-bg/--btn-border/--btn-bg-hover` breytum). Hættu-takkar (Afskrá, fjarlægja, afboða) halda rauða yfirsvifinu. Engin SQL-breyting.
+
+---
+
+## Sýnilegri aukatakkar
+
+Útlínu-takkar sem voru ekki rauðir/gylltir (t.d. „Tölfræði“, „Skoða skráningarsíðu“, „Afrita hlekk“, „Til baka“, flipar) voru of daufir — sérstaklega í ljósa þemanu. Nú nota þeir sameiginlega stíla `.btn-secondary` og `.btn-secondary-danger`: fylltir með sýnilegri brún og sterkum texta, drifnir af þema-breytum (`--btn-bg`, `--btn-border`, `--btn-bg-hover`) svo þeir séu áberandi í bæði ljósu og dökku þema. Rauðu og gylltu aðaltakkarnir eru óbreyttir.

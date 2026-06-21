@@ -39,7 +39,7 @@ export function EventCancelButton({ eventId, cancelled }: { eventId: string; can
         >
           {busy ? "…" : "Já, fella niður"}
         </button>
-        <button onClick={() => setConfirm(false)} className="rounded-xl border border-border px-4 py-2 text-sm text-muted">
+        <button onClick={() => setConfirm(false)} className="btn-secondary rounded-xl px-4 py-2 text-sm">
           Hætta við
         </button>
       </span>
@@ -49,7 +49,7 @@ export function EventCancelButton({ eventId, cancelled }: { eventId: string; can
   return (
     <button
       onClick={() => setConfirm(true)}
-      className="rounded-xl border border-border px-4 py-2 text-sm text-muted transition hover:border-danger hover:text-danger"
+      className="btn-secondary-danger rounded-xl px-4 py-2 text-sm"
     >
       Fella niður viðburð
     </button>

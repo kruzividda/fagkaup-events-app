@@ -38,21 +38,21 @@ export function EventRowActions({
     <div className="flex flex-wrap items-center gap-2">
       <Link
         href={`/dashboard/events/${eventId}/stats`}
-        className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:text-text"
+        className="btn-secondary rounded-lg px-3 py-1.5 text-xs"
       >
         Tölfræði
       </Link>
       <Link
         href={publicPath}
         target="_blank"
-        className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:text-text"
+        className="btn-secondary rounded-lg px-3 py-1.5 text-xs"
       >
         Skoða skráningarsíðu
       </Link>
       {status === "published" && (
         <button
           onClick={copyLink}
-          className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition hover:text-text"
+          className="btn-secondary rounded-lg px-3 py-1.5 text-xs"
         >
           {copied ? "Afritað!" : "Afrita hlekk"}
         </button>

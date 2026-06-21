@@ -70,25 +70,25 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         </Link>
         <Link
           href={`/dashboard/events/${params.eventId}/edit`}
-          className="rounded-xl border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
+          className="btn-secondary rounded-xl px-4 py-2 text-sm"
         >
           Breyta viðburði
         </Link>
         <Link
           href={`/dashboard/events/${params.eventId}/guests`}
-          className="rounded-xl border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
+          className="btn-secondary rounded-xl px-4 py-2 text-sm"
         >
           Gestalisti
         </Link>
         <Link
           href={`/dashboard/events/${params.eventId}/form`}
-          className="rounded-xl border border-border px-4 py-2 text-sm text-text transition hover:border-accent"
+          className="btn-secondary rounded-xl px-4 py-2 text-sm"
         >
           Skráningarform
         </Link>
         <Link
           href="/dashboard/events"
-          className="rounded-xl border border-border px-4 py-2 text-sm text-muted transition hover:text-text"
+          className="btn-secondary rounded-xl px-4 py-2 text-sm"
         >
           Til baka
         </Link>

@@ -284,7 +284,7 @@ function CoverUploader({
             type="button"
             onClick={remove}
             disabled={busy}
-            className="rounded-lg border border-border px-3 py-1.5 text-[13px] text-muted transition hover:border-danger hover:text-danger disabled:opacity-60"
+            className="btn-secondary-danger rounded-lg px-3 py-1.5 text-[13px]"
           >
             Fjarlægja
           </button>

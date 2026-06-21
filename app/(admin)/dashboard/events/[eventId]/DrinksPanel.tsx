@@ -98,14 +98,14 @@ export function DrinksPanel({
           <button
             onClick={() => run(() => adjustDrinks(eventId, -1), "Fækkað um 1 hjá öllum ✓")}
             disabled={busy}
-            className="rounded-xl border border-border px-4 py-2.5 text-sm text-text transition hover:border-accent disabled:opacity-50"
+            className="btn-secondary rounded-xl px-4 py-2.5 text-sm"
           >
             − 1 á alla
           </button>
           <button
             onClick={() => run(() => adjustDrinks(eventId, 1), "Bætt við 1 hjá öllum ✓")}
             disabled={busy}
-            className="rounded-xl border border-border px-4 py-2.5 text-sm text-text transition hover:border-accent disabled:opacity-50"
+            className="btn-secondary rounded-xl px-4 py-2.5 text-sm"
           >
             + 1 á alla
           </button>

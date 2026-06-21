@@ -84,7 +84,7 @@ export function UnitsManager({ initial }: { initial: Unit[] }) {
                   placeholder="t.d. Skútuvogur"
                   className={`${inputCls} flex-1`}
                 />
-                <button onClick={() => removeLoc(ui, li)} className="rounded-md border border-border px-2 text-xs text-muted hover:text-danger">
+                <button onClick={() => removeLoc(ui, li)} className="btn-secondary-danger rounded-md px-2 text-xs">
                   ×
                 </button>
               </div>
@@ -96,7 +96,7 @@ export function UnitsManager({ initial }: { initial: Unit[] }) {
         </Card>
       ))}
 
-      <button onClick={addUnit} className="rounded-lg border border-border px-4 py-2 text-sm text-text hover:border-accent">
+      <button onClick={addUnit} className="btn-secondary rounded-lg px-4 py-2 text-sm">
         + Bæta við deild
       </button>
 

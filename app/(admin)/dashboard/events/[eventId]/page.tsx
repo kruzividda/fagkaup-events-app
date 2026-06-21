@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
 import { DrinksPanel } from "./DrinksPanel";
 import { EventCancelButton } from "./EventCancelButton";
+import { EventPublishButton } from "./EventPublishButton";
 import { EventActions } from "./EventActions";
 import { AccessManager } from "./AccessManager";
 
@@ -49,6 +50,10 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
 
   return (
     <div className="max-w-2xl space-y-6">
+      <Link href="/dashboard/events" className="inline-flex items-center gap-1 text-sm text-muted transition hover:text-text">
+        ← Viðburðir
+      </Link>
+
       <div>
         <Eyebrow>Viðburður</Eyebrow>
         <PageTitle>{event.name}</PageTitle>
@@ -90,7 +95,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         >
           Skoða tölfræði
         </Link>
-        <EventActions eventId={params.eventId} status={event.status} publicPath={`/${orgSlug}/e/${event.slug}`} />
+        <EventActions status={event.status} publicPath={`/${orgSlug}/e/${event.slug}`} />
         <Link
           href={`/dashboard/events/${params.eventId}/edit`}
           className="btn-secondary rounded-xl px-4 py-2 text-sm"
@@ -109,13 +114,6 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         >
           Skráningarform
         </Link>
-        <Link
-          href="/dashboard/events"
-          className="btn-secondary rounded-xl px-4 py-2 text-sm"
-        >
-          Til baka
-        </Link>
-        <EventCancelButton eventId={params.eventId} cancelled={!!event.cancelled} />
       </div>
 
       <AccessManager eventId={params.eventId} initial={accessList} />
@@ -129,6 +127,14 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
           perSpouse={event.drinks_per_spouse ?? 0}
         />
       )}
+
+      <div className="border-t border-border pt-5">
+        <p className="mb-3 text-[11px] uppercase tracking-[0.14em] text-muted">Staða viðburðar</p>
+        <div className="flex flex-wrap gap-2">
+          <EventPublishButton eventId={params.eventId} status={event.status} />
+          <EventCancelButton eventId={params.eventId} cancelled={!!event.cancelled} />
+        </div>
+      </div>
     </div>
   );
 }

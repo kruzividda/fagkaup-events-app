@@ -29,7 +29,10 @@ function randomPin() {
 
 function fmt(dt: string | null) {
   if (!dt) return null;
-  return new Date(dt).toLocaleString("is-IS", { dateStyle: "short", timeStyle: "short", timeZone: "Atlantic/Reykjavik" });
+  const d = new Date(dt);
+  const p = (n: number) => String(n).padStart(2, "0");
+  // Ísland er UTC+0 -> notum UTC-hluta svo server og client gefi nákvæmlega sama streng
+  return `${d.getUTCDate()}.${d.getUTCMonth() + 1}.${d.getUTCFullYear()}, ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
 }
 
 export function AccessManager({ eventId, initial }: { eventId: string; initial: AccessRow[] }) {

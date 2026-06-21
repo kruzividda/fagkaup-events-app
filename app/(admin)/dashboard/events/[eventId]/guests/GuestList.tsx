@@ -45,14 +45,16 @@ export type Cols = {
 type Tab = "all" | "in" | "out" | "cancelled";
 type SortKey = "name" | "company" | "unit" | "location" | "status" | "drinks";
 
+const pad2 = (n: number) => String(n).padStart(2, "0");
+// Ísland er UTC+0 -> handvirkt snið svo server og client gefi sama streng (engin hydration-villa)
 function timeOf(iso: string | null) {
   if (!iso) return "";
-  return new Date(iso).toLocaleTimeString("is-IS", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Atlantic/Reykjavik" });
+  const d = new Date(iso);
+  return `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
 }
 function dateTimeOf(iso: string) {
-  return new Date(iso).toLocaleString("is-IS", {
-    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Atlantic/Reykjavik",
-  });
+  const d = new Date(iso);
+  return `${pad2(d.getUTCDate())}.${pad2(d.getUTCMonth() + 1)}.${d.getUTCFullYear()} ${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
 }
 
 function exportRows(rows: GuestRow[], eventName: string, showDrinks: boolean, cols: Cols, customCols: CustomCol[]) {

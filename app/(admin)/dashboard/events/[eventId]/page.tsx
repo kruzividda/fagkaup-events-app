@@ -118,15 +118,17 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         <EventCancelButton eventId={params.eventId} cancelled={!!event.cancelled} />
       </div>
 
-      <DrinksPanel
-        eventId={params.eventId}
-        drinksEnabled={event.drinks_enabled}
-        perPerson={event.drinks_per_person ?? 0}
-        spouseGets={event.spouse_gets_drinks}
-        perSpouse={event.drinks_per_spouse ?? 0}
-      />
-
       <AccessManager eventId={params.eventId} initial={accessList} />
+
+      {event.drinks_enabled && (
+        <DrinksPanel
+          eventId={params.eventId}
+          drinksEnabled={event.drinks_enabled}
+          perPerson={event.drinks_per_person ?? 0}
+          spouseGets={event.spouse_gets_drinks}
+          perSpouse={event.drinks_per_spouse ?? 0}
+        />
+      )}
     </div>
   );
 }

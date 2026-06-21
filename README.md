@@ -447,3 +447,15 @@ Litir, skuggar, fókus-hringir og raða-rendur eru drifin af þema-breytum (CSS 
 ## Viðburðalisti = yfirlit með tölum
 
 Viðburðalistinn er **myndakortagrid**: hero-mynd (16:9) efst, svo nafn viðburðar, svo tölur (skráðir með sætanýtingar-súlu + gestir). Staða birtist sem merki ofan á myndinni. Öll kortið er smellanlegt og opnar viðburðinn. Aðgerðirnar (**Birta/Afbirta**, **Skoða skráningarsíðu**, **Afrita hlekk**) búa inni á viðburðinum sjálfum, hjá hinum stillingunum.
+
+---
+
+## Ónettengur dyraskanni (0022)
+
+Dyraskanninn virkar nú þótt símasamband detti út. Þegar hann opnast sækir hann **afrit** af öllum miðum viðburðarins (`door_snapshot`) og geymir í tækinu (localStorage). Eftir það getur dyravörður skannað án nets: skanninn þekkir miðann, sýnir nafn/fyrirtæki/fæðuóþol, hafnar afbókuðum eða röngum miðum, og skráir mætingu í **biðröð** sem sendist sjálfkrafa í Supabase þegar netið kemur aftur (`sync_checkin` — heldur upprunalega skönnunartímanum, idempotent á miða).
+
+Efst er vísir: **● Nettengt / ⚠ Ónettengt**, fjöldi miða í afriti, fjöldi „í biðröð“, og „Samstilla“ takki. Innritun við dyr er örugg ónettengt því hver miði er aðeins innritaður einu sinni (tvöföld skönnun verður mjúk viðvörun).
+
+**Athugið:** Barinn er enn nettengdur. Ef dyrnar eru ónettengdar sér barinn ekki innritun gestsins fyrr en dyraskanninn hefur samstillt. Realtime þarf ekki fyrir þetta. Tækið verður að vera opið (skanninn hlaðinn) til að vinna ónettengt.
+
+> Krefst SQL: keyrðu `0022_offline_door.sql` (eftir 0021).

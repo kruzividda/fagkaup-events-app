@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow } from "@/components/ui";
-import { ScanScreen } from "../../ScanScreen";
+import { DoorScanScreen } from "../../DoorScanScreen";
 
 export default async function DoorScan({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
@@ -24,7 +24,7 @@ export default async function DoorScan({ params }: { params: { eventId: string }
           ← Til baka
         </Link>
       </div>
-      <ScanScreen mode="door" eventId={params.eventId} eventName={event.name} />
+      <DoorScanScreen eventId={params.eventId} eventName={event.name} />
     </main>
   );
 }

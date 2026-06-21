@@ -4,16 +4,20 @@ import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
 import { DrinksPanel } from "./DrinksPanel";
 import { EventCancelButton } from "./EventCancelButton";
+import { EventActions } from "./EventActions";
 
 export const dynamic = "force-dynamic";
 
 export default async function EventDetailPage({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
 
+  const { data: org } = await supabase.from("organizations").select("slug").limit(1).single();
+  const orgSlug = org?.slug ?? "fagkaup";
+
   const { data: event } = await supabase
     .from("events")
     .select(
-      "name, status, cancelled, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
+      "name, slug, status, cancelled, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
     )
     .eq("id", params.eventId)
     .single();
@@ -68,6 +72,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         >
           Skoða tölfræði
         </Link>
+        <EventActions eventId={params.eventId} status={event.status} publicPath={`/${orgSlug}/e/${event.slug}`} />
         <Link
           href={`/dashboard/events/${params.eventId}/edit`}
           className="btn-secondary rounded-xl px-4 py-2 text-sm"

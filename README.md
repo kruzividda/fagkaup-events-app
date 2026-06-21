@@ -441,3 +441,9 @@ Litir, skuggar, fókus-hringir og raða-rendur eru drifin af þema-breytum (CSS 
 ## Sýnilegri aukatakkar
 
 Útlínu-takkar sem voru ekki rauðir/gylltir (t.d. „Tölfræði“, „Skoða skráningarsíðu“, „Afrita hlekk“, „Til baka“, flipar) voru of daufir — sérstaklega í ljósa þemanu. Nú nota þeir sameiginlega stíla `.btn-secondary` og `.btn-secondary-danger`: fylltir með sýnilegri brún og sterkum texta, drifnir af þema-breytum (`--btn-bg`, `--btn-border`, `--btn-bg-hover`) svo þeir séu áberandi í bæði ljósu og dökku þema. Rauðu og gylltu aðaltakkarnir eru óbreyttir.
+
+---
+
+## Viðburðalisti = yfirlit með tölum
+
+Viðburðalistinn sýnir nú **tölur í fljótu bragði** í stað aðgerðatakka: fjölda skráðra (með sætanýtingar-súlu ef hámark er sett) og heildarfjölda gesta með mökum. Öll röðin er smellanleg og opnar viðburðinn. Aðgerðirnar (**Birta/Afbirta**, **Skoða skráningarsíðu**, **Afrita hlekk**) búa nú inni á viðburðinum sjálfum, hjá hinum stillingunum.

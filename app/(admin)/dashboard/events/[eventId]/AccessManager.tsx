@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui";
 import { Field, TextInput, Select, PrimaryButton } from "@/components/form";
@@ -37,13 +37,18 @@ export function AccessManager({ eventId, initial }: { eventId: string; initial: 
   const [list, setList] = useState<AccessRow[]>(initial);
   const [role, setRole] = useState("door");
   const [label, setLabel] = useState("");
-  const [pin, setPin] = useState(randomPin());
+  const [pin, setPin] = useState("");
   const [starts, setStarts] = useState("");
   const [ends, setEnds] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [created, setCreated] = useState<{ token: string; pin: string; label: string; role: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+
+  // Búa til PIN eftir mount (ekki í render -> engin hydration-ósamræmi)
+  useEffect(() => {
+    setPin(randomPin());
+  }, []);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const linkFor = (token: string) => `${origin}/s/${token}`;

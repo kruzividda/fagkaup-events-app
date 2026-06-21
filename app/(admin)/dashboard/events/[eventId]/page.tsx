@@ -58,7 +58,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         <Eyebrow>Viðburður</Eyebrow>
         <PageTitle>{event.name}</PageTitle>
         <p className="mt-1 text-sm text-muted">
-          {new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short" })}
+          {new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })}
           {event.location ? ` · ${event.location}` : ""}
         </p>
       </div>

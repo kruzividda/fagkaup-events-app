@@ -518,3 +518,13 @@ Skanna-hlekkurinn verður **opinn** (engin Supabase-innskráning): viðkomandi o
 > Þessi áfangi: gagnagrunnur (0023) + stjórnborðsviðmót til að stofna/stýra aðgangi. **Næst:** opinberi `/s/<token>` skannahlekkurinn með PIN-skjá + endurbætt dyraskanni (sem klárar offline-lagfæringuna), svo barþjóna-skanninn, og loks bakenda-aðgangur fyrir viðburðarfyrirtæki.
 
 > Krefst SQL: keyrðu `0023_event_access.sql` (eftir 0022).
+
+---
+
+## Opinber skanna-hlekkur `/s/<token>` + PIN (klárar offline-lagfæringuna)
+
+Skanna-hlekkurinn (`/s/<token>`) er nú til. Hann er **opinn** — engin Supabase-innskráning. Viðkomandi opnar hlekkinn, slær inn **PIN**, og fær session sem skannar með (`open_scanner` → `sync_checkin_s`). Lotan geymist í tækinu og helst þar til hún rennur út (eða er afturkölluð). Dyraskanninn nýtir áfram afritið + biðröðina (nú lyklað á aðgangs-token svo það helst þótt PIN sé slegið aftur).
+
+**Þetta lagar endurhleðslu án nets:** síðan þarf enga server-innskráningu, svo hún getur ekki lengur hent þér í innskráningu. SW (v3) geymir líka `/s/`-síður (cache-first). Ef lotan rennur út á meðan ónettengt er tapast innritun ekki — hún bíður í biðröð og sendist þegar opnað er aftur með PIN.
+
+Barþjóna-hlutverkið opnar skannann en sýnir „á leiðinni“ í bili (barskanninn kemur næst). Dyraskanninn er fullvirkur.

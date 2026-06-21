@@ -6,7 +6,7 @@
      svo endurhleðsla án nets hendir þér ekki í innskráningu.
    - Supabase-köll og POST: aldrei geymd — fara beint á netið.
 */
-const CACHE = "fk-shell-v2";
+const CACHE = "fk-shell-v3";
 const STATIC_RE = /\.(?:js|css|woff2?|ttf|png|jpe?g|svg|gif|webp|ico|webmanifest)$/i;
 
 const OFFLINE_HTML = `<!doctype html><html lang="is"><head><meta charset="utf-8">
@@ -80,7 +80,7 @@ self.addEventListener("fetch", (event) => {
 
   // 2) Flakk
   if (req.mode === "navigate") {
-    const isScan = url.pathname.startsWith("/door") || url.pathname.startsWith("/bar");
+    const isScan = url.pathname.startsWith("/door") || url.pathname.startsWith("/bar") || url.pathname.startsWith("/s/");
 
     if (isScan) {
       // CACHE-FIRST: ber fram geymda skel strax, uppfærir í bakgrunni

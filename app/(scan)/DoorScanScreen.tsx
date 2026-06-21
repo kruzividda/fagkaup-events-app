@@ -52,8 +52,20 @@ function saveJSON(key: string, val: unknown) {
   }
 }
 
-export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventName: string }) {
+export function DoorScanScreen({
+  eventId,
+  eventName,
+  sessionToken,
+  storageId,
+}: {
+  eventId?: string;
+  eventName: string;
+  sessionToken?: string;
+  storageId?: string;
+}) {
   const supabase = createClient();
+  const useSession = !!sessionToken;
+  const keyId = storageId ?? eventId ?? sessionToken ?? "scan";
 
   // token -> Ticket (í minni; speglað í localStorage)
   const snapRef = useRef<Map<string, Ticket>>(new Map());
@@ -75,19 +87,21 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
   const persistSnap = useCallback(() => {
     const obj: Record<string, Ticket> = {};
     snapRef.current.forEach((v, k) => (obj[k] = v));
-    saveJSON(snapKey(eventId), obj);
+    saveJSON(snapKey(keyId), obj);
     setSnapCount(snapRef.current.size);
-  }, [eventId]);
+  }, [keyId]);
 
   const persistQueue = useCallback(() => {
-    saveJSON(queueKey(eventId), queueRef.current);
+    saveJSON(queueKey(keyId), queueRef.current);
     setQueueCount(queueRef.current.length);
-  }, [eventId]);
+  }, [keyId]);
 
   // Sækir ferskt afrit af þjóninum (þegar nettengt)
   const fetchSnapshot = useCallback(async () => {
     try {
-      const { data, error } = await supabase.rpc("door_snapshot", { p_event_id: eventId });
+      const { data, error } = useSession
+        ? await supabase.rpc("door_snapshot_s", { p_session_token: sessionToken })
+        : await supabase.rpc("door_snapshot", { p_event_id: eventId });
       if (error) throw error;
       const res = data as { ok: boolean; tickets?: Ticket[] };
       if (!res?.ok || !res.tickets) return false;
@@ -108,7 +122,7 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
     } catch {
       return false;
     }
-  }, [eventId, supabase, persistSnap]);
+  }, [eventId, sessionToken, useSession, supabase, persistSnap]);
 
   // Sendir biðröðina í Supabase
   const flushQueue = useCallback(async () => {
@@ -117,16 +131,22 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
     const remaining: QueueItem[] = [];
     for (const item of queueRef.current) {
       try {
-        const { data, error } = await supabase.rpc("sync_checkin", {
-          p_event_id: eventId,
-          p_token: item.token,
-          p_scanned_at: item.scanned_at,
-        });
+        const { data, error } = useSession
+          ? await supabase.rpc("sync_checkin_s", {
+              p_session_token: sessionToken,
+              p_token: item.token,
+              p_scanned_at: item.scanned_at,
+            })
+          : await supabase.rpc("sync_checkin", {
+              p_event_id: eventId,
+              p_token: item.token,
+              p_scanned_at: item.scanned_at,
+            });
         const r = data as Result | null;
-        // ok eða duplicate => innritun komin til skila; annað (t.d. invalid) hendum við líka
-        if (error || (r && r.reason && !["duplicate"].includes(r.reason) && !r.ok)) {
-          if (error) remaining.push(item); // netvilla -> reyna aftur síðar
-        }
+        // Geymum áfram ef netvilla EÐA aðgangur útrunninn (svo innritun tapist ekki).
+        // ok/duplicate => komið til skila. invalid/wrong_event/cancelled => sleppum.
+        const keep = !!error || (r?.reason === "unauthorized");
+        if (keep) remaining.push(item);
       } catch {
         remaining.push(item); // netvilla -> reyna aftur síðar
       }
@@ -135,15 +155,15 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
     persistQueue();
     setLastSync(new Date().toISOString());
     setSyncing(false);
-  }, [eventId, supabase, syncing, persistQueue]);
+  }, [eventId, sessionToken, useSession, supabase, syncing, persistQueue]);
 
   // Frumstilling
   useEffect(() => {
     setOnline(navigator.onLine);
     // hlaða úr localStorage
-    const snapObj = loadJSON<Record<string, Ticket>>(snapKey(eventId), {});
+    const snapObj = loadJSON<Record<string, Ticket>>(snapKey(keyId), {});
     snapRef.current = new Map(Object.entries(snapObj));
-    queueRef.current = loadJSON<QueueItem[]>(queueKey(eventId), []);
+    queueRef.current = loadJSON<QueueItem[]>(queueKey(keyId), []);
     setSnapCount(snapRef.current.size);
     setQueueCount(queueRef.current.length);
 
@@ -173,7 +193,7 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
       clearInterval(iv);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId]);
+  }, [keyId]);
 
   // Tryggja að dyrasíðan sjálf sé geymd í skel (svo endurhleðsla án nets virki)
   useEffect(() => {
@@ -210,22 +230,32 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
     let res: Result;
     if (navigator.onLine) {
       try {
-        const { data, error } = await supabase.rpc("sync_checkin", {
-          p_event_id: eventId,
-          p_token: token,
-          p_scanned_at: new Date().toISOString(),
-        });
+        const { data, error } = useSession
+          ? await supabase.rpc("sync_checkin_s", {
+              p_session_token: sessionToken,
+              p_token: token,
+              p_scanned_at: new Date().toISOString(),
+            })
+          : await supabase.rpc("sync_checkin", {
+              p_event_id: eventId,
+              p_token: token,
+              p_scanned_at: new Date().toISOString(),
+            });
         if (error) throw error;
         res = (data as Result) ?? { ok: false, reason: "no_data" };
-        // uppfæra staðbundið afrit
-        const t = snapRef.current.get(token);
-        if (t) {
-          if (res.ok || res.reason === "duplicate") {
-            t.checked_in = true;
-            t.checked_in_at = t.checked_in_at ?? new Date().toISOString();
+        // Ef aðgangur útrunninn -> meðhöndla eins og offline (geyma í biðröð)
+        if (res.reason === "unauthorized") {
+          res = localScan(token);
+        } else {
+          const t = snapRef.current.get(token);
+          if (t) {
+            if (res.ok || res.reason === "duplicate") {
+              t.checked_in = true;
+              t.checked_in_at = t.checked_in_at ?? new Date().toISOString();
+            }
+            if (res.reason === "cancelled") t.cancelled = true;
+            persistSnap();
           }
-          if (res.reason === "cancelled") t.cancelled = true;
-          persistSnap();
         }
       } catch {
         res = localScan(token); // netvilla -> staðbundið + biðröð

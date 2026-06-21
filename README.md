@@ -459,3 +459,17 @@ Efst er vísir: **● Nettengt / ⚠ Ónettengt**, fjöldi miða í afriti, fjö
 **Athugið:** Barinn er enn nettengdur. Ef dyrnar eru ónettengdar sér barinn ekki innritun gestsins fyrr en dyraskanninn hefur samstillt. Realtime þarf ekki fyrir þetta. Tækið verður að vera opið (skanninn hlaðinn) til að vinna ónettengt.
 
 > Krefst SQL: keyrðu `0022_offline_door.sql` (eftir 0021).
+
+---
+
+## Service worker — skothelt offline (skanni eftir endurhleðslu)
+
+`public/sw.js` geymir "skel" appsins (HTML + JS/CSS) í tækinu svo dyraskanninn virki **líka eftir að síðan er endurhlaðin án nets**. Skráð sjálfvirkt af `components/ServiceWorkerRegister.tsx` (aðeins í production-byggingu).
+
+Stefna: static eignir (`_next/static`, leturgerðir, myndir) = cache-first; flakk undir `/door` og `/bar` = network-first með afriti til vara; Supabase-köll og POST eru aldrei geymd (fara beint á netið — ónettengt er meðhöndlað af biðröðinni í skannanum).
+
+**Mikilvægt:**
+- Virkar í **production** (`npm run build && npm start`) yfir **HTTPS** (eða `localhost`). Ekki virkt í `npm run dev`.
+- Opnaðu skannann **einu sinni nettengt** svo skelin geymist; eftir það þolir hann endurhleðslu án nets.
+- Þegar `sw.js` er breytt: hækkaðu `CACHE` útgáfuna (`fk-shell-v1` → `-v2`) svo gömul afrit hreinsist.
+- Til að setja upp sem app í síma (heimaskjár, án vafraramma) þarf að bæta `icon-192.png` og `icon-512.png` í `public/` og skrá þau í `app/manifest.ts`.

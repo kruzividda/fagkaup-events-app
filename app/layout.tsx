@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Fraunces } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const sans = Manrope({
   subsets: ["latin"],
@@ -34,7 +35,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="is" className={`${sans.variable} ${display.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }

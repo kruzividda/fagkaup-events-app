@@ -473,3 +473,28 @@ Stefna: static eignir (`_next/static`, leturgerðir, myndir) = cache-first; flak
 - Opnaðu skannann **einu sinni nettengt** svo skelin geymist; eftir það þolir hann endurhleðslu án nets.
 - Þegar `sw.js` er breytt: hækkaðu `CACHE` útgáfuna (`fk-shell-v1` → `-v2`) svo gömul afrit hreinsist.
 - Til að setja upp sem app í síma (heimaskjár, án vafraramma) þarf að bæta `icon-192.png` og `icon-512.png` í `public/` og skrá þau í `app/manifest.ts`.
+
+---
+
+## PWA — uppsetning í síma
+
+Appið er nú fullbúið sem PWA og hægt að setja á heimaskjá og keyra sem sjálfstætt app (án vafraramma):
+
+- **Tákn** í `public/`: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (Android adaptive) og `apple-touch-icon.png` (iOS). Fagkaup-rauð með hvítu „F“.
+- **Manifest** (`app/manifest.ts`): nafn, tákn, `display: standalone`, lóðrétt, dökk splash.
+- **iOS-stillingar** í `app/layout.tsx` (`appleWebApp`): apple-touch-icon, heimaskjár-titill „Fagkaup“, stöðustika.
+- **Uppsetningar-hjálpari** (`app/(scan)/InstallPrompt.tsx`): á dyra-/barsíðum birtist „Setja upp“ takki (Android/Chrome) eða leiðbeining „Deila → Bæta á heimaskjá“ (iOS). Felst þegar appið er þegar uppsett eða notandi lokar.
+
+Saman við service worker (0022-hluta) þýðir þetta: uppsett app sem opnast strax, virkar ónettengt og þolir endurhleðslu án nets. Krefst HTTPS í production (táknin/manifest virka líka á `localhost`). Til að skipta um tákn: skiptu út PNG-skránum í `public/`.
+
+---
+
+## PWA — uppsetjanlegt app í síma
+
+Táknin eru komin (`public/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` — Fagkaup-rauð með hvítu „F“) og skráð í `app/manifest.ts` + `app/layout.tsx`. Manifestið skilgreinir `standalone` ham, þemalit, og flýtileiðir á **Innritun (dyr)** og **Bar**.
+
+Þá geta dyraverðir/barþjónar **sett appið á heimaskjáinn** og keyrt það án vafraramma:
+- **iOS (Safari):** Deila → „Setja á heimaskjá“.
+- **Android (Chrome):** Valmynd → „Setja upp app“ / „Bæta á heimaskjá“.
+
+Saman við service worker (0022-skannann + skel-geymslu) þýðir þetta: appið opnast eins og venjulegt app, og dyraskanninn virkar þótt sambandið detti út og þótt síðan sé endurhlaðin. Krefst HTTPS í production (uppsetjanlegt app + myndavél).

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
+import { InstallPrompt } from "./InstallPrompt";
 
 export default async function ScanLayout({ children }: { children: React.ReactNode }) {
   const profile = await getProfile();
@@ -16,6 +17,7 @@ export default async function ScanLayout({ children }: { children: React.ReactNo
           </form>
         </div>
       </header>
+      <InstallPrompt />
       {children}
     </div>
   );

@@ -71,7 +71,7 @@ export function AccessManager({ eventId, initial }: { eventId: string; initial: 
         bad_pin: "PIN þarf að vera 4–8 tölustafir.",
         bad_role: "Ógilt hlutverk.",
       };
-      return setErr(map[res.reason ?? ""] ?? "Tókst ekki að stofna aðgang.");
+      return setErr(map[res.reason ?? ""] ?? `Tókst ekki að stofna aðgang.${res.reason ? ` (${res.reason})` : ""}`);
     }
     setCreated({ token: res.token!, pin: res.pin!, label: label.trim() || ROLE_LABEL[role], role });
     setLabel("");

@@ -446,4 +446,4 @@ Litir, skuggar, fókus-hringir og raða-rendur eru drifin af þema-breytum (CSS 
 
 ## Viðburðalisti = yfirlit með tölum
 
-Viðburðalistinn sýnir nú **tölur í fljótu bragði** í stað aðgerðatakka: fjölda skráðra (með sætanýtingar-súlu ef hámark er sett) og heildarfjölda gesta með mökum. Öll röðin er smellanleg og opnar viðburðinn. Aðgerðirnar (**Birta/Afbirta**, **Skoða skráningarsíðu**, **Afrita hlekk**) búa nú inni á viðburðinum sjálfum, hjá hinum stillingunum.
+Viðburðalistinn er **myndakortagrid**: hero-mynd (16:9) efst, svo nafn viðburðar, svo tölur (skráðir með sætanýtingar-súlu + gestir). Staða birtist sem merki ofan á myndinni. Öll kortið er smellanlegt og opnar viðburðinn. Aðgerðirnar (**Birta/Afbirta**, **Skoða skráningarsíðu**, **Afrita hlekk**) búa inni á viðburðinum sjálfum, hjá hinum stillingunum.

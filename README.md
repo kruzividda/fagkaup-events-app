@@ -498,3 +498,11 @@ Táknin eru komin (`public/icon-192.png`, `icon-512.png`, `icon-maskable-512.png
 - **Android (Chrome):** Valmynd → „Setja upp app“ / „Bæta á heimaskjá“.
 
 Saman við service worker (0022-skannann + skel-geymslu) þýðir þetta: appið opnast eins og venjulegt app, og dyraskanninn virkar þótt sambandið detti út og þótt síðan sé endurhlaðin. Krefst HTTPS í production (uppsetjanlegt app + myndavél).
+
+---
+
+## Lagfæring: endurhleðsla án nets hendir ekki í innskráningu
+
+Dyra-/barsíður eru server-rendraðar með innskráningarvörn. Áður gat endurhleðsla í lélegu/engu sambandi náð innskráningar-svari frá þjóninum. Nú ber service worker (**v2**) fram **geymdu skelina fyrst** (cache-first) fyrir `/door` og `/bar`, uppfærir í bakgrunni, og geymir aldrei innskráningar-svar (redirect). Skanninn biður líka SW að geyma dyrasíðuna strax við opnun. Niðurstaða: endurhleðsla án nets heldur skannanum opnum.
+
+> Eftir þessa uppfærslu: opnaðu skannann **einu sinni nettengt** svo nýi SW (v2) taki yfir og geymi síðuna. (SW v2 hreinsar líka gömul afrit sjálfkrafa.)

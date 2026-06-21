@@ -175,6 +175,15 @@ export function DoorScanScreen({ eventId, eventName }: { eventId: string; eventN
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
+  // Tryggja að dyrasíðan sjálf sé geymd í skel (svo endurhleðsla án nets virki)
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    if (!navigator.onLine) return;
+    navigator.serviceWorker.ready
+      .then((reg) => reg.active?.postMessage({ type: "cache-doc", url: window.location.href }))
+      .catch(() => {});
+  }, []);
+
   function localScan(token: string): Result {
     const t = snapRef.current.get(token);
     if (!t) return { ok: false, reason: "unknown_offline" };

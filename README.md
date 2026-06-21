@@ -506,3 +506,15 @@ Saman við service worker (0022-skannann + skel-geymslu) þýðir þetta: appið
 Dyra-/barsíður eru server-rendraðar með innskráningarvörn. Áður gat endurhleðsla í lélegu/engu sambandi náð innskráningar-svari frá þjóninum. Nú ber service worker (**v2**) fram **geymdu skelina fyrst** (cache-first) fyrir `/door` og `/bar`, uppfærir í bakgrunni, og geymir aldrei innskráningar-svar (redirect). Skanninn biður líka SW að geyma dyrasíðuna strax við opnun. Niðurstaða: endurhleðsla án nets heldur skannanum opnum.
 
 > Eftir þessa uppfærslu: opnaðu skannann **einu sinni nettengt** svo nýi SW (v2) taki yfir og geymi síðuna. (SW v2 hreinsar líka gömul afrit sjálfkrafa.)
+
+---
+
+## Gestaaðgangur á viðburð (0023) — fyrri hluti
+
+Hægt er að stofna aðgang fyrir utanaðkomandi dyraverði og barþjóna á hverjum viðburði (á viðburðasíðunni, „Aðgangur að viðburði“): hlutverk (dyravörður/barþjónn), nafn, **PIN** (4–8 tölustafir) og valfrjáls **tímamörk** (frá/til). Hver aðgangur fær einstakan **hlekk** (`/s/<token>`). PIN er geymt sem bcrypt-hash; það sést aðeins einu sinni við stofnun.
+
+Skanna-hlekkurinn verður **opinn** (engin Supabase-innskráning): viðkomandi opnar hann, slær inn PIN, og fær session sem skannar með (`open_scanner` → `sync_checkin_s` o.fl.). Þetta er líka lagfæringin á offline — skannasíðan þarf þá enga server-innskráningu sem getur fallið án nets.
+
+> Þessi áfangi: gagnagrunnur (0023) + stjórnborðsviðmót til að stofna/stýra aðgangi. **Næst:** opinberi `/s/<token>` skannahlekkurinn með PIN-skjá + endurbætt dyraskanni (sem klárar offline-lagfæringuna), svo barþjóna-skanninn, og loks bakenda-aðgangur fyrir viðburðarfyrirtæki.
+
+> Krefst SQL: keyrðu `0023_event_access.sql` (eftir 0022).

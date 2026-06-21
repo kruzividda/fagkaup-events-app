@@ -5,8 +5,20 @@ import { Eyebrow, PageTitle, Card } from "@/components/ui";
 import { DrinksPanel } from "./DrinksPanel";
 import { EventCancelButton } from "./EventCancelButton";
 import { EventActions } from "./EventActions";
+import { AccessManager } from "./AccessManager";
 
 export const dynamic = "force-dynamic";
+
+type AccessInitial = {
+  id: string;
+  role: string;
+  label: string;
+  token: string;
+  access_starts_at: string | null;
+  access_ends_at: string | null;
+  active: boolean;
+  created_at: string;
+};
 
 export default async function EventDetailPage({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
@@ -28,6 +40,12 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
     .select("id", { count: "exact", head: true })
     .eq("event_id", params.eventId)
     .eq("status", "registered");
+
+  const { data: accessData } = await supabase.rpc("list_event_access", { p_event_id: params.eventId });
+  const accessList =
+    (accessData as { ok: boolean; access?: AccessInitial[] } | null)?.ok
+      ? (accessData as { access?: AccessInitial[] }).access ?? []
+      : [];
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -107,6 +125,8 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         spouseGets={event.spouse_gets_drinks}
         perSpouse={event.drinks_per_spouse ?? 0}
       />
+
+      <AccessManager eventId={params.eventId} initial={accessList} />
     </div>
   );
 }

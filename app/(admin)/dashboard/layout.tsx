@@ -6,7 +6,6 @@ import { MobileNav } from "@/components/MobileNav";
 import { DashboardThemeToggle } from "@/components/DashboardThemeToggle";
 
 const NAV = [
-  { href: "/dashboard", label: "Yfirlit" },
   { href: "/dashboard/events", label: "Viðburðir" },
   { href: "/dashboard/users", label: "Notendur" },
   { href: "/dashboard/units", label: "Rekstrareiningar" },

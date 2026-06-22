@@ -6,7 +6,7 @@
      svo endurhleðsla án nets hendir þér ekki í innskráningu.
    - Supabase-köll og POST: aldrei geymd — fara beint á netið.
 */
-const CACHE = "fk-shell-v3";
+const CACHE = "fk-shell-v4";
 const STATIC_RE = /\.(?:js|css|woff2?|ttf|png|jpe?g|svg|gif|webp|ico|webmanifest)$/i;
 
 const OFFLINE_HTML = `<!doctype html><html lang="is"><head><meta charset="utf-8">

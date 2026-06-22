@@ -556,3 +556,9 @@ Allt keyrir um session-vottuðu `org_*` föllin (engin Supabase-innskráning), n
 ## Ríkari viðburðalýsing (Markdown)
 
 Viðburðalýsingin styður nú einfalt Markdown: **feitletrun**, *skáletrun*, fyrirsagnir (`##`), lista (`-` eða `1.`) og hlekki (`[texti](slóð)`). Ritillinn (`RichTextField`) hefur litla tækjaslá og „Forskoðun“. Lýsingin geymist sem texti og er birt með öruggum Markdown-teiknara (`lib/markdown.ts`) — allur HTML er escape-aður fyrst og aðeins leyfð snið mynduð, svo engin XSS-hætta. Engir nýir pakkar.
+
+---
+
+## Alvöru Fagkaup-tákn + iOS splash
+
+PWA-táknin (heimaskjár í síma) eru nú með alvöru Fagkaup-merkinu: **rauða „G“-ið á dökkum premium-grunni** (#0B121C) — `icon-192/512`, `icon-maskable-512`, `apple-touch-icon`, auk `favicon.ico` + `favicon-32` fyrir vafraflipa. iOS splash-skjáir (`/public/splash/…`, 8 algengar iPhone-stærðir) sýna hvíta FAGKAUP-merkið á sama dökka grunni meðan appið hleðst; tengt í gegnum `AppleSplash` (apple-touch-startup-image). Service worker bumpaður í v4 svo táknin uppfærist.

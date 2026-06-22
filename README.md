@@ -580,3 +580,8 @@ Boðsflæði: admin býr til boð (`auth.admin.generateLink` invite) — kerfið
 ### Breyta notanda + endurstilla lykilorð (0029)
 
 Á notendalistanum opnar **„Breyta“** spjald fyrir hvern notanda: breyta **nafni**, breyta **hlutverki** (ekki fyrir eiganda/sjálfan þig), **fjarlægja**, og **endurstilla lykilorð**. Lykilorðs-endurstilling býr til `recovery`-hlekk (`auth.admin.generateLink`) sem þú sendir á notandann — hann velur nýtt lykilorð sjálfur á `/welcome`. Krefst `0029_set_user_name.sql` (eftir 0028).
+
+### Lagfæring: boðsflæði + staff-aðgangur
+
+- **Middleware:** `/dashboard` (og `/door`,`/bar`) hleypa nú `staff` inn — áður voru aðeins owner/admin leyfð, sem læsti venjulega notendur úti með „forbidden“.
+- **Boðs-/endurstillingarhlekkir** vísa nú beint á `/welcome` (client-síðu) sem les session-token úr URL-hash (`#access_token=…`) og setur session. Áður fór hlekkurinn í gegnum server-`/auth/callback` sem las aðeins `?code=`, svo hash-token tapaðist og notandinn lenti á innskráningu.

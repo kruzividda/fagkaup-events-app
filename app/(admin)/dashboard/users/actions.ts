@@ -29,7 +29,7 @@ export async function inviteUser(
     email: email.trim().toLowerCase(),
     options: {
       data: { org_id: profile.org_id, role, full_name: fullName.trim() || email },
-      redirectTo: `${APP_URL}/auth/callback?next=/welcome`,
+      redirectTo: `${APP_URL}/welcome`,
     },
   });
 
@@ -74,7 +74,7 @@ export async function resetPassword(profileId: string): Promise<{ ok: boolean; l
   const { data, error } = await admin.auth.admin.generateLink({
     type: "recovery",
     email,
-    options: { redirectTo: `${APP_URL}/auth/callback?next=/welcome` },
+    options: { redirectTo: `${APP_URL}/welcome` },
   });
   if (error) return { ok: false, reason: "error" };
   return { ok: true, link: data.properties?.action_link };

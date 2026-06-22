@@ -3,9 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Hvaða slóðir krefjast hvaða hlutverka.
 const ROLE_GATES: { prefix: string; roles: string[] }[] = [
-  { prefix: "/dashboard", roles: ["owner", "admin"] },
-  { prefix: "/door", roles: ["owner", "admin", "door"] },
-  { prefix: "/bar", roles: ["owner", "admin", "bartender"] },
+  { prefix: "/dashboard", roles: ["owner", "admin", "staff"] },
+  { prefix: "/door", roles: ["owner", "admin", "staff", "door"] },
+  { prefix: "/bar", roles: ["owner", "admin", "staff", "bartender"] },
 ];
 
 export async function updateSession(request: NextRequest) {

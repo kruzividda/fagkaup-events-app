@@ -15,14 +15,43 @@ export default function WelcomePage() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    async function init() {
+      try {
+        // Boðs-/endurstillingarhlekkir skila token í URL-hash (#access_token=…).
+        if (typeof window !== "undefined") {
+          const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
+          const hp = new URLSearchParams(hash);
+          const access_token = hp.get("access_token");
+          const refresh_token = hp.get("refresh_token");
+          if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+            // Hreinsa token úr slóð
+            window.history.replaceState(null, "", window.location.pathname);
+          } else {
+            // Stundum kemur ?code= í staðinn — reyna að skipta því út
+            const code = new URLSearchParams(window.location.search).get("code");
+            if (code) {
+              try {
+                await supabase.auth.exchangeCodeForSession(code);
+              } catch {
+                /* ekki PKCE — höldum áfram */
+              }
+            }
+          }
+        }
+      } catch {
+        /* höldum áfram og athugum session */
+      }
+
+      const { data } = await supabase.auth.getUser();
       if (!data.user) {
         router.replace("/login");
         return;
       }
       setEmail(data.user.email ?? null);
       setChecking(false);
-    });
+    }
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

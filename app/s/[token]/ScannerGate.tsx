@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { DoorScanScreen } from "@/app/(scan)/DoorScanScreen";
+import { ScanScreen } from "@/app/(scan)/ScanScreen";
 
 type Session = {
   session_token: string;
@@ -170,9 +171,7 @@ export function ScannerGate({ token }: { token: string }) {
                 eventName={session.event_name}
               />
             ) : (
-              <div className="rounded-xl border border-border bg-surface p-5 text-center">
-                <p className="text-sm text-muted">Barþjóna-skanninn er á leiðinni í næstu uppfærslu.</p>
-              </div>
+              <ScanScreen mode="bar" sessionToken={session.session_token} eventName={session.event_name} />
             )}
           </div>
         )}

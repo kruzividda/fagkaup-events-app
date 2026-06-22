@@ -10,7 +10,7 @@ export function EventPublishButton({ eventId, status }: { eventId: string; statu
   const [confirm, setConfirm] = useState(false);
   const published = status === "published";
 
-  function go(next: "draft" | "published" | "closed") {
+  function go(next: string) {
     startTransition(async () => {
       await setEventStatus(eventId, next);
       setConfirm(false);

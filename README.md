@@ -528,3 +528,11 @@ Skanna-hlekkurinn (`/s/<token>`) er nú til. Hann er **opinn** — engin Supabas
 **Þetta lagar endurhleðslu án nets:** síðan þarf enga server-innskráningu, svo hún getur ekki lengur hent þér í innskráningu. SW (v3) geymir líka `/s/`-síður (cache-first). Ef lotan rennur út á meðan ónettengt er tapast innritun ekki — hún bíður í biðröð og sendist þegar opnað er aftur með PIN.
 
 Barþjóna-hlutverkið opnar skannann en sýnir „á leiðinni“ í bili (barskanninn kemur næst). Dyraskanninn er fullvirkur.
+
+---
+
+## Barþjóna-skanni um PIN-hlekk (0025)
+
+Barþjóna-aðgangur (role `bar`) opnar nú virkan skanna um `/s/<token>` + PIN, alveg eins og dyraskanninn. Barskanninn **krefst nettengingar**: úttektin (`redeem_drink_s`) keyrir á þjóninum með atómískri læsingu, svo aldrei er hægt að draga sama drykkinn tvisvar — óháð því hve mörg tæki/barþjónar skanna samtímis. Skanninn dregur einn drykk frá við hverja skönnun og sýnir „Drykkir eftir: N af M“. Sömu varnir og áður: innritun krafist fyrst, aldursmörk (20 ára fyrir áfengi, aðalhandhafi), afbókaðir miðar hafnað. Úttektir PIN-barþjóna eru rekjanlegar gegnum `access_id`.
+
+> Krefst SQL: keyrðu `0025_bar_scanner_session.sql` (eftir 0024).

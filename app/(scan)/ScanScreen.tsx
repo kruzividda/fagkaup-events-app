@@ -3,16 +3,19 @@
 import { useRef, useState } from "react";
 import { QrScanner } from "./QrScanner";
 import { scanCheckin, scanDrink, type ScanResult } from "./actions";
+import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 
 export function ScanScreen({
   mode,
   eventId,
   eventName,
+  sessionToken,
 }: {
   mode: "door" | "bar";
-  eventId: string;
+  eventId?: string;
   eventName: string;
+  sessionToken?: string;
 }) {
   const [paused, setPaused] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -26,7 +29,24 @@ export function ScanScreen({
     busyRef.current = true;
     setPaused(true);
     setLoading(true);
-    const res = mode === "door" ? await scanCheckin(eventId, t) : await scanDrink(eventId, t);
+    let res: ScanResult;
+    if (sessionToken) {
+      // Opinn PIN-hlekkur: session-vottuð úttekt (krefst nettengingar)
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc("redeem_drink_s", {
+          p_session_token: sessionToken,
+          p_token: t,
+          p_quantity: 1,
+        });
+        if (error) throw error;
+        res = (data as ScanResult) ?? { ok: false, reason: "no_data" };
+      } catch {
+        res = { ok: false, reason: "network" };
+      }
+    } else {
+      res = mode === "door" ? await scanCheckin(eventId!, t) : await scanDrink(eventId!, t);
+    }
     setResult(res);
     setLoading(false);
   }
@@ -170,6 +190,24 @@ function DoorResult({ r }: { r: ScanResult }) {
 }
 
 function BarResult({ r }: { r: ScanResult }) {
+  if (r.reason === "network" || r.reason === "no_data")
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⚠ Næ ekki sambandi" />
+        <Card className="text-center text-sm text-muted">
+          Barinn þarf nettengingu til að draga frá inneign. Athugaðu netið og reyndu aftur.
+        </Card>
+      </div>
+    );
+  if (r.reason === "unauthorized")
+    return (
+      <div className="space-y-3">
+        <Banner tone="bad" title="⚠ Aðgangur útrunninn" />
+        <Card className="text-center text-sm text-muted">
+          Opnaðu hlekkinn aftur og sláðu inn PIN til að halda áfram.
+        </Card>
+      </div>
+    );
   if (r.reason === "invalid") return <Banner tone="bad" title="Ógildur miði" />;
   if (r.reason === "wrong_event")
     return (

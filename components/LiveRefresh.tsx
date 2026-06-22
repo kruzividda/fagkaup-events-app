@@ -22,6 +22,7 @@ export function LiveRefresh({ eventId, tables }: { eventId: string; tables: stri
       timer = setTimeout(() => router.refresh(), 400); // safna breytingum í örstutta stund
     };
 
+    // 1) Rauntími (samstundis þegar virkt)
     const channel = supabase.channel(`live-${eventId}`);
     for (const table of tablesKey.split(",")) {
       channel.on(
@@ -32,8 +33,19 @@ export function LiveRefresh({ eventId, tables }: { eventId: string; tables: stri
     }
     channel.subscribe((status) => setLive(status === "SUBSCRIBED"));
 
+    // 2) Varaleið sem virkar alltaf: uppfæra við fókus + reglulega
+    const refreshIfVisible = () => {
+      if (document.visibilityState === "visible") router.refresh();
+    };
+    document.addEventListener("visibilitychange", refreshIfVisible);
+    window.addEventListener("focus", refreshIfVisible);
+    const poll = setInterval(refreshIfVisible, 12000);
+
     return () => {
       if (timer) clearTimeout(timer);
+      clearInterval(poll);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+      window.removeEventListener("focus", refreshIfVisible);
       supabase.removeChannel(channel);
     };
   }, [eventId, tablesKey, router]);
@@ -41,10 +53,10 @@ export function LiveRefresh({ eventId, tables }: { eventId: string; tables: stri
   return (
     <span
       className="inline-flex items-center gap-1.5 text-[12px] text-muted"
-      title={live ? "Uppfærist sjálfkrafa" : "Tengist…"}
+      title={live ? "Uppfærist sjálfkrafa (rauntími)" : "Uppfærist sjálfkrafa"}
     >
-      <span className={`h-2 w-2 rounded-full ${live ? "bg-success" : "bg-muted"}`} />
-      {live ? "Lifandi" : "Tengist…"}
+      <span className={`h-2 w-2 rounded-full ${live ? "bg-success" : "bg-accent"}`} />
+      {live ? "Lifandi" : "Uppfærist sjálfkrafa"}
     </span>
   );
 }

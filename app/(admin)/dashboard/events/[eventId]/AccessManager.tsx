@@ -158,11 +158,9 @@ export function AccessManager({ eventId, initial }: { eventId: string; initial: 
                     )}
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    {row.role !== "organizer" && (
-                      <button onClick={() => copy(linkFor(row.token), row.id)} className="btn-secondary rounded-lg px-2.5 py-1 text-xs">
-                        {copied === row.id ? "Afritað!" : "Afrita hlekk"}
-                      </button>
-                    )}
+                    <button onClick={() => copy(linkFor(row.token), row.id)} className="btn-secondary rounded-lg px-2.5 py-1 text-xs">
+                      {copied === row.id ? "Afritað!" : "Afrita hlekk"}
+                    </button>
                     <button onClick={() => toggle(row)} className="btn-secondary rounded-lg px-2.5 py-1 text-xs">
                       {row.active ? "Slökkva" : "Kveikja"}
                     </button>
@@ -189,6 +187,7 @@ export function AccessManager({ eventId, initial }: { eventId: string; initial: 
               options={[
                 { value: "door", label: "Dyravörður (innritun)" },
                 { value: "bar", label: "Barþjónn (drykkir)" },
+                { value: "organizer", label: "Viðburðarstjóri (bakendi)" },
               ]}
             />
           </Field>

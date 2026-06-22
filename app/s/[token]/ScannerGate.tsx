@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { DoorScanScreen } from "@/app/(scan)/DoorScanScreen";
 import { ScanScreen } from "@/app/(scan)/ScanScreen";
+import { OrganizerBackend } from "./OrganizerBackend";
 
 type Session = {
   session_token: string;
@@ -125,8 +126,8 @@ export function ScannerGate({ token }: { token: string }) {
         {phase === "pin" && (
           <div className="mt-8 space-y-5">
             <div className="text-center">
-              <p className="font-display text-2xl text-text">Skanni</p>
-              <p className="mt-1 text-sm text-muted">Sláðu inn PIN til að opna skannann.</p>
+              <p className="font-display text-2xl text-text">Aðgangur</p>
+              <p className="mt-1 text-sm text-muted">Sláðu inn PIN til að halda áfram.</p>
             </div>
 
             {err && (
@@ -159,7 +160,7 @@ export function ScannerGate({ token }: { token: string }) {
             <div className="mb-4">
               <p className="font-display text-xl text-text">{session.event_name}</p>
               <p className="text-xs text-muted">
-                {session.role === "door" ? "Innritun við dyr" : "Bar"}
+                {session.role === "door" ? "Innritun við dyr" : session.role === "bar" ? "Bar" : "Viðburðarstjóri"}
                 {session.label ? ` · ${session.label}` : ""}
               </p>
             </div>
@@ -170,8 +171,10 @@ export function ScannerGate({ token }: { token: string }) {
                 storageId={token}
                 eventName={session.event_name}
               />
-            ) : (
+            ) : session.role === "bar" ? (
               <ScanScreen mode="bar" sessionToken={session.session_token} eventName={session.event_name} />
+            ) : (
+              <OrganizerBackend sessionToken={session.session_token} eventName={session.event_name} />
             )}
           </div>
         )}

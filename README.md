@@ -536,3 +536,17 @@ Barþjóna-hlutverkið opnar skannann en sýnir „á leiðinni“ í bili (bars
 Barþjóna-aðgangur (role `bar`) opnar nú virkan skanna um `/s/<token>` + PIN, alveg eins og dyraskanninn. Barskanninn **krefst nettengingar**: úttektin (`redeem_drink_s`) keyrir á þjóninum með atómískri læsingu, svo aldrei er hægt að draga sama drykkinn tvisvar — óháð því hve mörg tæki/barþjónar skanna samtímis. Skanninn dregur einn drykk frá við hverja skönnun og sýnir „Drykkir eftir: N af M“. Sömu varnir og áður: innritun krafist fyrst, aldursmörk (20 ára fyrir áfengi, aðalhandhafi), afbókaðir miðar hafnað. Úttektir PIN-barþjóna eru rekjanlegar gegnum `access_id`.
 
 > Krefst SQL: keyrðu `0025_bar_scanner_session.sql` (eftir 0024).
+
+---
+
+## Bakendi viðburðarfyrirtækja (0026) — viðmót
+
+Viðburðarstjóri (role `organizer`) opnar sama `/s/<token>` + PIN og skannararnir, en lendir á **takmörkuðu bakenda fyrir einn viðburð** (`OrganizerBackend`) með fjórum köflum:
+- **Yfirlit** — skráðir, gestir, mættir, drykkir nýttir/leyfðir.
+- **Gestir** — fullur gestalisti með leit, tengiliðum, fæðuóþoli og mætingarstöðu.
+- **Starfsfólk** — stofna/kveikja/slökkva/eyða dyravörðum og barþjónum (fær hlekk + PIN). Getur ekki búið til fleiri viðburðarstjóra.
+- **Drykkir** — beita inneign á alla, og +1/−1 lifandi um kvöldið.
+
+Allt keyrir um session-vottuðu `org_*` föllin (engin Supabase-innskráning), njörvað við þennan eina viðburð. Admin stofnar organizer-aðganginn í „Aðgangur að viðburði“ (nú með valkostinum „Viðburðarstjóri (bakendi)“).
+
+> Krefst SQL: `0026_organizer_backend.sql` (eftir 0025).

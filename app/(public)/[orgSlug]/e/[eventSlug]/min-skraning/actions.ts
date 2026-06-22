@@ -130,7 +130,6 @@ export async function addMySpouse(
         eventName: ev.name,
         whenText: ev.whenText,
         location: ev.location,
-      showQr: ev.showQr,
         showQr: ev.showQr,
         tickets: [await ticket(spouseName || "Maki", res.spouse_token)],
       });
@@ -155,6 +154,7 @@ export async function resendMyBooking(
       eventName: ev.name,
       whenText: ev.whenText,
       location: ev.location,
+      showQr: ev.showQr,
       tickets: r.spouse_token ? [...tickets, await ticket(r.spouse_name || "Maki", r.spouse_token)] : tickets,
     });
     return { ok: true, sent: out.sent, reason: out.reason };

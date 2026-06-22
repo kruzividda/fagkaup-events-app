@@ -4,7 +4,7 @@ export type Profile = {
   id: string;
   org_id: string;
   full_name: string;
-  role: "owner" | "admin" | "door" | "bartender";
+  role: "owner" | "admin" | "staff" | "door" | "bartender";
 };
 
 /** Sækir profile fyrir innskráðan notanda (eða null). */

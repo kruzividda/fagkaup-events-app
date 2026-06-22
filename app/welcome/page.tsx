@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { EmailOtpType } from "@supabase/supabase-js";
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -17,25 +18,23 @@ export default function WelcomePage() {
   useEffect(() => {
     async function init() {
       try {
-        // Boðs-/endurstillingarhlekkir skila token í URL-hash (#access_token=…).
         if (typeof window !== "undefined") {
-          const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
-          const hp = new URLSearchParams(hash);
-          const access_token = hp.get("access_token");
-          const refresh_token = hp.get("refresh_token");
-          if (access_token && refresh_token) {
-            await supabase.auth.setSession({ access_token, refresh_token });
-            // Hreinsa token úr slóð
+          const qs = new URLSearchParams(window.location.search);
+          const token_hash = qs.get("token_hash");
+          const type = qs.get("type");
+
+          if (token_hash && type) {
+            // Deterministísk staðfesting — setur session beint, óháð Supabase-redirect.
+            await supabase.auth.verifyOtp({ token_hash, type: type as EmailOtpType });
             window.history.replaceState(null, "", window.location.pathname);
-          } else {
-            // Stundum kemur ?code= í staðinn — reyna að skipta því út
-            const code = new URLSearchParams(window.location.search).get("code");
-            if (code) {
-              try {
-                await supabase.auth.exchangeCodeForSession(code);
-              } catch {
-                /* ekki PKCE — höldum áfram */
-              }
+          } else if (window.location.hash.includes("access_token")) {
+            // Varaleið: token í hash.
+            const hp = new URLSearchParams(window.location.hash.slice(1));
+            const access_token = hp.get("access_token");
+            const refresh_token = hp.get("refresh_token");
+            if (access_token && refresh_token) {
+              await supabase.auth.setSession({ access_token, refresh_token });
+              window.history.replaceState(null, "", window.location.pathname);
             }
           }
         }

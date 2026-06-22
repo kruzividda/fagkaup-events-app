@@ -139,19 +139,35 @@ export function SeatingManager({
     setGroups((prev) => (prev ? prev.map((g, i) => (i === idx ? { ...g, tableNums: value } : g)) : prev));
   }
 
-  // Fylla borðnúmer í beinni röð (1,2,3…) sem upphafspunkt — má svo breyta handvirkt
+  // Fylla borð sjálfkrafa: pakka einingum í borð upp að borðastærð (litlar einingar deila borði)
   function autofill() {
     if (!groups) return;
     const cap = parseInt(genCap, 10) || 10;
-    let next = 1;
-    setGroups(
-      groups.map((g) => {
-        const needed = Math.max(1, Math.ceil(g.people.length / cap));
-        const nums: number[] = [];
-        for (let k = 0; k < needed; k++) nums.push(next++);
-        return { ...g, tableNums: nums.join(",") };
-      })
-    );
+    let curTable = 1;
+    let used = 0; // sæti notuð á curTable
+    const next = groups.map((g) => {
+      const nums: number[] = [];
+      let remaining = g.people.length;
+      if (remaining === 0) {
+        if (used >= cap) {
+          curTable++;
+          used = 0;
+        }
+        nums.push(curTable);
+      }
+      while (remaining > 0) {
+        if (used >= cap) {
+          curTable++;
+          used = 0;
+        }
+        if (!nums.includes(curTable)) nums.push(curTable);
+        const take = Math.min(cap - used, remaining);
+        used += take;
+        remaining -= take;
+      }
+      return { ...g, tableNums: nums.join(",") };
+    });
+    setGroups(next);
   }
 
   async function reload() {
@@ -236,7 +252,7 @@ export function SeatingManager({
           <p className="text-[13px] font-medium text-text">Borða-generator</p>
           <p className="text-xs text-muted">
             Hópaðu gesti og fáðu fjölda borða sem hver eining þarf. Sláðu svo inn borðnúmerin sem hver eining á að sitja
-            við (eins og salaskipanin ykkar) — kerfið fyllir þau. Tóm? Notaðu „Auto-fylla í röð“ sem upphafspunkt.
+            við (eins og salaskipanin ykkar) — kerfið fyllir þau. Eða smelltu á „Fylla borð sjálfkrafa“ til að pakka sjálfkrafa — svo má fínstilla.
           </p>
         </div>
         {genErr && <p className="rounded-lg border border-danger bg-[rgba(229,103,91,0.08)] px-3 py-2 text-sm text-danger">{genErr}</p>}
@@ -271,7 +287,7 @@ export function SeatingManager({
                 {people.length} gestir · lágmark {Math.ceil(people.length / (parseInt(genCap, 10) || 10))} borð (ef full nýting)
               </p>
               <button onClick={autofill} className="btn-secondary rounded-lg px-3 py-1.5 text-xs">
-                Auto-fylla í röð
+                Fylla borð sjálfkrafa
               </button>
             </div>
 

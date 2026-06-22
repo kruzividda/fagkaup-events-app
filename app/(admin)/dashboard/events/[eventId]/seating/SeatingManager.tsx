@@ -174,40 +174,42 @@ export function SeatingManager({
     if (!groups) return;
     const cap = parseInt(genCap, 10) || 10;
 
-    // Validera: nóg borð per hóp + engin tvínotuð borðnúmer
-    const seen = new Map<number, string>();
-    const conflicts: number[] = [];
+    // Validera: hver hópur með borðnúmer
     for (const g of groups) {
-      const nums = parseNums(g.tableNums);
-      if (nums.length === 0) return setGenErr(`Vantar borðnúmer fyrir „${g.name}“.`);
-      if (nums.length * cap < g.people.length)
-        return setGenErr(`Of fá borð fyrir „${g.name}“ (${g.people.length} gestir, ${nums.length} borð × ${cap}).`);
-      for (const n of nums) {
-        if (seen.has(n) && seen.get(n) !== g.name) conflicts.push(n);
-        seen.set(n, g.name);
-      }
+      if (parseNums(g.tableNums).length === 0) return setGenErr(`Vantar borðnúmer fyrir „${g.name}“.`);
     }
-    if (conflicts.length) return setGenErr(`Borðnúmer notuð oftar en einu sinni: ${[...new Set(conflicts)].sort((a, b) => a - b).join(", ")}.`);
 
     if (!confirm("Þetta endurgerir alla borðaskipan og eldri úthlutun hverfur. Halda áfram?")) return;
 
-    // Borð: eitt per númer, með heiti einingar
-    const labelByNum = new Map<number, string>();
-    for (const g of groups) for (const n of parseNums(g.tableNums)) if (!labelByNum.has(n)) labelByNum.set(n, g.name);
-    const planTables = [...labelByNum.entries()]
-      .sort((a, b) => a[0] - b[0])
-      .map(([n, label]) => ({ table_number: n, label, capacity: cap }));
+    // Borð mega vera sameiginleg milli eininga — sameina heiti
+    const namesByTable = new Map<number, string[]>();
+    for (const g of groups)
+      for (const n of parseNums(g.tableNums)) {
+        const arr = namesByTable.get(n) ?? [];
+        if (!arr.includes(g.name)) arr.push(g.name);
+        namesByTable.set(n, arr);
+      }
+    const planTables = [...namesByTable.keys()]
+      .sort((a, b) => a - b)
+      .map((n) => ({ table_number: n, label: namesByTable.get(n)!.join(", "), capacity: cap }));
 
-    // Úthlutun: fylla borð hverrar einingar upp að borðastærð
+    // Úthlutun: fylla borð, leyfa einingum að deila, virða borðastærð á hverju borði
+    const occ = new Map<number, number>();
     const assignments: { ticket_id: string; table_number: number; seat_number: number }[] = [];
     for (const g of groups) {
       const nums = parseNums(g.tableNums);
-      let i = 0;
-      for (const n of nums) {
-        for (let seat = 1; seat <= cap && i < g.people.length; seat++) {
-          assignments.push({ ticket_id: g.people[i].ticket_id, table_number: n, seat_number: seat });
-          i++;
+      for (const person of g.people) {
+        let placed = false;
+        for (const n of nums) {
+          const used = occ.get(n) ?? 0;
+          if (used < cap) {
+            occ.set(n, used + 1);
+            assignments.push({ ticket_id: person.ticket_id, table_number: n, seat_number: used + 1 });
+            placed = true;
+            break;
+          }
         }
+        if (!placed) return setGenErr(`Ekki nóg pláss fyrir „${g.name}“ á borðum ${nums.join(", ")} (borðastærð ${cap}). Bættu við borðnúmeri.`);
       }
     }
 
@@ -266,8 +268,7 @@ export function SeatingManager({
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-muted">
-                {people.length} gestir ·{" "}
-                {groups.reduce((s, g) => s + Math.max(1, Math.ceil(g.people.length / (parseInt(genCap, 10) || 10))), 0)} borð þarf (lágmark)
+                {people.length} gestir · lágmark {Math.ceil(people.length / (parseInt(genCap, 10) || 10))} borð (ef full nýting)
               </p>
               <button onClick={autofill} className="btn-secondary rounded-lg px-3 py-1.5 text-xs">
                 Auto-fylla í röð
@@ -285,9 +286,7 @@ export function SeatingManager({
                     <div className="flex items-center justify-between gap-2">
                       <p className="truncate text-sm font-medium text-text">{g.name}</p>
                       <div className="flex shrink-0 items-center gap-1">
-                        <span className="text-xs text-muted">
-                          {g.people.length} · {needed} borð
-                        </span>
+                        <span className="text-xs text-muted">{g.people.length} gestir</span>
                         <button onClick={() => moveGroup(idx, -1)} disabled={idx === 0} className="btn-secondary rounded-lg px-2 py-1 text-xs disabled:opacity-30" aria-label="Færa upp">
                           ↑
                         </button>

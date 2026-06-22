@@ -12,6 +12,9 @@ export type Person = {
   holder_type: string;
   table_number: number | null;
   seat_number: number | null;
+  company: string | null;
+  business_unit: string | null;
+  location: string | null;
 };
 
 export function SeatingManager({
@@ -87,8 +90,188 @@ export function SeatingManager({
     persist(p.ticket_id, p.table_number, p.table_number == null ? null : p.seat_number);
   }
 
+  // ---------- Sjálfvirkur borða-generator ----------
+  const [groupBy, setGroupBy] = useState<"location" | "business_unit" | "company">("location");
+  const [genCap, setGenCap] = useState("10");
+  const [fillMode, setFillMode] = useState(false);
+  const [groups, setGroups] = useState<{ name: string; people: Person[] }[] | null>(null);
+  const [genBusy, setGenBusy] = useState(false);
+  const [genErr, setGenErr] = useState<string | null>(null);
+  const [genResult, setGenResult] = useState<string | null>(null);
+
+  const fieldOf = (p: Person) =>
+    groupBy === "location" ? p.location : groupBy === "business_unit" ? p.business_unit : p.company;
+
+  function analyze() {
+    const cap = parseInt(genCap, 10);
+    if (!Number.isFinite(cap) || cap < 1) return setGenErr("Sláðu inn gilda borðastærð.");
+    setGenErr(null);
+    setGenResult(null);
+    const map = new Map<string, Person[]>();
+    for (const p of people) {
+      const v = (fieldOf(p) || "").trim() || "Óflokkað";
+      if (!map.has(v)) map.set(v, []);
+      map.get(v)!.push(p);
+    }
+    const gs = Array.from(map.entries()).map(([name, ppl]) => ({ name, people: ppl }));
+    gs.sort((a, b) => b.people.length - a.people.length);
+    setGroups(gs);
+  }
+
+  function moveGroup(idx: number, dir: -1 | 1) {
+    setGroups((prev) => {
+      if (!prev) return prev;
+      const next = [...prev];
+      const j = idx + dir;
+      if (j < 0 || j >= next.length) return prev;
+      [next[idx], next[j]] = [next[j], next[idx]];
+      return next;
+    });
+  }
+
+  async function reload() {
+    const [tRes, tkRes] = await Promise.all([
+      supabase.from("event_tables").select("id, table_number, label, capacity").eq("event_id", eventId).order("table_number", { ascending: true }),
+      supabase.from("tickets").select("id, table_number, seat_number").eq("event_id", eventId),
+    ]);
+    setTables((tRes.data ?? []) as SeatTable[]);
+    const tk = (tkRes.data ?? []) as { id: string; table_number: number | null; seat_number: number | null }[];
+    const tkMap = new Map(tk.map((x) => [x.id, x]));
+    setPeople((prev) =>
+      prev.map((p) => {
+        const m = tkMap.get(p.ticket_id);
+        return m ? { ...p, table_number: m.table_number, seat_number: m.seat_number } : p;
+      })
+    );
+  }
+
+  async function generate() {
+    if (!groups) return;
+    const cap = parseInt(genCap, 10) || 10;
+    if (!confirm("Þetta endurgerir alla borðaskipan og eldri úthlutun hverfur. Halda áfram?")) return;
+
+    let tableNo = 0;
+    let seatInTable = cap;
+    const planTables: { table_number: number; label: string | null; capacity: number }[] = [];
+    const assignments: { ticket_id: string; table_number: number; seat_number: number }[] = [];
+    const startTable = (label: string) => {
+      tableNo++;
+      seatInTable = 0;
+      planTables.push({ table_number: tableNo, label, capacity: cap });
+    };
+
+    for (const g of groups) {
+      if (!fillMode || seatInTable >= cap) startTable(g.name);
+      for (const person of g.people) {
+        if (seatInTable >= cap) startTable(g.name);
+        seatInTable++;
+        assignments.push({ ticket_id: person.ticket_id, table_number: tableNo, seat_number: seatInTable });
+      }
+    }
+
+    setGenBusy(true);
+    setGenErr(null);
+    const { data, error } = await supabase.rpc("apply_seating_plan", {
+      p_event_id: eventId,
+      p_tables: planTables,
+      p_assignments: assignments,
+    });
+    setGenBusy(false);
+    const res = data as { ok: boolean } | null;
+    if (error || !res?.ok) return setGenErr("Tókst ekki að vista borðaskipan.");
+    await reload();
+    setGroups(null);
+    setGenResult(`${planTables.length} borð búin til · ${assignments.length} gestum úthlutað.`);
+  }
+
   return (
     <div className="space-y-5">
+      {/* Sjálfvirkur generator */}
+      <Card className="space-y-3">
+        <div>
+          <p className="text-[13px] font-medium text-text">Sjálfvirk borðaskipan</p>
+          <p className="text-xs text-muted">
+            Hópaðu gesti eftir staðsetningu, einingu eða fyrirtæki og láttu kerfið úthluta borðum. Raðaðu hópunum svo
+            þeir sem eiga að sitja nálægt hvor öðrum lendi á aðliggjandi borðum.
+          </p>
+        </div>
+        {genErr && <p className="rounded-lg border border-danger bg-[rgba(229,103,91,0.08)] px-3 py-2 text-sm text-danger">{genErr}</p>}
+        {genResult && <p className="rounded-lg border border-success bg-[rgba(95,178,138,0.08)] px-3 py-2 text-sm text-success">{genResult}</p>}
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Field label="Hópa eftir">
+            <select
+              value={groupBy}
+              onChange={(e) => setGroupBy(e.target.value as "location" | "business_unit" | "company")}
+              className="w-full rounded-lg border border-border bg-elevated px-3 py-2 text-sm text-text outline-none focus:border-accent"
+            >
+              <option value="location">Staðsetning</option>
+              <option value="business_unit">Rekstrareining</option>
+              <option value="company">Fyrirtæki</option>
+            </select>
+          </Field>
+          <Field label="Borðastærð" required>
+            <TextInput value={genCap} onChange={setGenCap} type="number" placeholder="t.d. 10" />
+          </Field>
+          <div className="flex items-end">
+            <button onClick={analyze} className="btn-secondary w-full rounded-lg px-3 py-2 text-sm">
+              Greina hópa
+            </button>
+          </div>
+        </div>
+
+        {groups && (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              {groups.map((g, idx) => {
+                const cap = parseInt(genCap, 10) || 10;
+                const needed = Math.ceil(g.people.length / cap);
+                return (
+                  <div key={g.name} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-text">{g.name}</p>
+                      <p className="text-xs text-muted">
+                        {g.people.length} gestir · {needed} borð
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        onClick={() => moveGroup(idx, -1)}
+                        disabled={idx === 0}
+                        className="btn-secondary rounded-lg px-2 py-1 text-xs disabled:opacity-30"
+                        aria-label="Færa upp"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => moveGroup(idx, 1)}
+                        disabled={idx === groups.length - 1}
+                        className="btn-secondary rounded-lg px-2 py-1 text-xs disabled:opacity-30"
+                        aria-label="Færa niður"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-2 text-[13px] text-text">
+              <input type="checkbox" checked={fillMode} onChange={(e) => setFillMode(e.target.checked)} className="h-4 w-4 accent-[var(--accent)]" />
+              Leyfa aðliggjandi hópum að deila borði (fyllir borð betur)
+            </label>
+
+            <PrimaryButton onClick={generate} disabled={genBusy}>
+              {genBusy ? "Bý til…" : "Búa til borðaskipan"}
+            </PrimaryButton>
+            <p className="text-xs text-muted">
+              Athugið: þetta endurgerir alla borðaskipan. Þú getur fínstillt handvirkt að neðan eftir á.
+            </p>
+          </div>
+        )}
+      </Card>
+
       {/* Borð */}
       <Card className="space-y-3">
         <p className="text-[13px] font-medium text-text">Borð ({tables.length})</p>

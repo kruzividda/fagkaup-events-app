@@ -16,12 +16,12 @@ export default async function SeatingPage({ params }: { params: { eventId: strin
 
   const [tablesRes, regsRes, ticketsRes] = await Promise.all([
     supabase.from("event_tables").select("id, table_number, label, capacity").eq("event_id", id).order("table_number", { ascending: true }),
-    supabase.from("registrations").select("id, full_name, status, spouse_name").eq("event_id", id).eq("status", "registered"),
+    supabase.from("registrations").select("id, full_name, status, spouse_name, company, business_unit, location").eq("event_id", id).eq("status", "registered"),
     supabase.from("tickets").select("id, registration_id, holder_type, holder_name, table_number, seat_number").eq("event_id", id),
   ]);
 
   const tables = (tablesRes.data ?? []) as SeatTable[];
-  type Reg = { id: string; full_name: string; status: string; spouse_name: string | null };
+  type Reg = { id: string; full_name: string; status: string; spouse_name: string | null; company: string | null; business_unit: string | null; location: string | null };
   const regById = new Map<string, Reg>((regsRes.data as Reg[] | null ?? []).map((r) => [r.id, r]));
 
   const people: Person[] = (ticketsRes.data ?? [])
@@ -35,6 +35,9 @@ export default async function SeatingPage({ params }: { params: { eventId: strin
         holder_type: t.holder_type,
         table_number: t.table_number,
         seat_number: t.seat_number,
+        company: reg.company,
+        business_unit: reg.business_unit,
+        location: reg.location,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name, "is"));

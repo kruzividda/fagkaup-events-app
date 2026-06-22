@@ -597,5 +597,9 @@ Tölvupóstur/Teams skannar hlekki sjálfkrafa og notar einnota token upp. Því
 - **Úthluta gestum** (hverjum miða — aðal + maka/+1) á borð og sæti. Sýnir hve margir eru á hverju borði (af sætafjölda).
 Úthlutun vistast á `tickets.table_number/seat_number` og birtist sjálfkrafa á miða gestsins („Borð / Sæti“). Uppfærist live. Notar RLS sem er þegar til — engin ný SQL.
 
+
+### Sjálfvirkur borða-generator (0030)
+Á Borðaskipan-síðunni: veldu **borðastærð** + **hópun** (staðsetning / rekstrareining / fyrirtæki) → „Greina hópa“. Kerfið sýnir hópana með fjölda + borðafjölda. **Raðaðu hópunum** (↑/↓) svo tengdar einingar lendi á aðliggjandi borðum. „Búa til borðaskipan“ úthlutar öllum gestum í einu (gegnum `apply_seating_plan`, atómískt). Valkostur: leyfa aðliggjandi hópum að deila borði (fyllir betur). Hægt að fínstilla handvirkt eftir á. Krefst `0030_seating_plan.sql`.
+
 ### Bakteinn / næstu liðir
 - **Ekki senda QR kóða**: valkostur per viðburð að sleppa QR-kóða (fyrir smærri viðburði án dyravarðar) — svo þátttakendur haldi ekki að þeir þurfi að sýna kóða við inngang. (Á eftir að útfæra.)

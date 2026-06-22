@@ -27,7 +27,7 @@ export default async function UsersPage() {
           notendastjórnun); <strong>notandi</strong> getur unnið með viðburði og skráningar en ekki stýrt notendum.
         </p>
       </div>
-      <UsersManager initial={users} selfId={profile.id} />
+      <UsersManager initial={users} />
     </div>
   );
 }

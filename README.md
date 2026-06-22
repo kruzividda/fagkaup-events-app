@@ -576,3 +576,7 @@ Stjórnendur (owner/admin) geta boðið inn starfsfólki á „Notendur → Star
 Boðsflæði: admin býr til boð (`auth.admin.generateLink` invite) — kerfið sýnir **hlekk** sem admin sendir á viðkomandi (engin SMTP-uppsetning nauðsynleg). Notandinn smellir, lendir á `/welcome`, setur sitt eigið lykilorð og fær aðgang. Prófíll verður til sjálfkrafa úr boðsgögnunum (`handle_new_user`). Að fjarlægja notanda eyðir auth-aðgangi + prófíl (cascade).
 
 > Krefst SQL: keyrðu `0027_add_staff_role.sql` EITT OG SÉR fyrst, svo `0028_user_management.sql`.
+
+### Breyta notanda + endurstilla lykilorð (0029)
+
+Á notendalistanum opnar **„Breyta“** spjald fyrir hvern notanda: breyta **nafni**, breyta **hlutverki** (ekki fyrir eiganda/sjálfan þig), **fjarlægja**, og **endurstilla lykilorð**. Lykilorðs-endurstilling býr til `recovery`-hlekk (`auth.admin.generateLink`) sem þú sendir á notandann — hann velur nýtt lykilorð sjálfur á `/welcome`. Krefst `0029_set_user_name.sql` (eftir 0028).

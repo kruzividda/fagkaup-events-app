@@ -51,6 +51,35 @@ export async function changeRole(profileId: string, role: "admin" | "staff"): Pr
   return r;
 }
 
+export async function updateName(profileId: string, name: string): Promise<{ ok: boolean; reason?: string }> {
+  const supabase = createClient();
+  const { data } = await supabase.rpc("set_user_name", { p_id: profileId, p_name: name });
+  const r = (data as { ok: boolean; reason?: string }) ?? { ok: false };
+  if (r.ok) revalidatePath("/dashboard/users");
+  return r;
+}
+
+export async function resetPassword(profileId: string): Promise<{ ok: boolean; link?: string; reason?: string }> {
+  const profile = await requireAccountAdmin();
+  if (!profile) return { ok: false, reason: "forbidden" };
+
+  const admin = createAdminClient();
+  const { data: target } = await admin.from("profiles").select("org_id").eq("id", profileId).single();
+  if (!target || target.org_id !== profile.org_id) return { ok: false, reason: "not_found" };
+
+  const { data: userRes, error: getErr } = await admin.auth.admin.getUserById(profileId);
+  const email = userRes?.user?.email;
+  if (getErr || !email) return { ok: false, reason: "error" };
+
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo: `${APP_URL}/auth/callback?next=/welcome` },
+  });
+  if (error) return { ok: false, reason: "error" };
+  return { ok: true, link: data.properties?.action_link };
+}
+
 export async function removeUser(profileId: string): Promise<{ ok: boolean; reason?: string }> {
   const profile = await requireAccountAdmin();
   if (!profile) return { ok: false, reason: "forbidden" };

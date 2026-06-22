@@ -589,3 +589,13 @@ Boðsflæði: admin býr til boð (`auth.admin.generateLink` invite) — kerfið
 ### Skanna-öruggt boðsflæði (Teams/SafeLinks)
 
 Tölvupóstur/Teams skannar hlekki sjálfkrafa og notar einnota token upp. Því fer boðs-/endurstillingarhlekkurinn nú á **millisíðu** (`/welcome?token_hash=…`) sem staðfestir EKKERT við hleðslu — hún sýnir „Halda áfram“-hnapp. Aðeins við alvöru smell fer notandinn á `/auth/confirm` sem staðfestir token-ið. Skannar gera bara GET og smella ekki á hnappa, svo token-ið lifir þar til manneskja smellir.
+
+## Borðaskipan (stjórnborð)
+
+Þegar „Nota borðaskipan“ er virkt á viðburði birtist **Borðaskipan**-hlekkur á viðburðar-síðunni (`/dashboard/events/[id]/seating`). Þar má:
+- Skilgreina **borð** (númer, heiti, sætafjöldi) og eyða þeim.
+- **Úthluta gestum** (hverjum miða — aðal + maka/+1) á borð og sæti. Sýnir hve margir eru á hverju borði (af sætafjölda).
+Úthlutun vistast á `tickets.table_number/seat_number` og birtist sjálfkrafa á miða gestsins („Borð / Sæti“). Uppfærist live. Notar RLS sem er þegar til — engin ný SQL.
+
+### Bakteinn / næstu liðir
+- **Ekki senda QR kóða**: valkostur per viðburð að sleppa QR-kóða (fyrir smærri viðburði án dyravarðar) — svo þátttakendur haldi ekki að þeir þurfi að sýna kóða við inngang. (Á eftir að útfæra.)

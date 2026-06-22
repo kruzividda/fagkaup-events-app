@@ -585,3 +585,7 @@ Boðsflæði: admin býr til boð (`auth.admin.generateLink` invite) — kerfið
 
 - **Middleware:** `/dashboard` (og `/door`,`/bar`) hleypa nú `staff` inn — áður voru aðeins owner/admin leyfð, sem læsti venjulega notendur úti með „forbidden“.
 - **Boðs-/endurstillingarhlekkir** vísa nú beint á `/welcome` (client-síðu) sem les session-token úr URL-hash (`#access_token=…`) og setur session. Áður fór hlekkurinn í gegnum server-`/auth/callback` sem las aðeins `?code=`, svo hash-token tapaðist og notandinn lenti á innskráningu.
+
+### Skanna-öruggt boðsflæði (Teams/SafeLinks)
+
+Tölvupóstur/Teams skannar hlekki sjálfkrafa og notar einnota token upp. Því fer boðs-/endurstillingarhlekkurinn nú á **millisíðu** (`/welcome?token_hash=…`) sem staðfestir EKKERT við hleðslu — hún sýnir „Halda áfram“-hnapp. Aðeins við alvöru smell fer notandinn á `/auth/confirm` sem staðfestir token-ið. Skannar gera bara GET og smella ekki á hnappa, svo token-ið lifir þar til manneskja smellir.

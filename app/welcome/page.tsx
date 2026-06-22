@@ -4,34 +4,54 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+type Mode = "checking" | "interstitial" | "password" | "error";
+
 export default function WelcomePage() {
   const router = useRouter();
   const supabase = createClient();
+
+  const [mode, setMode] = useState<Mode>("checking");
   const [email, setEmail] = useState<string | null>(null);
-  const [checking, setChecking] = useState(true);
+  const [tokenHash, setTokenHash] = useState("");
+  const [type, setType] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const [linkError, setLinkError] = useState(false);
-
   useEffect(() => {
-    async function init() {
-      // /auth/confirm setur session-köku áður en hingað er komið.
-      const failed = new URLSearchParams(window.location.search).get("villa") === "hlekkur";
-      const { data } = await supabase.auth.getUser();
-      if (failed || !data.user) {
-        setLinkError(true);
-        setChecking(false);
+    const qs = new URLSearchParams(window.location.search);
+    const th = qs.get("token_hash");
+    const ty = qs.get("type");
+    const failed = qs.get("villa") === "hlekkur";
+
+    if (failed) {
+      setMode("error");
+      return;
+    }
+    if (th && ty) {
+      // Millisíða — EKKI staðfesta token-ið strax (skanna-öruggt).
+      setTokenHash(th);
+      setType(ty);
+      setMode("interstitial");
+      return;
+    }
+    // Komið til baka frá /auth/confirm — ætti að vera með session.
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) {
+        setMode("error");
         return;
       }
       setEmail(data.user.email ?? null);
-      setChecking(false);
-    }
-    init();
+      setMode("password");
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function proceed() {
+    // Aðeins við alvöru smell — staðfestir token server-megin og setur session.
+    window.location.href = `/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=${encodeURIComponent(type)}&next=/welcome`;
+  }
 
   async function save() {
     setErr(null);
@@ -45,7 +65,12 @@ export default function WelcomePage() {
     router.refresh();
   }
 
-  if (checking) {
+  const Logo = () => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="mx-auto mb-3 h-10 w-auto" />
+  );
+
+  if (mode === "checking") {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center px-5">
         <p className="text-sm text-muted">Augnablik…</p>
@@ -53,12 +78,11 @@ export default function WelcomePage() {
     );
   }
 
-  if (linkError) {
+  if (mode === "error") {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
         <div className="fk-rise w-full max-w-sm text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="mx-auto mb-3 h-10 w-auto" />
+          <Logo />
           <h1 className="font-display text-2xl font-semibold text-text">Hlekkurinn virkar ekki</h1>
           <p className="mt-2 text-sm text-muted">
             Hlekkurinn er útrunninn eða þegar notaður. Biddu stjórnanda um nýjan hlekk til að setja lykilorð.
@@ -71,12 +95,31 @@ export default function WelcomePage() {
     );
   }
 
+  if (mode === "interstitial") {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
+        <div className="fk-rise w-full max-w-sm text-center">
+          <Logo />
+          <h1 className="font-display text-2xl font-semibold text-text">Velkomin!</h1>
+          <p className="mt-2 text-sm text-muted">
+            Smelltu hér að neðan til að halda áfram og setja lykilorðið þitt.
+          </p>
+          <button
+            onClick={proceed}
+            className="mt-5 w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-ink transition hover:brightness-110"
+          >
+            Halda áfram
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
       <div className="fk-rise w-full max-w-sm">
         <div className="mb-7 flex flex-col items-center text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="mb-3 h-10 w-auto" />
+          <Logo />
           <h1 className="font-display text-2xl font-semibold text-text">Velkomin!</h1>
           <p className="mt-2 text-sm text-muted">
             {email ? <>Settu lykilorð fyrir {email} til að ljúka aðgangi.</> : "Settu lykilorð til að ljúka aðgangi."}

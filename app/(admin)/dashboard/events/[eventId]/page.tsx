@@ -24,25 +24,28 @@ type AccessInitial = {
 export default async function EventDetailPage({ params }: { params: { eventId: string } }) {
   const supabase = createClient();
 
-  const { data: org } = await supabase.from("organizations").select("slug").limit(1).single();
-  const orgSlug = org?.slug ?? "fagkaup";
+  const [orgRes, eventRes, regRes, accessRes] = await Promise.all([
+    supabase.from("organizations").select("slug").limit(1).single(),
+    supabase
+      .from("events")
+      .select(
+        "name, slug, status, cancelled, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
+      )
+      .eq("id", params.eventId)
+      .single(),
+    supabase
+      .from("registrations")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", params.eventId)
+      .eq("status", "registered"),
+    supabase.rpc("list_event_access", { p_event_id: params.eventId }),
+  ]);
 
-  const { data: event } = await supabase
-    .from("events")
-    .select(
-      "name, slug, status, cancelled, starts_at, location, max_guests, drinks_enabled, drinks_per_person, spouse_gets_drinks, drinks_per_spouse, uses_seating"
-    )
-    .eq("id", params.eventId)
-    .single();
+  const orgSlug = orgRes.data?.slug ?? "fagkaup";
+  const event = eventRes.data;
   if (!event) notFound();
-
-  const { count: regCount } = await supabase
-    .from("registrations")
-    .select("id", { count: "exact", head: true })
-    .eq("event_id", params.eventId)
-    .eq("status", "registered");
-
-  const { data: accessData } = await supabase.rpc("list_event_access", { p_event_id: params.eventId });
+  const regCount = regRes.count;
+  const accessData = accessRes.data;
   const accessList =
     (accessData as { ok: boolean; access?: AccessInitial[] } | null)?.ok
       ? (accessData as { access?: AccessInitial[] }).access ?? []

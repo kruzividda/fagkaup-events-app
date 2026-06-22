@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
 
@@ -61,7 +62,7 @@ export default async function EventsPage() {
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {events.map((e) => {
             const s = stats[e.id] ?? { registered: 0, guests: 0 };
-            const cover = pub(e.cover_image_path) ?? pub(e.cover_image_path_mobile);
+            const cover = pub(e.cover_image_path_mobile) ?? pub(e.cover_image_path);
             const pct = e.max_guests ? Math.min(100, Math.round((s.registered / e.max_guests) * 100)) : null;
             const full = e.max_guests != null && s.registered >= e.max_guests;
             const statusLabel = e.cancelled ? "Felld niður" : STATUS_LABEL[e.status] ?? e.status;
@@ -74,10 +75,12 @@ export default async function EventsPage() {
                 {/* Hero 16:9 */}
                 <div className="relative aspect-[16/9] w-full overflow-hidden bg-elevated">
                   {cover ? (
-                    <img
+                    <Image
                       src={cover}
                       alt={e.name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                      className="object-cover transition duration-500 group-hover:scale-[1.04]"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-elevated to-surface">

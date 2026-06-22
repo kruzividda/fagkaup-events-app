@@ -23,6 +23,7 @@ type Initial = {
   drinks_per_spouse: number;
   drinks_alcoholic: boolean;
   uses_seating: boolean;
+  qr_enabled: boolean;
   theme: string;
   registration_opens_at: string | null;
   registration_closes_at: string | null;
@@ -60,6 +61,7 @@ export function EditEventForm({
     drinks_per_spouse: initial.drinks_per_spouse || "",
     drinks_alcoholic: initial.drinks_alcoholic,
     uses_seating: initial.uses_seating,
+    qr_enabled: initial.qr_enabled ?? true,
     theme: initial.theme ?? "glamour",
     registration_opens_at: toLocalInput(initial.registration_opens_at ?? undefined),
     registration_closes_at: toLocalInput(initial.registration_closes_at ?? undefined),
@@ -184,6 +186,11 @@ export function EditEventForm({
 
       <Card>
         <Checkbox checked={f.uses_seating} onChange={(v) => set("uses_seating", v)} label="Nota borðaskipan" />
+      </Card>
+
+      <Card className="space-y-1.5">
+        <Checkbox checked={f.qr_enabled} onChange={(v) => set("qr_enabled", v)} label="Senda QR kóða á gesti" />
+        <p className="text-xs text-muted">Slökktu á þessu fyrir smærri viðburði án dyravarðar eða drykkjamiða — þá fá gestir staðfestingu án QR-kóða. (QR þarf fyrir innritun við dyr og drykkjamiða.)</p>
       </Card>
 
       {error && <p className="rounded-xl border border-danger bg-[rgba(229,103,91,0.08)] px-4 py-3 text-sm text-danger">{error}</p>}

@@ -130,6 +130,8 @@ export async function addMySpouse(
         eventName: ev.name,
         whenText: ev.whenText,
         location: ev.location,
+      showQr: ev.showQr,
+        showQr: ev.showQr,
         tickets: [await ticket(spouseName || "Maki", res.spouse_token)],
       });
     } catch {
@@ -162,9 +164,9 @@ export async function resendMyBooking(
 }
 
 // ---- hjálparföll ----
-async function eventInfo(eventId: string): Promise<{ name: string; whenText: string; location: string | null }> {
+async function eventInfo(eventId: string): Promise<{ name: string; whenText: string; location: string | null; showQr: boolean }> {
   const admin = createAdminClient();
-  const { data } = await admin.from("events").select("name, starts_at, location").eq("id", eventId).single();
+  const { data } = await admin.from("events").select("name, starts_at, location, qr_enabled, drinks_enabled").eq("id", eventId).single();
   const whenText = data?.starts_at
     ? new Date(data.starts_at).toLocaleString("is-IS", {
         dateStyle: "full",
@@ -172,7 +174,12 @@ async function eventInfo(eventId: string): Promise<{ name: string; whenText: str
         timeZone: "Atlantic/Reykjavik",
       })
     : "";
-  return { name: data?.name ?? "Viðburður", whenText, location: data?.location ?? null };
+  return {
+    name: data?.name ?? "Viðburður",
+    whenText,
+    location: data?.location ?? null,
+    showQr: data?.qr_enabled !== false || !!data?.drinks_enabled,
+  };
 }
 
 async function ticket(label: string, token: string): Promise<TicketInfo> {

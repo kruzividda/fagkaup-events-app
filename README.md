@@ -601,5 +601,9 @@ Tölvupóstur/Teams skannar hlekki sjálfkrafa og notar einnota token upp. Því
 ### Sjálfvirkur borða-generator (0030)
 Á Borðaskipan-síðunni: veldu **borðastærð** + **hópun** (staðsetning / rekstrareining / fyrirtæki) → „Greina hópa“. Kerfið sýnir hópana með fjölda + borðafjölda. **Raðaðu hópunum** (↑/↓) svo tengdar einingar lendi á aðliggjandi borðum. „Búa til borðaskipan“ úthlutar öllum gestum í einu (gegnum `apply_seating_plan`, atómískt). Valkostur: leyfa aðliggjandi hópum að deila borði (fyllir betur). Hægt að fínstilla handvirkt eftir á. Krefst `0030_seating_plan.sql`.
 
+
+### Sleppa QR-kóða per viðburð (0031)
+Valkostur „Senda QR kóða á gesti“ (sjálfgefið á) í stillingum viðburðar. Slökkt → miði og staðfestingarpóstur sýna ENGAN QR-kóða, og textinn „Sýndu þennan kóða við innganginn“ víkur fyrir „Þú ert skráð(ur)“. Hentar smærri viðburðum án dyravarðar. Öryggi: QR helst sýnilegt ef drykkjamiðar eru virkir (barinn þarf hann). Krefst `0031_qr_enabled.sql`.
+
 ### Bakteinn / næstu liðir
-- **Ekki senda QR kóða**: valkostur per viðburð að sleppa QR-kóða (fyrir smærri viðburði án dyravarðar) — svo þátttakendur haldi ekki að þeir þurfi að sýna kóða við inngang. (Á eftir að útfæra.)
+

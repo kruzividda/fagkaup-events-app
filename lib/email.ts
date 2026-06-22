@@ -6,6 +6,7 @@ type ConfirmArgs = {
   whenText: string;
   location?: string | null;
   tickets: TicketInfo[];
+  showQr?: boolean;
 };
 
 /**
@@ -20,12 +21,13 @@ export async function sendConfirmationEmail(
   const from = process.env.RESEND_FROM;
   if (!key || !from || !a.to) return { sent: false, reason: "no_email_config" };
 
+  const showQr = a.showQr !== false;
   const ticketsHtml = a.tickets
     .map(
       (t) => `
       <div style="margin:18px 0;text-align:center">
         <p style="margin:0 0 6px;font-weight:600;color:#0B121C">${escapeHtml(t.label)}</p>
-        <img src="${t.qrDataUrl}" width="200" height="200" alt="QR miði" style="border-radius:12px"/>
+        ${showQr ? `<img src="${t.qrDataUrl}" width="200" height="200" alt="QR miði" style="border-radius:12px"/>` : ""}
         <p style="margin:6px 0 0">
           <a href="${t.ticketUrl}" style="color:#9a7b33;font-size:13px">Opna miðann</a>
         </p>

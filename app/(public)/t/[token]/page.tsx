@@ -18,7 +18,7 @@ export default async function TicketPage({ params }: { params: { token: string }
 
   const [{ data: reg }, { data: event }, { data: balances }, { data: siblings }] = await Promise.all([
     admin.from("registrations").select("full_name").eq("id", ticket.registration_id).single(),
-    admin.from("events").select("name, starts_at, location, drinks_enabled").eq("id", ticket.event_id).single(),
+    admin.from("events").select("name, starts_at, location, drinks_enabled, qr_enabled").eq("id", ticket.event_id).single(),
     admin.from("drink_account_balances").select("allowance, remaining").eq("ticket_id", ticket.id),
     admin
       .from("tickets")
@@ -37,6 +37,7 @@ export default async function TicketPage({ params }: { params: { token: string }
   const totalAllowance = (balances ?? []).reduce((s, b) => s + (b.allowance ?? 0), 0);
   const totalRemaining = (balances ?? []).reduce((s, b) => s + (b.remaining ?? 0), 0);
   const hasDrinks = event?.drinks_enabled && totalAllowance > 0;
+  const showQr = event?.qr_enabled !== false || hasDrinks;
 
   const sibling = (siblings ?? [])[0];
 
@@ -48,10 +49,12 @@ export default async function TicketPage({ params }: { params: { token: string }
       </div>
 
       <Card accent className="flex flex-col items-center gap-4">
-        <div className="rounded-2xl bg-white p-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={qr} alt="QR miði" width={232} height={232} className="block rounded-lg" />
-        </div>
+        {showQr && (
+          <div className="rounded-2xl bg-white p-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qr} alt="QR miði" width={232} height={232} className="block rounded-lg" />
+          </div>
+        )}
         <div className="text-center">
           <p className="font-display text-xl text-text">{holderName}</p>
           {ticket.holder_type === "guest" && <p className="text-xs text-accent">Maki / +1</p>}
@@ -101,7 +104,13 @@ export default async function TicketPage({ params }: { params: { token: string }
         </Link>
       )}
 
-      <p className="text-center text-xs text-muted">Sýndu þennan QR-kóða við innganginn.</p>
+      {showQr ? (
+        <p className="text-center text-xs text-muted">
+          {event?.qr_enabled !== false ? "Sýndu þennan QR-kóða við innganginn." : "Sýndu þennan kóða á barnum."}
+        </p>
+      ) : (
+        <p className="text-center text-xs text-muted">Þú ert skráð(ur). Engan kóða þarf að sýna við inngang.</p>
+      )}
     </main>
   );
 }

@@ -38,7 +38,7 @@ export async function registerGuest(
 
     const { data: ev } = await admin
       .from("events")
-      .select("name, starts_at, location")
+      .select("name, starts_at, location, qr_enabled, drinks_enabled")
       .eq("id", input.eventId)
       .single();
     const whenText = ev?.starts_at
@@ -58,7 +58,12 @@ export async function registerGuest(
         }
       : null;
 
-    const common = { eventName: ev?.name ?? "Viðburður", whenText, location: ev?.location ?? null };
+    const common = {
+      eventName: ev?.name ?? "Viðburður",
+      whenText,
+      location: ev?.location ?? null,
+      showQr: ev?.qr_enabled !== false || !!ev?.drinks_enabled,
+    };
 
     // Póstur til aðalgests
     if (primaryEmail) {

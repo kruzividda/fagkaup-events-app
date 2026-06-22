@@ -73,6 +73,7 @@ export default function NewEventPage() {
     drinks_per_spouse: "",
     drinks_alcoholic: true,
     uses_seating: false,
+    qr_enabled: true,
     theme: "glamour",
     registration_opens_at: "",
     registration_closes_at: "",
@@ -219,6 +220,11 @@ export default function NewEventPage() {
 
       <Card>
         <Checkbox checked={f.uses_seating} onChange={(v) => set("uses_seating", v)} label="Nota borðaskipan" />
+      </Card>
+
+      <Card className="space-y-1.5">
+        <Checkbox checked={f.qr_enabled} onChange={(v) => set("qr_enabled", v)} label="Senda QR kóða á gesti" />
+        <p className="text-xs text-muted">Slökktu á þessu fyrir smærri viðburði án dyravarðar eða drykkjamiða — þá fá gestir staðfestingu án QR-kóða. (QR þarf fyrir innritun við dyr og drykkjamiða.)</p>
       </Card>
 
       {error && (

@@ -4,7 +4,8 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui";
-import { Field, TextInput, TextArea, NumberInput, Select, Checkbox, PrimaryButton, EVENT_TYPE_OPTIONS } from "@/components/form";
+import { Field, TextInput, NumberInput, Select, Checkbox, PrimaryButton, EVENT_TYPE_OPTIONS } from "@/components/form";
+import { RichTextField } from "@/components/RichTextField";
 import { updateEvent, setEventCover } from "./actions";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import type { NewEventInput } from "../../new/actions";
@@ -87,7 +88,7 @@ export function EditEventForm({
           <TextInput value={f.name} onChange={(v) => set("name", v)} />
         </Field>
         <Field label="Lýsing">
-          <TextArea value={f.description} onChange={(v) => set("description", v)} />
+          <RichTextField value={f.description} onChange={(v) => set("description", v)} />
         </Field>
         <Field label="Þema skráningarsíðu">
           <Select

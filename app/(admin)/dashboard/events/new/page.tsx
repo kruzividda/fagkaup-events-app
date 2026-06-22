@@ -6,13 +6,13 @@ import { Eyebrow, PageTitle, Card } from "@/components/ui";
 import {
   Field,
   TextInput,
-  TextArea,
   NumberInput,
   Select,
   Checkbox,
   PrimaryButton,
   EVENT_TYPE_OPTIONS,
 } from "@/components/form";
+import { RichTextField } from "@/components/RichTextField";
 import { createEvent, setCover, type NewEventInput } from "./actions";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
@@ -127,7 +127,7 @@ export default function NewEventPage() {
         </Field>
 
         <Field label="Lýsing">
-          <TextArea value={f.description} onChange={(v) => set("description", v)} />
+          <RichTextField value={f.description} onChange={(v) => set("description", v)} />
         </Field>
 
         <Field label="Þema skráningarsíðu">

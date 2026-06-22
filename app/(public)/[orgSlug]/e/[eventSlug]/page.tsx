@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { renderMarkdown } from "@/lib/markdown";
 import { LandingHeader } from "./LandingHeader";
 import { Countdown } from "./Countdown";
 
@@ -89,7 +90,7 @@ export default async function EventLanding({
 
         {event.description && (
           <div className="mt-6 max-w-3xl rounded-2xl border border-border bg-surface p-5 sm:p-6">
-            <p className="whitespace-pre-line text-[15px] leading-relaxed text-text">{event.description}</p>
+            <div className="richtext" dangerouslySetInnerHTML={{ __html: renderMarkdown(event.description) }} />
           </div>
         )}
 

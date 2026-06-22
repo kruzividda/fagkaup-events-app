@@ -550,3 +550,9 @@ Viðburðarstjóri (role `organizer`) opnar sama `/s/<token>` + PIN og skannarar
 Allt keyrir um session-vottuðu `org_*` föllin (engin Supabase-innskráning), njörvað við þennan eina viðburð. Admin stofnar organizer-aðganginn í „Aðgangur að viðburði“ (nú með valkostinum „Viðburðarstjóri (bakendi)“).
 
 > Krefst SQL: `0026_organizer_backend.sql` (eftir 0025).
+
+---
+
+## Ríkari viðburðalýsing (Markdown)
+
+Viðburðalýsingin styður nú einfalt Markdown: **feitletrun**, *skáletrun*, fyrirsagnir (`##`), lista (`-` eða `1.`) og hlekki (`[texti](slóð)`). Ritillinn (`RichTextField`) hefur litla tækjaslá og „Forskoðun“. Lýsingin geymist sem texti og er birt með öruggum Markdown-teiknara (`lib/markdown.ts`) — allur HTML er escape-aður fyrst og aðeins leyfð snið mynduð, svo engin XSS-hætta. Engir nýir pakkar.

@@ -139,31 +139,35 @@ export function SeatingManager({
     setGroups((prev) => (prev ? prev.map((g, i) => (i === idx ? { ...g, tableNums: value } : g)) : prev));
   }
 
-  // Fylla borð sjálfkrafa: pakka einingum í borð upp að borðastærð (litlar einingar deila borði)
+  // Fylla borð sjálfkrafa: halda hverjum hópi heilum (splitta ekki litlum hópum).
+  // Hópur fer á fyrsta borð sem rúmar hann ALLAN — annars nýtt borð (skilur frekar eftir laust sæti).
   function autofill() {
     if (!groups) return;
     const cap = parseInt(genCap, 10) || 10;
-    let curTable = 1;
-    let used = 0; // sæti notuð á curTable
+    const tables: number[] = []; // sæti notuð per borð (index 0 = borð 1)
     const next = groups.map((g) => {
+      const size = g.people.length;
       const nums: number[] = [];
-      let remaining = g.people.length;
-      if (remaining === 0) {
-        if (used >= cap) {
-          curTable++;
-          used = 0;
+      if (size <= cap) {
+        // Halda hópnum heilum
+        let idx = size === 0 ? tables.findIndex((u) => u < cap) : tables.findIndex((u) => u + size <= cap);
+        if (idx === -1) {
+          tables.push(0);
+          idx = tables.length - 1;
         }
-        nums.push(curTable);
-      }
-      while (remaining > 0) {
-        if (used >= cap) {
-          curTable++;
-          used = 0;
+        tables[idx] += size;
+        nums.push(idx + 1);
+      } else {
+        // Stærri en borð: verður að skiptast — ný samliggjandi borð
+        let remaining = size;
+        while (remaining > 0) {
+          tables.push(0);
+          const idx = tables.length - 1;
+          const take = Math.min(cap, remaining);
+          tables[idx] += take;
+          remaining -= take;
+          nums.push(idx + 1);
         }
-        if (!nums.includes(curTable)) nums.push(curTable);
-        const take = Math.min(cap - used, remaining);
-        used += take;
-        remaining -= take;
       }
       return { ...g, tableNums: nums.join(",") };
     });

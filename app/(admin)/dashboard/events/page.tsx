@@ -62,7 +62,8 @@ export default async function EventsPage() {
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {events.map((e) => {
             const s = stats[e.id] ?? { registered: 0, guests: 0 };
-            const cover = pub(e.cover_image_path_mobile) ?? pub(e.cover_image_path);
+            // Kortin eru 16:9 (lárétt) -> notum láréttu myndina (1920x1080), ekki lóðréttu mobile-útgáfuna
+            const cover = pub(e.cover_image_path) ?? pub(e.cover_image_path_mobile);
             const pct = e.max_guests ? Math.min(100, Math.round((s.registered / e.max_guests) * 100)) : null;
             const full = e.max_guests != null && s.registered >= e.max_guests;
             const statusLabel = e.cancelled ? "Felld niður" : STATUS_LABEL[e.status] ?? e.status;

@@ -42,7 +42,7 @@ export async function inviteUser(
   const hashed = data.properties?.hashed_token;
   if (!hashed) return { ok: false, reason: "error" };
   revalidatePath("/dashboard/users");
-  return { ok: true, link: `${APP_URL}/welcome?token_hash=${hashed}&type=invite` };
+  return { ok: true, link: `${APP_URL}/auth/confirm?token_hash=${hashed}&type=invite&next=/welcome` };
 }
 
 export async function changeRole(profileId: string, role: "admin" | "staff"): Promise<{ ok: boolean; reason?: string }> {
@@ -81,7 +81,7 @@ export async function resetPassword(profileId: string): Promise<{ ok: boolean; l
   if (error) return { ok: false, reason: "error" };
   const hashed = data.properties?.hashed_token;
   if (!hashed) return { ok: false, reason: "error" };
-  return { ok: true, link: `${APP_URL}/welcome?token_hash=${hashed}&type=recovery` };
+  return { ok: true, link: `${APP_URL}/auth/confirm?token_hash=${hashed}&type=recovery&next=/welcome` };
 }
 
 export async function removeUser(profileId: string): Promise<{ ok: boolean; reason?: string }> {

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { EmailOtpType } from "@supabase/supabase-js";
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -15,36 +14,16 @@ export default function WelcomePage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const [linkError, setLinkError] = useState(false);
+
   useEffect(() => {
     async function init() {
-      try {
-        if (typeof window !== "undefined") {
-          const qs = new URLSearchParams(window.location.search);
-          const token_hash = qs.get("token_hash");
-          const type = qs.get("type");
-
-          if (token_hash && type) {
-            // Deterministísk staðfesting — setur session beint, óháð Supabase-redirect.
-            await supabase.auth.verifyOtp({ token_hash, type: type as EmailOtpType });
-            window.history.replaceState(null, "", window.location.pathname);
-          } else if (window.location.hash.includes("access_token")) {
-            // Varaleið: token í hash.
-            const hp = new URLSearchParams(window.location.hash.slice(1));
-            const access_token = hp.get("access_token");
-            const refresh_token = hp.get("refresh_token");
-            if (access_token && refresh_token) {
-              await supabase.auth.setSession({ access_token, refresh_token });
-              window.history.replaceState(null, "", window.location.pathname);
-            }
-          }
-        }
-      } catch {
-        /* höldum áfram og athugum session */
-      }
-
+      // /auth/confirm setur session-köku áður en hingað er komið.
+      const failed = new URLSearchParams(window.location.search).get("villa") === "hlekkur";
       const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace("/login");
+      if (failed || !data.user) {
+        setLinkError(true);
+        setChecking(false);
         return;
       }
       setEmail(data.user.email ?? null);
@@ -70,6 +49,24 @@ export default function WelcomePage() {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center px-5">
         <p className="text-sm text-muted">Augnablik…</p>
+      </main>
+    );
+  }
+
+  if (linkError) {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
+        <div className="fk-rise w-full max-w-sm text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="mx-auto mb-3 h-10 w-auto" />
+          <h1 className="font-display text-2xl font-semibold text-text">Hlekkurinn virkar ekki</h1>
+          <p className="mt-2 text-sm text-muted">
+            Hlekkurinn er útrunninn eða þegar notaður. Biddu stjórnanda um nýjan hlekk til að setja lykilorð.
+          </p>
+          <a href="/login" className="mt-5 inline-block rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-ink">
+            Fara á innskráningu
+          </a>
+        </div>
       </main>
     );
   }

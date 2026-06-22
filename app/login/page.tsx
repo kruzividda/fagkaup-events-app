@@ -44,11 +44,9 @@ function LoginForm() {
     <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
       <div className="fk-rise w-full max-w-sm">
         <div className="mb-7 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[rgba(200,164,92,0.4)] bg-gradient-to-br from-[rgba(200,164,92,0.18)] to-transparent shadow-glow">
-            <span className="font-display text-2xl font-semibold text-accent">F</span>
-          </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">Fagkaup</p>
-          <h1 className="mt-1 font-display text-[34px] font-semibold leading-tight text-text">Events</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="mb-3 h-10 w-auto" />
+          <h1 className="font-display text-2xl font-semibold leading-tight text-text">Events</h1>
           <p className="mt-2 text-sm text-muted">Innskráning fyrir starfsfólk</p>
         </div>
 

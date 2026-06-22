@@ -9,7 +9,7 @@ export default async function ScanLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen">
       <header className="flex items-center justify-between border-b border-border px-5 py-3">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Fagkaup</span>
+        <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="h-4 w-auto" />
         <div className="flex items-center gap-3">
           <span className="text-[11px] uppercase tracking-wide text-muted">{profile.role}</span>
           <form action="/auth/signout" method="post">

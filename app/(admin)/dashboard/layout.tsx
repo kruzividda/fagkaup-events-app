@@ -14,16 +14,13 @@ const NAV = [
   { href: "/bar", label: "Bar" },
 ];
 
-function Brand() {
+function Brand({ theme }: { theme: string }) {
+  const src = theme === "fagkaup" ? "/fagkaup-logo.png" : "/fagkaup-logo-white.png";
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-accent-soft">
-        <span className="font-display text-base font-semibold text-accent">F</span>
-      </div>
-      <div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">Fagkaup</p>
-        <p className="-mt-0.5 font-display text-lg text-text">Events</p>
-      </div>
+    <div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="Fagkaup" className="h-6 w-auto" />
+      <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">Events</p>
     </div>
   );
 }
@@ -40,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {/* Föst hliðarstika (tölvuskjár) */}
       <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-20 md:flex md:w-60 md:flex-col md:border-r md:border-border md:bg-surface">
         <div className="p-5">
-          <Brand />
+          <Brand theme={theme} />
         </div>
         <div className="flex-1 overflow-y-auto">
           <NavLinks items={NAV} />
@@ -53,7 +50,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex items-center gap-3">
             <MobileNav items={NAV} />
             <span className="hidden text-[13px] uppercase tracking-[0.14em] text-muted md:inline">Stjórnborð</span>
-            <span className="font-display text-base text-text md:hidden">Events</span>
+            <img src={theme === "fagkaup" ? "/fagkaup-logo.png" : "/fagkaup-logo-white.png"} alt="Fagkaup" className="h-5 w-auto md:hidden" />
           </div>
           <div className="flex items-center gap-3">
             <DashboardThemeToggle current={theme} />

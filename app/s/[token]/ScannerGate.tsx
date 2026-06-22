@@ -112,7 +112,7 @@ export function ScannerGate({ token }: { token: string }) {
   return (
     <div className="min-h-[100dvh]">
       <header className="flex items-center justify-between border-b border-border px-5 py-3">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Fagkaup</span>
+        <img src="/fagkaup-logo-white.png" alt="Fagkaup" className="h-4 w-auto" />
         {session && (
           <button onClick={signOut} className="text-xs text-muted transition hover:text-text">
             Loka

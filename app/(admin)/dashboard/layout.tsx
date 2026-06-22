@@ -32,6 +32,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Þema stjórnborðs úr vafraköku — ljóst (fagkaup) er sjálfgefið
   const theme = cookies().get("dashboard-theme")?.value === "glamour" ? "glamour" : "fagkaup";
 
+  // Notendastjórnun aðeins fyrir owner/admin
+  const accountAdmin = profile.role === "owner" || profile.role === "admin";
+  const nav = NAV.filter((n) => n.href !== "/dashboard/users" || accountAdmin);
+
   return (
     <div data-theme={theme} className={`min-h-[100dvh] ${theme === "fagkaup" ? "bg-bg text-text" : ""}`}>
       {/* Föst hliðarstika (tölvuskjár) */}
@@ -40,7 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Brand theme={theme} />
         </div>
         <div className="flex-1 overflow-y-auto">
-          <NavLinks items={NAV} />
+          <NavLinks items={nav} />
         </div>
       </aside>
 
@@ -48,7 +52,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="md:pl-60">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-[var(--bar-bg)] px-4 backdrop-blur md:px-6">
           <div className="flex items-center gap-3">
-            <MobileNav items={NAV} />
+            <MobileNav items={nav} />
             <span className="hidden text-[13px] uppercase tracking-[0.14em] text-muted md:inline">Stjórnborð</span>
             <img src={theme === "fagkaup" ? "/fagkaup-logo.png" : "/fagkaup-logo-white.png"} alt="Fagkaup" className="h-5 w-auto md:hidden" />
           </div>

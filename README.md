@@ -562,3 +562,17 @@ Viðburðalýsingin styður nú einfalt Markdown: **feitletrun**, *skáletrun*, 
 ## Alvöru Fagkaup-tákn + iOS splash
 
 PWA-táknin (heimaskjár í síma) eru nú með alvöru Fagkaup-merkinu: **rauða „G“-ið á dökkum premium-grunni** (#0B121C) — `icon-192/512`, `icon-maskable-512`, `apple-touch-icon`, auk `favicon.ico` + `favicon-32` fyrir vafraflipa. iOS splash-skjáir (`/public/splash/…`, 8 algengar iPhone-stærðir) sýna hvíta FAGKAUP-merkið á sama dökka grunni meðan appið hleðst; tengt í gegnum `AppleSplash` (apple-touch-startup-image). Service worker bumpaður í v4 svo táknin uppfærist.
+
+---
+
+## Notendastjórnun (0027 + 0028)
+
+Stjórnendur (owner/admin) geta boðið inn starfsfólki á „Notendur → Starfsfólk“ og úthlutað hlutverki:
+- **Stjórnandi (admin):** fullur aðgangur, þ.m.t. notendastjórnun.
+- **Notandi (staff):** fullur rekstrar-aðgangur (viðburðir, skráningar, skannar, útflutningur) en EKKI notendastjórnun.
+
+Öryggi: `is_admin()` nær nú yfir owner/admin/staff (rekstur), en `is_account_admin()` (owner/admin) læsir notendastjórnun. „Notendur“ í valmynd og sjálf síðan eru falin/læst fyrir staff.
+
+Boðsflæði: admin býr til boð (`auth.admin.generateLink` invite) — kerfið sýnir **hlekk** sem admin sendir á viðkomandi (engin SMTP-uppsetning nauðsynleg). Notandinn smellir, lendir á `/welcome`, setur sitt eigið lykilorð og fær aðgang. Prófíll verður til sjálfkrafa úr boðsgögnunum (`handle_new_user`). Að fjarlægja notanda eyðir auth-aðgangi + prófíl (cascade).
+
+> Krefst SQL: keyrðu `0027_add_staff_role.sql` EITT OG SÉR fyrst, svo `0028_user_management.sql`.

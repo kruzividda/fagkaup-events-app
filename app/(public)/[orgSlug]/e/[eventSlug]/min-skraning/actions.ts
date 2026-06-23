@@ -131,6 +131,8 @@ export async function addMySpouse(
         whenText: ev.whenText,
         location: ev.location,
         showQr: ev.showQr,
+        fromName: ev.fromName,
+        fromEmail: ev.fromEmail,
         tickets: [await ticket(spouseName || "Maki", res.spouse_token)],
       });
     } catch {
@@ -155,6 +157,8 @@ export async function resendMyBooking(
       whenText: ev.whenText,
       location: ev.location,
       showQr: ev.showQr,
+      fromName: ev.fromName,
+      fromEmail: ev.fromEmail,
       tickets: r.spouse_token ? [...tickets, await ticket(r.spouse_name || "Maki", r.spouse_token)] : tickets,
     });
     return { ok: true, sent: out.sent, reason: out.reason };
@@ -164,9 +168,9 @@ export async function resendMyBooking(
 }
 
 // ---- hjálparföll ----
-async function eventInfo(eventId: string): Promise<{ name: string; whenText: string; location: string | null; showQr: boolean }> {
+async function eventInfo(eventId: string): Promise<{ name: string; whenText: string; location: string | null; showQr: boolean; fromName: string | null; fromEmail: string | null }> {
   const admin = createAdminClient();
-  const { data } = await admin.from("events").select("name, starts_at, location, qr_enabled, drinks_enabled").eq("id", eventId).single();
+  const { data } = await admin.from("events").select("name, starts_at, location, qr_enabled, drinks_enabled, sender_name, sender_email").eq("id", eventId).single();
   const whenText = data?.starts_at
     ? new Date(data.starts_at).toLocaleString("is-IS", {
         dateStyle: "full",
@@ -179,6 +183,8 @@ async function eventInfo(eventId: string): Promise<{ name: string; whenText: str
     whenText,
     location: data?.location ?? null,
     showQr: data?.qr_enabled !== false || !!data?.drinks_enabled,
+    fromName: data?.sender_name ?? null,
+    fromEmail: data?.sender_email ?? null,
   };
 }
 

@@ -605,5 +605,11 @@ Tölvupóstur/Teams skannar hlekki sjálfkrafa og notar einnota token upp. Því
 ### Sleppa QR-kóða per viðburð (0031)
 Valkostur „Senda QR kóða á gesti“ (sjálfgefið á) í stillingum viðburðar. Slökkt → miði og staðfestingarpóstur sýna ENGAN QR-kóða, og textinn „Sýndu þennan kóða við innganginn“ víkur fyrir „Þú ert skráð(ur)“. Hentar smærri viðburðum án dyravarðar. Öryggi: QR helst sýnilegt ef drykkjamiðar eru virkir (barinn þarf hann). Krefst `0031_qr_enabled.sql`.
 
+
+### Sendandi staðfestingarpósts per viðburð (0032)
+Hver viðburður getur haft eigið **sendandanafn** og **sendanda netfang** (t.d. `Johan Rönning <ronning@ronning.is>`) í stillingum viðburðar. Staðfestingar- og endursendingar-póstar fyrir þann viðburð koma þá frá því netfangi. Tómt → almenna netfang kerfisins (`RESEND_FROM`).
+
+**FORSENDA:** lén sendanda (ronning.is, sindri.is …) verður að vera **staðfest í Resend** (DNS: SPF/DKIM). Annars hafnar Resend póstinum eða hann lendir í ruslpósti. Staðfesting léna er gerð í Resend-stjórnborðinu, ekki í appinu. Krefst `0032_event_sender.sql`.
+
 ### Bakteinn / næstu liðir
 

@@ -7,6 +7,8 @@ type ConfirmArgs = {
   location?: string | null;
   tickets: TicketInfo[];
   showQr?: boolean;
+  fromName?: string | null;
+  fromEmail?: string | null;
 };
 
 /**
@@ -18,7 +20,12 @@ export async function sendConfirmationEmail(
   a: ConfirmArgs
 ): Promise<{ sent: boolean; reason?: string }> {
   const key = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM;
+  const fallbackFrom = process.env.RESEND_FROM;
+  const from = a.fromEmail
+    ? a.fromName
+      ? `${a.fromName} <${a.fromEmail}>`
+      : a.fromEmail
+    : fallbackFrom;
   if (!key || !from || !a.to) return { sent: false, reason: "no_email_config" };
 
   const showQr = a.showQr !== false;

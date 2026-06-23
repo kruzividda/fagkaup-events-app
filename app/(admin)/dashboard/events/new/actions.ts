@@ -17,6 +17,8 @@ export type NewEventInput = {
   drinks_alcoholic: boolean;
   uses_seating: boolean;
   qr_enabled: boolean;
+  sender_name: string;
+  sender_email: string;
   theme: string;
   registration_opens_at: string;
   registration_closes_at: string;
@@ -99,6 +101,8 @@ export async function createEvent(
       theme: input.theme === "fagkaup" ? "fagkaup" : "glamour",
       uses_seating: input.uses_seating,
       qr_enabled: input.qr_enabled !== false,
+      sender_name: input.sender_name?.trim() || null,
+      sender_email: input.sender_email?.trim() || null,
       registration_opens_at: input.registration_opens_at ? new Date(input.registration_opens_at).toISOString() : null,
       registration_closes_at: input.registration_closes_at ? new Date(input.registration_closes_at).toISOString() : null,
       created_by: user.id,

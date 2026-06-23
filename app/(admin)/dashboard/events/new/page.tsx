@@ -74,6 +74,8 @@ export default function NewEventPage() {
     drinks_alcoholic: true,
     uses_seating: false,
     qr_enabled: true,
+    sender_name: "",
+    sender_email: "",
     theme: "glamour",
     registration_opens_at: "",
     registration_closes_at: "",
@@ -225,6 +227,24 @@ export default function NewEventPage() {
       <Card className="space-y-1.5">
         <Checkbox checked={f.qr_enabled} onChange={(v) => set("qr_enabled", v)} label="Senda QR kóða á gesti" />
         <p className="text-xs text-muted">Slökktu á þessu fyrir smærri viðburði án dyravarðar eða drykkjamiða — þá fá gestir staðfestingu án QR-kóða. (QR þarf fyrir innritun við dyr og drykkjamiða.)</p>
+      </Card>
+
+      <Card className="space-y-4">
+        <div>
+          <p className="text-sm font-medium text-text">Sendandi staðfestingarpósts</p>
+          <p className="mt-0.5 text-xs text-muted">
+            Veldu netfang sem pósturinn kemur frá (t.d. ronning@ronning.is fyrir Johan Rönning). Lénið verður að vera staðfest í
+            Resend. Ef tómt er notað almenna netfang kerfisins.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Sendandanafn">
+            <TextInput value={f.sender_name} onChange={(v) => set("sender_name", v)} placeholder="Johan Rönning" />
+          </Field>
+          <Field label="Sendanda netfang">
+            <TextInput type="email" value={f.sender_email} onChange={(v) => set("sender_email", v)} placeholder="ronning@ronning.is" />
+          </Field>
+        </div>
       </Card>
 
       {error && (

@@ -611,5 +611,13 @@ Hver viðburður getur haft eigið **sendandanafn** og **sendanda netfang** (t.d
 
 **FORSENDA:** lén sendanda (ronning.is, sindri.is …) verður að vera **staðfest í Resend** (DNS: SPF/DKIM). Annars hafnar Resend póstinum eða hann lendir í ruslpósti. Staðfesting léna er gerð í Resend-stjórnborðinu, ekki í appinu. Krefst `0032_event_sender.sql`.
 
+
+### Persónuvernd / GDPR (0006, hert í 0033)
+Sérstök **Persónuvernd-síða** (`/dashboard/personuvernd`, í valmynd — aðeins stjórnendur). Leitaðu að skráningu eftir nafni/netfangi/kennitölu og:
+- **Nafnleynd** (`anonymize_registration`): fjarlægir nafn, netfang, síma, kennitölu, fæðuóþol og athugasemdir, en heldur tölfræði (mæting, drykkir, fyrirtæki/eining/staðsetning). Setur `anonymized_at`.
+- **Eyða** (`delete_registration`): hörð eyðing skráningar (cascade hreinsar miða, drykki, svör).
+
+Allar aðgerðir skráðar í **`audit_logs`** og birtar neðst á síðunni (tími, aðgerð, viðburður, hver framkvæmdi). Aðgengilegt **starfsfólki** (owner/admin/staff) — staff er innanhúss og hefur sömu sýn og admin; utanaðkomandi viðburðarstjórar (PIN-aðgangur) hafa ekki stjórnborðs-aðgang. Bakendinn er úr `0006_audit_gdpr.sql`, endurbættur í `0033_gdpr_hardening.sql`.
+
 ### Bakteinn / næstu liðir
 

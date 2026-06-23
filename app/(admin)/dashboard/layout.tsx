@@ -8,6 +8,7 @@ import { DashboardThemeToggle } from "@/components/DashboardThemeToggle";
 const NAV = [
   { href: "/dashboard/events", label: "Viðburðir" },
   { href: "/dashboard/users", label: "Notendur" },
+  { href: "/dashboard/personuvernd", label: "Persónuvernd" },
   { href: "/dashboard/units", label: "Rekstrareiningar" },
   { href: "/door", label: "Innritun (dyr)" },
   { href: "/bar", label: "Bar" },

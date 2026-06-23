@@ -625,5 +625,16 @@ Samþykkis-hakið í skráningu (t.d. „Ég samþykki að upplýsingar mínar s
 
 > Sniðmátið er drög með hornklofa-staðgenglum ([nafn], [netfang], [varðveislutími]) — yfirfara og helst lögfræðilega skoðun áður en birt.
 
+
+### Google Wallet (sofandi þar til skilríki eru sett)
+„Bæta í Google Wallet" hnappur á miða-síðunni (`/t/[token]`). Hnappurinn birtist **aðeins** ef öll þrjú env eru sett:
+`GOOGLE_WALLET_ISSUER_ID`, `GOOGLE_WALLET_SA_EMAIL`, `GOOGLE_WALLET_SA_KEY` (PEM einkalykill úr service-account JSON; `\n` í env er meðhöndlað). Annars er hann falinn — engin áhrif.
+
+Útfærsla: `lib/google-wallet.ts` býr til undirritað „Save to Google Wallet" JWT (RS256, innbyggt Node `crypto` — **engin ný pakkning**) með Generic-passa (cardTitle, header=viðburður, subheader=nafn, QR-barcode=token, textModulesData fyrir dagsetningu/stað/borð-sæti, hexBackgroundColor #0B121C, logo úr `/icon-192.png`). Klasi + hlutur eru inline í JWT svo enginn auka REST-kall þarf.
+
+**Uppsetning (gerist utan appsins):** (1) Google Cloud verkefni → virkja Google Wallet API. (2) Sækja um Google Wallet **Issuer**-reikning → fá Issuer ID. (3) Búa til **service account** + sækja JSON-lykil. (4) Setja `client_email` í `GOOGLE_WALLET_SA_EMAIL` og `private_key` í `GOOGLE_WALLET_SA_KEY`, Issuer ID í `GOOGLE_WALLET_ISSUER_ID` í Vercel → redeploy.
+
+Apple Wallet bíður (þarf greiddan Apple Developer-reikning + Pass Type ID skírteini).
+
 ### Bakteinn / næstu liðir
 

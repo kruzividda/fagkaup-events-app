@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { qrDataUrl } from "@/lib/qr";
+import { googleWalletSaveUrl } from "@/lib/google-wallet";
 import { Eyebrow, Card } from "@/components/ui";
 
 export default async function TicketPage({ params }: { params: { token: string } }) {
@@ -48,6 +49,22 @@ export default async function TicketPage({ params }: { params: { token: string }
 
   const sibling = (siblings ?? [])[0];
 
+  // Google Wallet (sofandi þar til skilríki eru sett í env)
+  const whenTextLong = event?.starts_at
+    ? new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
+    : "";
+  const walletUrl = showQr
+    ? googleWalletSaveUrl({
+        token: params.token,
+        eventName: event?.name ?? "Viðburður",
+        holderName,
+        whenText: whenTextLong,
+        location: event?.location ?? null,
+        tableNumber: ticket.table_number,
+        seatNumber: ticket.seat_number,
+      })
+    : null;
+
   return (
     <main className="fk-rise mx-auto max-w-sm px-5 py-8 space-y-5">
       <div>
@@ -74,6 +91,22 @@ export default async function TicketPage({ params }: { params: { token: string }
           {event?.location && <p className="text-xs text-muted">{event.location}</p>}
         </div>
       </Card>
+
+      {walletUrl && (
+        <a
+          href={walletUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-text transition hover:border-accent"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M3 10h18" stroke="currentColor" strokeWidth="1.6" />
+            <circle cx="16.5" cy="14.5" r="1.5" fill="currentColor" />
+          </svg>
+          Bæta í Google Wallet
+        </a>
+      )}
 
       {hasDrinks && (
         <Card accent className="text-center">

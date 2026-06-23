@@ -24,6 +24,7 @@ export type WalletTicket = {
   location?: string | null;
   tableNumber?: number | null;
   seatNumber?: number | null;
+  heroImageUrl?: string | null;
 };
 
 export function googleWalletSaveUrl(t: WalletTicket): string | null {
@@ -59,6 +60,12 @@ export function googleWalletSaveUrl(t: WalletTicket): string | null {
     genericObject.logo = {
       sourceUri: { uri: `${appUrl}/icon-192.png` },
       contentDescription: { defaultValue: { language: "is", value: "Fagkaup" } },
+    };
+  }
+  if (t.heroImageUrl) {
+    genericObject.heroImage = {
+      sourceUri: { uri: t.heroImageUrl },
+      contentDescription: { defaultValue: { language: "is", value: t.eventName } },
     };
   }
 

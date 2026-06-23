@@ -19,7 +19,7 @@ export default async function TicketPage({ params }: { params: { token: string }
 
   const [{ data: reg }, { data: event }, { data: balances }, { data: siblings }] = await Promise.all([
     admin.from("registrations").select("full_name").eq("id", ticket.registration_id).single(),
-    admin.from("events").select("name, starts_at, location, drinks_enabled, qr_enabled, slug, org_id").eq("id", ticket.event_id).single(),
+    admin.from("events").select("name, starts_at, location, drinks_enabled, qr_enabled, slug, org_id, cover_image_path, cover_image_path_mobile").eq("id", ticket.event_id).single(),
     admin.from("drink_account_balances").select("allowance, remaining").eq("ticket_id", ticket.id),
     admin
       .from("tickets")
@@ -53,6 +53,8 @@ export default async function TicketPage({ params }: { params: { token: string }
   const whenTextLong = event?.starts_at
     ? new Date(event.starts_at).toLocaleString("is-IS", { dateStyle: "long", timeStyle: "short", timeZone: "Atlantic/Reykjavik" })
     : "";
+  const coverPath = event?.cover_image_path ?? event?.cover_image_path_mobile ?? null;
+  const heroImageUrl = coverPath ? admin.storage.from("event-media").getPublicUrl(coverPath).data.publicUrl : null;
   const walletUrl = showQr
     ? googleWalletSaveUrl({
         token: params.token,
@@ -62,6 +64,7 @@ export default async function TicketPage({ params }: { params: { token: string }
         location: event?.location ?? null,
         tableNumber: ticket.table_number,
         seatNumber: ticket.seat_number,
+        heroImageUrl,
       })
     : null;
 

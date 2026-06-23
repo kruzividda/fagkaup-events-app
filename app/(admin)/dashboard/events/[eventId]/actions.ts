@@ -56,3 +56,11 @@ export async function setEventCancelled(
   revalidatePath("/dashboard/events");
   return { ok: true };
 }
+
+export async function duplicateEvent(eventId: string): Promise<{ ok: boolean; newId?: string; error?: string }> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("duplicate_event", { p_event_id: eventId });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/dashboard/events");
+  return { ok: true, newId: data as string };
+}

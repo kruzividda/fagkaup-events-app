@@ -98,7 +98,7 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
         >
           Skoða tölfræði
         </Link>
-        <EventActions status={event.status} publicPath={`/${orgSlug}/e/${event.slug}`} />
+        <EventActions eventId={params.eventId} status={event.status} publicPath={`/${orgSlug}/e/${event.slug}`} />
         <Link
           href={`/dashboard/events/${params.eventId}/edit`}
           className="btn-secondary rounded-xl px-4 py-2 text-sm"

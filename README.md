@@ -636,5 +636,14 @@ Samþykkis-hakið í skráningu (t.d. „Ég samþykki að upplýsingar mínar s
 
 Apple Wallet bíður (þarf greiddan Apple Developer-reikning + Pass Type ID skírteini).
 
+
+### Viðburða-yfirlit: leit, sía, röðun, afritun (0035)
+Viðburða-síðan (`/dashboard/events`) notar nú `EventsBrowser` (client):
+- **Leit** efst (eftir heiti) + **sía** (dropdown eftir tegund viðburðar, `EVENT_TYPE_OPTIONS`).
+- **Röðun**: væntanlegir viðburðir efst (næst á dagskrá fyrst), svo skil („Liðnir viðburðir") og liðnir neðst (nýjastir fyrst, daufari). Skiptingin notar `nowIso` frá server (hydration-örugg).
+- Tegundar-merki bætt á hvert kort.
+
+**Afrita viðburð**: „Afrita viðburð" hnappur á viðburðar-síðu (`EventActions`) → `duplicate_event` RPC (0035) afritar viðburðinn (sem **drög**, nýtt slug + „ (afrit)"), öll form-reiti, valkosti og skilyrtar undirspurningar (visible_if field-tilvísanir endurvarpaðar). Afritar EKKI skráningar/miða. Fer beint á breyta-síðu afritsins. Hentar árlega endurteknum viðburðum.
+
 ### Bakteinn / næstu liðir
 

@@ -3,6 +3,7 @@ import { Card, Eyebrow, PageTitle } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/auth";
 import { PersonuverndManager } from "./PersonuverndManager";
+import { PolicyEditor } from "./PolicyEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,13 @@ export default async function PersonuverndPage() {
   if (profile.role !== "owner" && profile.role !== "admin" && profile.role !== "staff") redirect("/dashboard");
 
   const supabase = createClient();
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("slug, privacy_policy")
+    .eq("id", profile.org_id)
+    .single();
+  const policyUrl = org?.slug ? `/${org.slug}/personuvernd` : "#";
+
   const { data: logs } = await supabase
     .from("audit_logs")
     .select("id, action, created_at, events(name), profiles(full_name)")
@@ -57,6 +65,8 @@ export default async function PersonuverndPage() {
           einstaklings um að gögnum sé eytt.
         </p>
       </Card>
+
+      <PolicyEditor initial={org?.privacy_policy ?? ""} publicUrl={policyUrl} />
 
       <PersonuverndManager />
 

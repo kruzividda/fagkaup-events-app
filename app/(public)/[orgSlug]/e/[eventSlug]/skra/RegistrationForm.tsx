@@ -30,6 +30,7 @@ const REASON_TEXT: Record<string, string> = {
 
 export function RegistrationForm({
   eventId,
+  orgSlug,
   fields,
   orgUnits,
 }: {
@@ -139,6 +140,16 @@ export function RegistrationForm({
               </div>
             ) : (
               node
+            )}
+            {f.field_type === "consent" && (
+              <a
+                href={`/${orgSlug}/personuvernd`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1.5 inline-block text-xs text-accent underline underline-offset-2"
+              >
+                Lesa persónuverndarstefnu
+              </a>
             )}
           </div>
         );

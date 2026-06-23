@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -69,6 +70,17 @@ export async function deleteRegistration(id: string): Promise<{ ok: boolean; rea
   if (!profile) return { ok: false, reason: "forbidden" };
   const supabase = createClient();
   const { error } = await supabase.rpc("delete_registration", { p_id: id });
+  if (error) return { ok: false, reason: error.message };
+  revalidatePath("/dashboard/personuvernd");
+  return { ok: true };
+}
+
+export async function savePrivacyPolicy(text: string): Promise<{ ok: boolean; reason?: string }> {
+  const profile = await requireStaff();
+  if (!profile) return { ok: false, reason: "forbidden" };
+  const admin = createAdminClient();
+  const value = (text ?? "").trim() || null;
+  const { error } = await admin.from("organizations").update({ privacy_policy: value }).eq("id", profile.org_id);
   if (error) return { ok: false, reason: error.message };
   revalidatePath("/dashboard/personuvernd");
   return { ok: true };

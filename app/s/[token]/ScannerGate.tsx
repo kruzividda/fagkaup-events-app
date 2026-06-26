@@ -141,6 +141,8 @@ export function ScannerGate({ token }: { token: string }) {
               onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
               onKeyDown={(e) => e.key === "Enter" && submitPin()}
               inputMode="numeric"
+              type="password"
+              autoComplete="off"
               autoFocus
               placeholder="••••"
               className="w-full rounded-2xl border border-border bg-elevated px-4 py-4 text-center font-display text-3xl tracking-[0.4em] text-text outline-none focus:border-accent"

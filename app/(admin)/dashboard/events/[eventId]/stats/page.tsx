@@ -8,7 +8,7 @@ type Reg = { id: string; status: string; company: string | null; business_unit: 
 type Ticket = { id: string; registration_id: string };
 type CheckIn = { ticket_id: string };
 type Account = { id: string; ticket_id: string | null; scope: string; allowance: number };
-type Redemption = { account_id: string; ticket_id: string | null; quantity: number; redeemed_by: string | null; redeemed_at: string };
+type Redemption = { account_id: string; ticket_id: string | null; quantity: number; redeemed_by: string | null; redeemed_at: string; drink_type: string | null };
 type Profile = { id: string; full_name: string };
 
 function groupAttendance(regs: Reg[], attended: Set<string>, key: keyof Reg) {
@@ -76,7 +76,7 @@ export default async function StatsPage({ params }: { params: { eventId: string 
       supabase.from("check_ins").select("ticket_id").eq("event_id", id),
       supabase.from("invitations").select("id").eq("event_id", id),
       supabase.from("drink_accounts").select("id, ticket_id, scope, allowance").eq("event_id", id),
-      supabase.from("drink_redemptions").select("account_id, ticket_id, quantity, redeemed_by, redeemed_at").eq("event_id", id),
+      supabase.from("drink_redemptions").select("account_id, ticket_id, quantity, redeemed_by, redeemed_at, drink_type").eq("event_id", id),
       supabase.from("profiles").select("id, full_name"),
       supabase.from("event_form_fields").select("id, field_key, label, field_type, requirement, is_custom, sort_order").eq("event_id", id).order("sort_order", { ascending: true }),
     ]);
@@ -158,6 +158,13 @@ export default async function StatsPage({ params }: { params: { eventId: string 
     cur.txns += 1;
     byBartender.set(k, cur);
   }
+  const byType = new Map<string, number>();
+  for (const r of redemptions) {
+    if (!r.drink_type) continue;
+    byType.set(r.drink_type, (byType.get(r.drink_type) ?? 0) + (r.quantity ?? 0));
+  }
+  const drinkTypes = [...byType.entries()].sort((a, b) => b[1] - a[1]);
+
   const bartenders = [...byBartender.entries()]
     .map(([k, v]) => ({ name: k === "óþekkt" ? "Óþekkt" : profileName.get(k) ?? "Óþekkt", ...v }))
     .sort((a, b) => b.drinks - a.drinks);
@@ -242,6 +249,17 @@ export default async function StatsPage({ params }: { params: { eventId: string 
             <StatCard label="Nýttu hluta" value={usedSome} />
             <StatCard label="Nýttu enga" value={usedNone} />
           </div>
+          {drinkTypes.length > 0 && (
+            <Card className="space-y-2">
+              <p className="text-xs font-semibold text-muted">Eftir tegund</p>
+              {drinkTypes.map(([t, n]) => (
+                <div key={t} className="flex items-center justify-between text-sm">
+                  <span className="text-text">{t}</span>
+                  <span className="font-display text-accent">{n}</span>
+                </div>
+              ))}
+            </Card>
+          )}
         </section>
       )}
 

@@ -6,6 +6,8 @@ import { scanCheckin, scanDrink, syncWalletDrinks, type ScanResult } from "./act
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 
+const DRINK_TYPES = ["Bjór", "Léttvín", "Gosbjór", "Gos"] as const;
+
 export function ScanScreen({
   mode,
   eventId,
@@ -21,6 +23,7 @@ export function ScanScreen({
   const [result, setResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [manual, setManual] = useState("");
+  const [drinkType, setDrinkType] = useState<string>(DRINK_TYPES[0]);
   const busyRef = useRef(false);
 
   async function handleScan(token: string) {
@@ -38,6 +41,7 @@ export function ScanScreen({
           p_session_token: sessionToken,
           p_token: t,
           p_quantity: 1,
+          p_drink_type: mode === "bar" ? drinkType : null,
         });
         if (error) throw error;
         res = (data as ScanResult) ?? { ok: false, reason: "no_data" };
@@ -45,7 +49,7 @@ export function ScanScreen({
         res = { ok: false, reason: "network" };
       }
     } else {
-      res = mode === "door" ? await scanCheckin(eventId!, t) : await scanDrink(eventId!, t);
+      res = mode === "door" ? await scanCheckin(eventId!, t) : await scanDrink(eventId!, t, 1, drinkType);
     }
     setResult(res);
     setLoading(false);
@@ -67,6 +71,27 @@ export function ScanScreen({
     <div className="space-y-5">
       {!result && (
         <>
+          {mode === "bar" && (
+            <div className="space-y-2">
+              <p className="text-center text-xs text-muted">Tegund drykkjar</p>
+              <div className="grid grid-cols-4 gap-2">
+                {DRINK_TYPES.map((dt) => (
+                  <button
+                    key={dt}
+                    onClick={() => setDrinkType(dt)}
+                    className={`rounded-xl px-2 py-2.5 text-sm font-semibold transition ${
+                      drinkType === dt
+                        ? "bg-accent text-[#0B121C]"
+                        : "border border-border bg-elevated text-muted hover:text-text"
+                    }`}
+                  >
+                    {dt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <QrScanner onScan={handleScan} paused={paused} />
 
           <div className="space-y-2">
@@ -273,11 +298,13 @@ function BarResult({ r }: { r: ScanResult }) {
 
   const remaining = Number(r.remaining ?? 0);
   const allowance = Number(r.allowance ?? 0);
+  const dtype = (r.drink_type as string | null) ?? null;
   return (
     <div className="space-y-3">
       <Banner tone="ok" title="✓ Drykkur skráður" />
       <Card className="text-center">
-        <p className="text-xs text-muted">Drykkir eftir</p>
+        {dtype && <p className="font-display text-lg text-text">{dtype}</p>}
+        <p className="mt-1 text-xs text-muted">Drykkir eftir</p>
         <p className="mt-1 font-display text-3xl text-accent">
           {remaining} af {allowance}
         </p>

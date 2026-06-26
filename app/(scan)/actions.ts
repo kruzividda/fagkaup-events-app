@@ -18,12 +18,13 @@ export async function scanCheckin(eventId: string, token: string): Promise<ScanR
 }
 
 /** Drykkjaúttekt. Hafnar miða sem tilheyrir öðrum viðburði. */
-export async function scanDrink(eventId: string, token: string, quantity = 1): Promise<ScanResult> {
+export async function scanDrink(eventId: string, token: string, quantity = 1, drinkType?: string): Promise<ScanResult> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("redeem_drink", {
     p_event_id: eventId,
     p_token: token,
     p_quantity: quantity,
+    p_drink_type: drinkType ?? null,
   });
   if (error) return { ok: false, reason: error.message };
   return (data as ScanResult) ?? { ok: false, reason: "no_data" };

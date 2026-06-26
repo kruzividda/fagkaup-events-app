@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { QrScanner } from "./QrScanner";
-import { scanCheckin, scanDrink, type ScanResult } from "./actions";
+import { scanCheckin, scanDrink, syncWalletDrinks, type ScanResult } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 
@@ -49,6 +49,11 @@ export function ScanScreen({
     }
     setResult(res);
     setLoading(false);
+
+    // Uppfæra drykkjateljara á Google Wallet miða (best-effort, blokkar ekki)
+    if (res?.ok && mode === "bar") {
+      void syncWalletDrinks(t).catch(() => {});
+    }
   }
 
   function next() {

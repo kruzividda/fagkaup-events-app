@@ -328,36 +328,6 @@ export function DoorScanScreen({
         </button>
       </div>
 
-      {/* Persónuvernd: hreinsa staðbundin gögn úr þessu tæki */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs">
-        <span className="text-muted">Afritið geymist tímabundið í tækinu og hreinsast sjálfkrafa eftir viðburð.</span>
-        {confirmClear ? (
-          <span className="inline-flex items-center gap-2">
-            {queueCount > 0 && <span className="text-danger">{queueCount} óstillt — tapast!</span>}
-            <button
-              onClick={() => {
-                clearDeviceData();
-                setConfirmClear(false);
-                setResult(null);
-              }}
-              className="rounded-lg bg-danger px-2.5 py-1 font-semibold text-white"
-            >
-              Hreinsa núna
-            </button>
-            <button onClick={() => setConfirmClear(false)} className="rounded-lg border border-border px-2.5 py-1 text-muted">
-              Hætta við
-            </button>
-          </span>
-        ) : (
-          <button
-            onClick={() => setConfirmClear(true)}
-            className="rounded-lg border border-border px-2.5 py-1 text-muted transition hover:text-danger"
-          >
-            Hreinsa gögn úr þessu tæki
-          </button>
-        )}
-      </div>
-
       {!snapLoaded && (
         <Card className="text-center">
           <p className="text-sm text-muted">Sæki afrit af gestalista…</p>
@@ -406,6 +376,37 @@ export function DoorScanScreen({
           </button>
         </>
       )}
+
+
+      {/* Persónuvernd: hreinsa staðbundin gögn úr þessu tæki (neðst) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs">
+        <span className="text-muted">Afritið geymist tímabundið í tækinu og hreinsast sjálfkrafa eftir viðburð.</span>
+        {confirmClear ? (
+          <span className="inline-flex items-center gap-2">
+            {queueCount > 0 && <span className="text-danger">{queueCount} óstillt — tapast!</span>}
+            <button
+              onClick={() => {
+                clearDeviceData();
+                setConfirmClear(false);
+                setResult(null);
+              }}
+              className="rounded-lg bg-danger px-2.5 py-1 font-semibold text-white"
+            >
+              Hreinsa núna
+            </button>
+            <button onClick={() => setConfirmClear(false)} className="rounded-lg border border-border px-2.5 py-1 text-muted">
+              Hætta við
+            </button>
+          </span>
+        ) : (
+          <button
+            onClick={() => setConfirmClear(true)}
+            className="rounded-lg border border-border px-2.5 py-1 text-muted transition hover:text-danger"
+          >
+            Hreinsa gögn úr þessu tæki
+          </button>
+        )}
+      </div>
 
       <p className="text-center text-[11px] text-muted">{eventName}</p>
     </div>

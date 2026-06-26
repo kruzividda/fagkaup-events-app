@@ -8,6 +8,7 @@ export type NewEventInput = {
   name: string;
   description: string;
   event_type: string;
+  template_id?: string;
   starts_at: string; // datetime-local
   location: string;
   max_guests: number | "";
@@ -49,6 +50,21 @@ export async function createEvent(
   if (!input.name.trim()) return { ok: false, error: "Heiti vantar." };
   if (!input.starts_at) return { ok: false, error: "Dagsetning vantar." };
 
+  // Leysa valið form-sniðmát (ef gefið): ræður flokki (event_type) og reitum.
+  let resolvedType = input.event_type;
+  let templateEventId: string | null = null;
+  if (input.template_id) {
+    const { data: ft } = await supabase
+      .from("form_templates")
+      .select("event_type, template_event_id")
+      .eq("id", input.template_id)
+      .maybeSingle();
+    if (ft) {
+      resolvedType = ft.event_type as string;
+      templateEventId = (ft.template_event_id as string | null) ?? null;
+    }
+  }
+
   const slug = `${slugify(input.name)}-${Math.random().toString(36).slice(2, 6)}`;
 
   const { data: event, error } = await supabase
@@ -58,7 +74,7 @@ export async function createEvent(
       name: input.name.trim(),
       slug,
       description: input.description.trim() || null,
-      event_type: input.event_type,
+      event_type: resolvedType,
       status: "draft",
       starts_at: new Date(input.starts_at).toISOString(),
       location: input.location.trim() || null,
@@ -83,21 +99,12 @@ export async function createEvent(
 
   if (error || !event) return { ok: false, error: error?.message ?? "Vistun mistókst." };
 
-  // Afrita reiti úr sniðmáti tegundar ef það er til, annars sjálfgefið.
-  const { data: tmpl } = await supabase
-    .from("events")
-    .select("id")
-    .eq("org_id", profile.org_id)
-    .eq("is_template", true)
-    .eq("event_type", input.event_type)
-    .limit(1)
-    .maybeSingle();
-
-  if (tmpl?.id) {
-    const { error: copyErr } = await supabase.rpc("copy_form_fields", { p_from: tmpl.id, p_to: event.id });
+  // Afrita reiti úr völdu sniðmáti ef það á is_template viðburð, annars sjálfgefið.
+  if (templateEventId) {
+    const { error: copyErr } = await supabase.rpc("copy_form_fields", { p_from: templateEventId, p_to: event.id });
     if (copyErr) return { ok: false, error: copyErr.message };
   } else {
-    const fields = templateFor(input.event_type).map((f) => ({
+    const fields = templateFor(resolvedType).map((f) => ({
       is_custom: false,
       ...f,
       event_id: event.id,

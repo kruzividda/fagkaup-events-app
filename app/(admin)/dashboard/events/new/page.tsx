@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
 import {
@@ -10,10 +10,10 @@ import {
   Select,
   Checkbox,
   PrimaryButton,
-  EVENT_TYPE_OPTIONS,
 } from "@/components/form";
 import { RichTextField } from "@/components/RichTextField";
 import { createEvent, setCover, type NewEventInput } from "./actions";
+import { listFormTemplates, type FormTemplate } from "../../form-templates/actions";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 function CoverInput({
@@ -64,6 +64,7 @@ export default function NewEventPage() {
     name: "",
     description: "",
     event_type: "arshatid",
+    template_id: "",
     starts_at: "",
     location: "",
     max_guests: "",
@@ -85,6 +86,21 @@ export default function NewEventPage() {
 
   function set<K extends keyof NewEventInput>(k: K, v: NewEventInput[K]) {
     setF((prev) => ({ ...prev, [k]: v }));
+  }
+
+  const [templates, setTemplates] = useState<FormTemplate[]>([]);
+  useEffect(() => {
+    listFormTemplates().then((res) => {
+      if (res.ok && res.templates.length) {
+        setTemplates(res.templates);
+        setF((prev) => ({ ...prev, template_id: res.templates[0].id, event_type: res.templates[0].event_type }));
+      }
+    });
+  }, []);
+
+  function pickTemplate(id: string) {
+    const t = templates.find((x) => x.id === id);
+    setF((prev) => ({ ...prev, template_id: id, event_type: t ? t.event_type : prev.event_type }));
   }
 
   async function uploadCover(eventId: string, slot: "desktop" | "mobile", file: File) {
@@ -145,8 +161,12 @@ export default function NewEventPage() {
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Tegund">
-            <Select value={f.event_type} onChange={(v) => set("event_type", v)} options={EVENT_TYPE_OPTIONS} />
+          <Field label="Form / tegund">
+            <Select
+              value={f.template_id ?? ""}
+              onChange={pickTemplate}
+              options={templates.map((t) => ({ value: t.id, label: t.label }))}
+            />
           </Field>
           <Field label="Dagsetning og tími" required>
             <TextInput type="datetime-local" value={f.starts_at} onChange={(v) => set("starts_at", v)} />

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
-import { EVENT_TYPE_OPTIONS } from "@/components/form";
+import { EVENT_TYPE_OPTIONS } from "@/lib/event-templates";
 import { FormBuilder, type BuilderField } from "../../events/[eventId]/form/FormBuilder";
 import { getOrCreateTemplate } from "../actions";
 

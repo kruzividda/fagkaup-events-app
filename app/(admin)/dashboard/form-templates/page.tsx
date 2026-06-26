@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow, PageTitle, Card } from "@/components/ui";
-import { EVENT_TYPE_OPTIONS } from "@/components/form";
+import { EVENT_TYPE_OPTIONS } from "@/lib/event-templates";
 
 export default async function FormTemplatesPage() {
   const supabase = createClient();

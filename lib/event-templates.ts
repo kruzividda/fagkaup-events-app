@@ -46,3 +46,16 @@ export function templateFor(eventType: string): TemplateField[] {
 }
 
 export const TEMPLATE_NAME_PREFIX = "Sniðmát: ";
+
+// Viðburðartegundir — skilgreint hér (server-öruggt) svo bæði server- og
+// client-kóði geti flutt þetta inn. components/form.tsx endurútflytur þetta.
+export const EVENT_TYPE_OPTIONS = [
+  { value: "arshatid", label: "Árshátíð" },
+  { value: "golfmot", label: "Golfmót" },
+  { value: "vorukynning", label: "Vörukynning" },
+  { value: "fraedslufundur", label: "Fræðslufundur" },
+  { value: "opid_hus", label: "Opið hús" },
+  { value: "vidskiptavinavidburdur", label: "Viðskiptavinaviðburður" },
+  { value: "starfsmannavidburdur", label: "Starfsmannaviðburður" },
+  { value: "sersnidinn", label: "Sérsniðinn viðburður" },
+];

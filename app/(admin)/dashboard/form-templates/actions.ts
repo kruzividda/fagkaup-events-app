@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
 import { templateFor, TEMPLATE_NAME_PREFIX } from "@/lib/event-templates";
-import { EVENT_TYPE_OPTIONS } from "@/components/form";
+import { EVENT_TYPE_OPTIONS } from "@/lib/event-templates";
 
 /**
  * Finnur (eða býr til í fyrsta sinn) falinn sniðmáts-viðburð fyrir tegund.

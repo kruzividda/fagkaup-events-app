@@ -8,8 +8,10 @@ import { MyBookingClient } from "./MyBookingClient";
 
 export default async function MyRegistrationPage({
   params,
+  searchParams,
 }: {
   params: { orgSlug: string; eventSlug: string };
+  searchParams: { token?: string };
 }) {
   const admin = createAdminClient();
   const { data: org } = await admin.from("organizations").select("id").eq("slug", params.orgSlug).single();
@@ -35,7 +37,13 @@ export default async function MyRegistrationPage({
           <h1 className="font-display text-[28px] font-semibold leading-[1.1] text-text">{event.name}</h1>
         </header>
 
-        <MyBookingClient eventId={event.id} eventName={event.name} />
+        <MyBookingClient
+          eventId={event.id}
+          eventName={event.name}
+          orgSlug={params.orgSlug}
+          eventSlug={params.eventSlug}
+          token={searchParams.token ?? null}
+        />
 
         <p className="text-center">
           <Link href={`/${params.orgSlug}/e/${params.eventSlug}`} className="text-[13px] text-muted underline-offset-4 hover:underline">

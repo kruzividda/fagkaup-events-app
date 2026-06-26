@@ -9,6 +9,7 @@ type ConfirmArgs = {
   showQr?: boolean;
   fromName?: string | null;
   fromEmail?: string | null;
+  manageUrl?: string | null;
 };
 
 /**
@@ -49,6 +50,7 @@ export async function sendConfirmationEmail(
     <p style="margin:12px 0 4px"><strong>Hvenær:</strong> ${escapeHtml(a.whenText)}</p>
     ${a.location ? `<p style="margin:0"><strong>Hvar:</strong> ${escapeHtml(a.location)}</p>` : ""}
     ${ticketsHtml}
+    ${a.manageUrl ? `<p style="margin:18px 0 0;text-align:center"><a href="${a.manageUrl}" style="color:#9a7b33;font-size:13px">Breyta eða afboða skráningu</a></p>` : ""}
   </div>`;
 
   try {

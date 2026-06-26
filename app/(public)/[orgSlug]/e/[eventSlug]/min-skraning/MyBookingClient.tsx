@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui";
 import { Field, TextInput, PrimaryButton } from "@/components/form";
 import {
@@ -11,51 +11,79 @@ import {
   cancelMySpouse,
   addMySpouse,
   resendMyBooking,
+  requestEditLink,
   type MyBooking,
 } from "./actions";
 
-export function MyBookingClient({ eventId, eventName }: { eventId: string; eventName: string }) {
-  const [kt, setKt] = useState("");
+type Phase = "loading" | "request" | "view" | "invalid";
+
+export function MyBookingClient({
+  eventId,
+  eventName,
+  orgSlug,
+  eventSlug,
+  token,
+}: {
+  eventId: string;
+  eventName: string;
+  orgSlug: string;
+  eventSlug: string;
+  token: string | null;
+}) {
   const [booking, setBooking] = useState<MyBooking | null>(null);
-  const [phase, setPhase] = useState<"lookup" | "view" | "cancelled">("lookup");
+  const [phase, setPhase] = useState<Phase>(token ? "loading" : "request");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
 
-  // form-reitir
+  // request-link form
+  const [reqEmail, setReqEmail] = useState("");
+  const [reqSent, setReqSent] = useState(false);
+
+  // edit form-reitir
   const [phone, setPhone] = useState("");
   const [dietary, setDietary] = useState("");
   const [spouseName, setSpouseName] = useState("");
   const [spouseEmail, setSpouseEmail] = useState("");
-  const [note, setNote] = useState<string | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
-  async function refresh() {
-    const res = await lookupMyBooking(eventId, kt);
-    if (res.found && res.booking) {
-      setBooking(res.booking);
-      setPhone(res.booking.phone ?? "");
-      setDietary(res.booking.dietary ?? "");
-    }
-  }
+  const applyBooking = useCallback((b: MyBooking) => {
+    setBooking(b);
+    setPhone(b.phone ?? "");
+    setDietary(b.dietary ?? "");
+  }, []);
 
-  async function doLookup() {
-    setErr(null);
-    setNote(null);
-    if (kt.replace(/\D/g, "").length !== 10) return setErr("Sláðu inn 10 stafa kennitölu.");
-    setBusy(true);
-    const res = await lookupMyBooking(eventId, kt);
-    setBusy(false);
-    if (!res.found || !res.booking) return setErr("Engin virk skráning fannst með þessari kennitölu.");
-    setBooking(res.booking);
-    setPhone(res.booking.phone ?? "");
-    setDietary(res.booking.dietary ?? "");
-    setPhase("view");
-  }
+  const refresh = useCallback(async () => {
+    if (!token) return;
+    const res = await lookupMyBooking(token);
+    if (res.found && res.booking) applyBooking(res.booking);
+  }, [token, applyBooking]);
+
+  // Sjálfvirk uppfletting þegar hlekkur (token) er til staðar
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (!token) return;
+      const res = await lookupMyBooking(token);
+      if (!alive) return;
+      if (res.found && res.booking) {
+        applyBooking(res.booking);
+        setPhase("view");
+      } else {
+        setPhase("invalid");
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [token, applyBooking]);
 
   async function saveInfo() {
+    if (!token) return;
     setBusy(true);
     setNote(null);
-    const res = await updateMyBooking(eventId, kt, phone, dietary);
+    setErr(null);
+    const res = await updateMyBooking(token, phone, dietary);
     setBusy(false);
     if (!res.ok) return setErr("Tókst ekki að vista. Reyndu aftur.");
     setNote("Upplýsingar vistaðar.");
@@ -63,10 +91,12 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
   }
 
   async function addSpouse() {
+    if (!token) return;
     setNote(null);
+    setErr(null);
     if (!spouseName.trim()) return setErr("Sláðu inn nafn maka.");
     setBusy(true);
-    const res = await addMySpouse(eventId, kt, spouseName, spouseEmail);
+    const res = await addMySpouse(eventId, token, spouseName, spouseEmail);
     setBusy(false);
     if (!res.ok) return setErr(res.reason === "already_has_spouse" ? "Maki er þegar skráður." : "Tókst ekki að bæta við maka.");
     setSpouseName("");
@@ -76,9 +106,11 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
   }
 
   async function removeSpouse() {
+    if (!token) return;
     setBusy(true);
     setNote(null);
-    const res = await cancelMySpouse(eventId, kt);
+    setErr(null);
+    const res = await cancelMySpouse(token);
     setBusy(false);
     if (!res.ok) return setErr("Tókst ekki að afboða maka.");
     setNote("Maki afboðaður.");
@@ -86,29 +118,34 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
   }
 
   async function resend() {
+    if (!token) return;
     setBusy(true);
     setNote(null);
-    const res = await resendMyBooking(eventId, kt);
+    setErr(null);
+    const res = await resendMyBooking(eventId, orgSlug, eventSlug, token);
     setBusy(false);
     if (!res.ok) return setErr("Tókst ekki að endursenda.");
     setNote(res.sent ? "Staðfesting og QR send á netfangið þitt." : "Tókst ekki að senda póst (netfang eða póstþjónusta ekki stillt).");
   }
 
   async function cancelAll() {
-    setBusy(true);
-    setNote(null);
-    const res = await cancelMyBooking(eventId, kt);
-    setBusy(false);
-    setConfirmCancel(false);
-    if (!res.ok) return setErr("Tókst ekki að afboða.");
-    await refresh(); // skráning verður afbókuð — sýnir endurskráningarvalkost
-  }
-
-  async function reactivate() {
+    if (!token) return;
     setBusy(true);
     setNote(null);
     setErr(null);
-    const res = await reactivateMyBooking(eventId, kt);
+    const res = await cancelMyBooking(token);
+    setBusy(false);
+    setConfirmCancel(false);
+    if (!res.ok) return setErr("Tókst ekki að afboða.");
+    await refresh();
+  }
+
+  async function reactivate() {
+    if (!token) return;
+    setBusy(true);
+    setNote(null);
+    setErr(null);
+    const res = await reactivateMyBooking(token);
     setBusy(false);
     if (!res.ok) {
       const map: Record<string, string> = {
@@ -125,30 +162,57 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
     await refresh();
   }
 
-  if (phase === "lookup") {
+  async function sendLink() {
+    setErr(null);
+    if (!/.+@.+\..+/.test(reqEmail.trim())) return setErr("Sláðu inn gilt netfang.");
+    setBusy(true);
+    await requestEditLink(eventId, orgSlug, eventSlug, reqEmail.trim());
+    setBusy(false);
+    setReqSent(true);
+  }
+
+  // ---- Hleðsla ----
+  if (phase === "loading") {
     return (
-      <Card accent className="space-y-4">
-        <div>
-          <p className="font-display text-lg text-text">Mín skráning</p>
-          <p className="text-sm text-muted">Sláðu inn kennitöluna þína til að breyta eða afboða skráninguna þína.</p>
-        </div>
-        <Field label="Kennitala" required>
-          <TextInput
-            value={kt}
-            onChange={(v) => setKt(v.replace(/\D/g, "").slice(0, 10))}
-            inputMode="numeric"
-            placeholder="10 tölustafir"
-          />
-        </Field>
-        {err && <p className="text-sm text-danger">{err}</p>}
-        <PrimaryButton onClick={doLookup} disabled={busy}>
-          {busy ? "Leita…" : "Finna skráningu"}
-        </PrimaryButton>
+      <Card accent className="space-y-2">
+        <p className="font-display text-lg text-text">Augnablik…</p>
+        <p className="text-sm text-muted">Sæki skráninguna þína.</p>
       </Card>
     );
   }
 
-  // phase === "view"
+  // ---- Enginn/ógildur hlekkur -> biðja um hlekk í póst ----
+  if (phase === "request" || phase === "invalid") {
+    return (
+      <Card accent className="space-y-4">
+        <div>
+          <p className="font-display text-lg text-text">Mín skráning</p>
+          <p className="text-sm text-muted">
+            {phase === "invalid"
+              ? "Hlekkurinn er útrunninn eða ógildur. Sláðu inn netfangið þitt og við sendum þér nýjan hlekk til að breyta eða afboða skráninguna."
+              : "Sláðu inn netfangið sem þú skráðir þig með. Við sendum þér öruggan hlekk til að breyta eða afboða skráninguna."}
+          </p>
+        </div>
+        {reqSent ? (
+          <p className="rounded-xl border border-success bg-[rgba(106,168,107,0.08)] px-4 py-3 text-sm text-success">
+            Ef skráning er til á þessu netfangi sendum við hlekk á það. Athugaðu pósthólfið þitt.
+          </p>
+        ) : (
+          <>
+            <Field label="Netfang" required>
+              <TextInput value={reqEmail} onChange={setReqEmail} type="email" placeholder="nafn@fyrirtaeki.is" />
+            </Field>
+            {err && <p className="text-sm text-danger">{err}</p>}
+            <PrimaryButton onClick={sendLink} disabled={busy}>
+              {busy ? "Sendi…" : "Senda mér hlekk"}
+            </PrimaryButton>
+          </>
+        )}
+      </Card>
+    );
+  }
+
+  // ---- phase === "view" ----
   return (
     <div className="space-y-5">
       <Card className="space-y-1">
@@ -174,85 +238,70 @@ export function MyBookingClient({ eventId, eventName }: { eventId: string; event
         <>
           <Card className="space-y-4">
             <p className="font-display text-base text-text">Mínar upplýsingar</p>
-        <Field label="Símanúmer">
-          <TextInput value={phone} onChange={setPhone} type="tel" />
-        </Field>
-        <Field label="Fæðuóþol / ofnæmi">
-          <TextInput value={dietary} onChange={setDietary} />
-        </Field>
-        <PrimaryButton onClick={saveInfo} disabled={busy}>
-          Vista breytingar
-        </PrimaryButton>
-      </Card>
-
-      <Card className="space-y-4">
-        <p className="font-display text-base text-text">Maki / +1</p>
-        {booking?.hasSpouse ? (
-          <>
-            <p className="text-sm text-muted">
-              Skráður maki: <span className="text-text">{booking.spouseName || "+1"}</span>
-              {booking.spouseCheckedIn && <span className="text-success"> · innritaður</span>}
-            </p>
-            <button
-              onClick={removeSpouse}
-              disabled={busy}
-              className="btn-secondary-danger rounded-xl px-4 py-2.5 text-sm disabled:opacity-60"
-            >
-              Afboða maka
-            </button>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-muted">Bættu við maka eða +1. Hann fær sinn eigin miða og QR.</p>
-            <Field label="Nafn maka">
-              <TextInput value={spouseName} onChange={setSpouseName} />
+            <Field label="Símanúmer">
+              <TextInput value={phone} onChange={setPhone} type="tel" />
             </Field>
-            <Field label="Tölvupóstur maka (fyrir hans miða)">
-              <TextInput value={spouseEmail} onChange={setSpouseEmail} type="email" />
+            <Field label="Fæðuóþol / ofnæmi">
+              <TextInput value={dietary} onChange={setDietary} />
             </Field>
-            <PrimaryButton onClick={addSpouse} disabled={busy}>
-              Bæta við maka
+            <PrimaryButton onClick={saveInfo} disabled={busy}>
+              Vista breytingar
             </PrimaryButton>
-          </>
-        )}
-      </Card>
+          </Card>
 
-      <Card className="space-y-3">
-        <p className="font-display text-base text-text">Miðinn minn</p>
-        <button
-          onClick={resend}
-          disabled={busy}
-          className="rounded-xl border border-accent px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent-soft disabled:opacity-60"
-        >
-          Endursenda staðfestingu og QR
-        </button>
-      </Card>
+          <Card className="space-y-4">
+            <p className="font-display text-base text-text">Maki / +1</p>
+            {booking?.hasSpouse ? (
+              <>
+                <p className="text-sm text-muted">
+                  Skráður maki: <span className="text-text">{booking.spouseName || "+1"}</span>
+                  {booking.spouseCheckedIn && <span className="text-success"> · innritaður</span>}
+                </p>
+                <button onClick={removeSpouse} disabled={busy} className="btn-secondary-danger rounded-xl px-4 py-2.5 text-sm disabled:opacity-60">
+                  Afboða maka
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted">Bættu við maka eða +1. Hann fær sinn eigin miða og QR.</p>
+                <Field label="Nafn maka">
+                  <TextInput value={spouseName} onChange={setSpouseName} />
+                </Field>
+                <Field label="Tölvupóstur maka (fyrir hans miða)">
+                  <TextInput value={spouseEmail} onChange={setSpouseEmail} type="email" />
+                </Field>
+                <PrimaryButton onClick={addSpouse} disabled={busy}>
+                  Bæta við maka
+                </PrimaryButton>
+              </>
+            )}
+          </Card>
 
-      <Card className="space-y-3">
-        <p className="font-display text-base text-text">Afboða</p>
-        <p className="text-sm text-muted">Get ekki mætt? Þú getur afboðað þig. Ef þú ert með maka afbókast hann líka.</p>
-        {confirmCancel ? (
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={cancelAll}
-              disabled={busy}
-              className="rounded-xl bg-danger px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
-            >
-              Já, afboða mig
+          <Card className="space-y-3">
+            <p className="font-display text-base text-text">Miðinn minn</p>
+            <button onClick={resend} disabled={busy} className="rounded-xl border border-accent px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent-soft disabled:opacity-60">
+              Endursenda staðfestingu og QR
             </button>
-            <button onClick={() => setConfirmCancel(false)} className="btn-secondary rounded-xl px-4 py-2.5 text-sm">
-              Hætta við
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setConfirmCancel(true)}
-            className="btn-secondary-danger rounded-xl px-4 py-2.5 text-sm"
-          >
-            Afboða skráninguna mína
-          </button>
-        )}
-      </Card>
+          </Card>
+
+          <Card className="space-y-3">
+            <p className="font-display text-base text-text">Afboða</p>
+            <p className="text-sm text-muted">Get ekki mætt? Þú getur afboðað þig. Ef þú ert með maka afbókast hann líka.</p>
+            {confirmCancel ? (
+              <div className="flex flex-wrap gap-2">
+                <button onClick={cancelAll} disabled={busy} className="rounded-xl bg-danger px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60">
+                  Já, afboða mig
+                </button>
+                <button onClick={() => setConfirmCancel(false)} className="btn-secondary rounded-xl px-4 py-2.5 text-sm">
+                  Hætta við
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setConfirmCancel(true)} className="btn-secondary-danger rounded-xl px-4 py-2.5 text-sm">
+                Afboða skráninguna mína
+              </button>
+            )}
+          </Card>
         </>
       )}
     </div>

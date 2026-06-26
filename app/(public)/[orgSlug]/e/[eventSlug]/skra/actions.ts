@@ -22,7 +22,7 @@ export async function registerGuest(
   });
 
   if (error) return { ok: false, reason: error.message };
-  const result = data as { ok: boolean; ticket_token?: string; spouse_token?: string | null; reason?: string };
+  const result = data as { ok: boolean; ticket_token?: string; spouse_token?: string | null; edit_token?: string; reason?: string };
   if (!result?.ok || !result.ticket_token) {
     return { ok: false, reason: result?.reason ?? "unknown" };
   }
@@ -38,9 +38,14 @@ export async function registerGuest(
 
     const { data: ev } = await admin
       .from("events")
-      .select("name, starts_at, location, qr_enabled, drinks_enabled, sender_name, sender_email")
+      .select("name, slug, org_id, starts_at, location, qr_enabled, drinks_enabled, sender_name, sender_email")
       .eq("id", input.eventId)
       .single();
+    let manageUrl: string | null = null;
+    if (ev?.slug && ev?.org_id && result.edit_token) {
+      const { data: org } = await admin.from("organizations").select("slug").eq("id", ev.org_id).single();
+      if (org?.slug) manageUrl = `${appUrl}/${org.slug}/e/${ev.slug}/min-skraning?token=${result.edit_token}`;
+    }
     const whenText = ev?.starts_at
       ? new Date(ev.starts_at).toLocaleString("is-IS", { dateStyle: "full", timeStyle: "short" })
       : "";
@@ -70,7 +75,7 @@ export async function registerGuest(
     // Póstur til aðalgests
     if (primaryEmail) {
       const tickets = spouseTicket && !spouseEmail ? [primaryTicket, spouseTicket] : [primaryTicket];
-      await sendConfirmationEmail({ to: primaryEmail, ...common, tickets });
+      await sendConfirmationEmail({ to: primaryEmail, ...common, manageUrl, tickets });
     }
     // Sér póstur til maka ef netfang maka er gefið
     if (spouseEmail && spouseTicket) {

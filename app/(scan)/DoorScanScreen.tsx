@@ -34,6 +34,9 @@ type QueueItem = { token: string; scanned_at: string };
 
 const snapKey = (e: string) => `fk-door-snap-${e}`;
 const queueKey = (e: string) => `fk-door-queue-${e}`;
+const snapAtKey = (e: string) => `fk-door-snapat-${e}`;
+// Offline-afrit (persónugögn) rennur út og hreinsast sjálfkrafa eftir þennan tíma.
+const SNAP_TTL_MS = 18 * 60 * 60 * 1000; // 18 klst
 
 function loadJSON<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -82,18 +85,35 @@ export function DoorScanScreen({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [manual, setManual] = useState("");
+  const [confirmClear, setConfirmClear] = useState(false);
   const busyRef = useRef(false);
 
   const persistSnap = useCallback(() => {
     const obj: Record<string, Ticket> = {};
     snapRef.current.forEach((v, k) => (obj[k] = v));
     saveJSON(snapKey(keyId), obj);
+    saveJSON(snapAtKey(keyId), Date.now());
     setSnapCount(snapRef.current.size);
   }, [keyId]);
 
   const persistQueue = useCallback(() => {
     saveJSON(queueKey(keyId), queueRef.current);
     setQueueCount(queueRef.current.length);
+  }, [keyId]);
+
+  // Hreinsar öll staðbundin gögn (afrit + biðröð) úr þessu tæki.
+  const clearDeviceData = useCallback(() => {
+    try {
+      window.localStorage.removeItem(snapKey(keyId));
+      window.localStorage.removeItem(queueKey(keyId));
+      window.localStorage.removeItem(snapAtKey(keyId));
+    } catch {
+      /* óaðgengilegt */
+    }
+    snapRef.current = new Map();
+    queueRef.current = [];
+    setSnapCount(0);
+    setQueueCount(0);
   }, [keyId]);
 
   // Sækir ferskt afrit af þjóninum (þegar nettengt)
@@ -160,6 +180,17 @@ export function DoorScanScreen({
   // Frumstilling
   useEffect(() => {
     setOnline(navigator.onLine);
+    // Sjálfvirk hreinsun: ef offline-afritið er útrunnið, fjarlægjum við
+    // persónugögnin úr tækinu (biðröð óstilltra innritana er varðveitt).
+    const savedAt = loadJSON<number>(snapAtKey(keyId), 0);
+    if (savedAt && Date.now() - savedAt > SNAP_TTL_MS) {
+      try {
+        window.localStorage.removeItem(snapKey(keyId));
+        window.localStorage.removeItem(snapAtKey(keyId));
+      } catch {
+        /* óaðgengilegt */
+      }
+    }
     // hlaða úr localStorage
     const snapObj = loadJSON<Record<string, Ticket>>(snapKey(keyId), {});
     snapRef.current = new Map(Object.entries(snapObj));
@@ -295,6 +326,36 @@ export function DoorScanScreen({
         >
           {syncing ? "Samstilli…" : "Samstilla"}
         </button>
+      </div>
+
+      {/* Persónuvernd: hreinsa staðbundin gögn úr þessu tæki */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs">
+        <span className="text-muted">Afritið geymist tímabundið í tækinu og hreinsast sjálfkrafa eftir viðburð.</span>
+        {confirmClear ? (
+          <span className="inline-flex items-center gap-2">
+            {queueCount > 0 && <span className="text-danger">{queueCount} óstillt — tapast!</span>}
+            <button
+              onClick={() => {
+                clearDeviceData();
+                setConfirmClear(false);
+                setResult(null);
+              }}
+              className="rounded-lg bg-danger px-2.5 py-1 font-semibold text-white"
+            >
+              Hreinsa núna
+            </button>
+            <button onClick={() => setConfirmClear(false)} className="rounded-lg border border-border px-2.5 py-1 text-muted">
+              Hætta við
+            </button>
+          </span>
+        ) : (
+          <button
+            onClick={() => setConfirmClear(true)}
+            className="rounded-lg border border-border px-2.5 py-1 text-muted transition hover:text-danger"
+          >
+            Hreinsa gögn úr þessu tæki
+          </button>
+        )}
       </div>
 
       {!snapLoaded && (

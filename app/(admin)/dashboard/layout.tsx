@@ -7,6 +7,7 @@ import { DashboardThemeToggle } from "@/components/DashboardThemeToggle";
 
 const NAV = [
   { href: "/dashboard/events", label: "Viðburðir" },
+  { href: "/dashboard/form-templates", label: "Form sniðmát" },
   { href: "/dashboard/users", label: "Notendur" },
   { href: "/dashboard/personuvernd", label: "Persónuvernd" },
   { href: "/dashboard/units", label: "Rekstrareiningar" },
@@ -34,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   // Notendastjórnun aðeins fyrir owner/admin
   const accountAdmin = profile.role === "owner" || profile.role === "admin";
-  const nav = NAV.filter((n) => n.href !== "/dashboard/users" || accountAdmin);
+  const nav = NAV.filter((n) => (n.href !== "/dashboard/users" && n.href !== "/dashboard/form-templates") || accountAdmin);
 
   return (
     <div data-theme={theme} className={`min-h-[100dvh] ${theme === "fagkaup" ? "bg-bg text-text" : ""}`}>

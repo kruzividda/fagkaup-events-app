@@ -112,6 +112,12 @@ export default async function EventDetailPage({ params }: { params: { eventId: s
           Gestalisti
         </Link>
         <Link
+          href={`/dashboard/events/${params.eventId}/bodslisti`}
+          className="btn-secondary rounded-xl px-4 py-2 text-sm"
+        >
+          Boðslisti
+        </Link>
+        <Link
           href={`/dashboard/events/${params.eventId}/form`}
           className="btn-secondary rounded-xl px-4 py-2 text-sm"
         >
